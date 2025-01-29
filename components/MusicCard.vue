@@ -18,7 +18,7 @@ const props = withDefaults(defineProps<{
   showGrade: false,
 });
 
-const gradeMap = ['高一', '高二', '高三'];
+const gradeMap = ['','高一', '高二', '高三'];
 
 function isMine() {
   const songStore = useSongStore();
