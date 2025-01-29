@@ -7,14 +7,13 @@
 <p align="center">
 A simple yet powerful song request system
 </p>
-
 <p align="center">
   <a href="https://nuxt.com"><img src="https://img.shields.io/badge/Built%20With%20Nuxt-18181B?logo=nuxt.js" alt="Nuxt Website"></a>
-  <a href="https://github.com/SMS-COSMO/the1068fm/pulls"><img src="https://img.shields.io/badge/PRs-welcome-blue.svg" alt="PRs Welcome"></a>
-  <a href="https://stats.uptimerobot.com/AGNLNIrGM6"><img src="https://img.shields.io/uptimerobot/ratio/7/m795876635-3a8b812dbc51e838cfb3229a" alt="Uptime"></a>
+  <img src="https://img.shields.io/github/stars/ljk743121/the1068fm">
 </p>
 
 ## Features
+
 - ✨ Effortlessly gather song requests from audience with our user-friendly interface.
 - 🕓 Real-time updates, stay up-to-date with the latest requests and changes in the playlist.
 - 💪 Hassle-free song management made easy with our automatic arrange system.
@@ -22,10 +21,12 @@ A simple yet powerful song request system
 ## Usage
 
 ### As an end user
-✅ Just visit [the website](https://fm.the1068.pictures) to use!
+
+✅ Just visit [the website](https://syzsgbz.dynv6.net) to use!
 
 ### As an admin
-1. 🔐 Login to [the dashboard](https://fm.the1068.pictures/manage)
+
+1. 🔐 Login to [the dashboard](https://syzsgbz.dynv6.net/manage)
 2. 🎶 Check the songs and arrange them
 
 ## Stack
@@ -67,8 +68,8 @@ Run the scrips with `bun run xxx`.
 
 ## Contributors
 
-<a href="https://github.com/sms-cosmo/the1068fm/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=sms-cosmo/the1068fm" />
+<a href="https://github.com/ljk743121/the1068fm/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ljk743121/the1068fm" />
 </a>
 
 ## License
