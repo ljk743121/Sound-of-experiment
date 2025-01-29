@@ -1,11 +1,11 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import * as t from 'drizzle-orm/pg-core';
 import { useNanoID } from '../../../composables/useNanoID';
 
-export const times = sqliteTable('times', {
-  id: text('id', { mode: 'text' }).primaryKey().$defaultFn(() => useNanoID()),
-  name: text('name', { mode: 'text' }).notNull(),
-  startAt: integer('start_at', { mode: 'timestamp' }).notNull(),
-  endAt: integer('end_at', { mode: 'timestamp' }).notNull(),
-  repeats: integer('repeats', { mode: 'boolean' }).notNull().default(false),
-  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+export const times = t.pgTable('times', {
+  id: t.text('id').primaryKey().$defaultFn(() => useNanoID()),
+  name: t.text('name').notNull(),
+  startAt: t.timestamp('start_at').notNull(),
+  endAt: t.timestamp('end_at').notNull(),
+  repeats: t.boolean('repeats').notNull().default(false),
+  isActive: t.boolean('is_active').notNull().default(true),
 });

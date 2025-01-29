@@ -1,7 +1,7 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import * as t from 'drizzle-orm/pg-core';
 
-export const arrangements = sqliteTable('arrangements', {
-  date: text('date', { mode: 'text' }).primaryKey(),
-  songIds: text('song_ids', { mode: 'json' }).$type<string[]>(),
-  isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(false),
+export const arrangements = t.pgTable('arrangements', {
+  date: t.text('date').primaryKey(),
+  songIds: t.json('song_ids').$type<string[]>(),
+  isPublic: t.boolean('is_public').notNull().default(false),
 });

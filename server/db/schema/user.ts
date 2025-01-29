@@ -1,14 +1,14 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import * as t from 'drizzle-orm/pg-core';
 import { useNanoID } from '../../../composables/useNanoID';
 
-export const users = sqliteTable('users', {
-  id: text('id', { mode: 'text' }).primaryKey().$defaultFn(() => useNanoID()),
-  password: text('password', { mode: 'text' }).notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+export const users = t.pgTable('users', {
+  id: t.text('id').primaryKey().$defaultFn(() => useNanoID()),
+  password: t.text('password').notNull(),
+  createdAt: t.timestamp('created_at').notNull().defaultNow(),
 });
 
-export const refreshTokens = sqliteTable('refresh_tokens', {
-  id: text('id', { mode: 'text' }).primaryKey().$defaultFn(() => useNanoID()),
-  token: text('token', { mode: 'text' }).notNull(),
-  owner: text('owner', { mode: 'text' }).references(() => users.id).notNull(),
+export const refreshTokens = t.pgTable('refresh_tokens', {
+  id: t.text('id').primaryKey().$defaultFn(() => useNanoID()),
+  token: t.text('token').notNull(),
+  owner: t.text('owner').references(() => users.id).notNull(),
 });

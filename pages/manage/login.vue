@@ -59,7 +59,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 <template>
   <div class="flex flex-row items-center gap-5 p-5 h-screen max-w-2xl mx-auto">
-    <UiCard class="w-full">
+    <UiCard class="w-[450px]">
       <UiCardHeader>
         <UiCardTitle>
           登录

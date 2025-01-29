@@ -26,7 +26,7 @@ export const useUserStore = defineStore('user', () => {
   const canSubmit = () => {
     if (!lastSubmission.value)
       return true;
-    return new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) > new Date(lastSubmission.value);
+    return new Date(Date.now() - 5 * 60 * 1000) > new Date(lastSubmission.value);
   };
 
   const changeAutoArrange = (data: 'day' | 'week') => {

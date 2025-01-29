@@ -16,6 +16,9 @@
             <em>the1068fm</em> 是由<b>COSMO智慧校园平台运研中心</b>为<b>风华子衿广播站</b>声声慢点歌节目开发的一体化系统，包含歌曲投稿，歌曲审核，一键排歌，导出歌单等功能。
           </p>
           <p>
+            此版本由Ljk进行修改,仅用于实验之声广播站的点歌节目。
+          </p>
+          <p>
             这个项目的代码是开源的，你可以在
             <NuxtLink to="https://github.com/SMS-COSMO/the1068fm" class="font-bold">
               <span>这里</span>

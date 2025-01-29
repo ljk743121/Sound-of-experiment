@@ -474,7 +474,7 @@ onMounted(async () => {
     <UiCard v-if="isDesktop" class="lg:w-[600px] w-full relative hidden lg:block">
       <UiCardHeader>
         <UiCardTitle class="my-[-0.5rem]">
-          <LogosThe1068fm class="h-14 mx-auto" />
+          <img src="https://s2.loli.net/2025/01/29/QjHcTYmGphxiyV9.jpg" alt="logo" class="h-14 mx-auto">
         </UiCardTitle>
       </UiCardHeader>
       <UiCardContent>

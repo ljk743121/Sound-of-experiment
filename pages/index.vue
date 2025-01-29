@@ -72,9 +72,9 @@ definePageMeta({
 });
 
 useHead({
-  title: 'the1068fm 点歌系统',
+  title: 'the1068fm_soe 点歌系统',
   meta: [
-    { name: 'description', content: 'the1068fm 点歌系统 Made by COSMO.' },
+    { name: 'description', content: 'the1068fm 点歌系统 Made by COSMO.(Modify by Ljk)' },
   ],
   bodyAttrs: {
     class: 'm-0 min-w-screen',
@@ -144,7 +144,7 @@ async function refreshData() {
     <div class="mx-5 grid lg:grid-cols-2 lg:gap-8">
       <div>
         <div class="lg:mb-4 mt-4 mx-1 lg:mt-8 flex justify-start">
-          <LogosCombined class="w-full" />
+          <img src="https://s2.loli.net/2025/01/29/QjHcTYmGphxiyV9.jpg" alt="soe" class="scale-[0.5]">
         </div>
         <section class="my-4 grid grid-cols-1 gap-4 font-shuhei">
           <div class="grid grid-cols-2 gap-2">
