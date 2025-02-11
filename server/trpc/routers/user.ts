@@ -90,6 +90,8 @@ export const userRouter = router({
               id: true,
               name: true,
               creator: true,
+              ownerDisplayName: true,
+              isRealName: true,
               message: true,
               state: true,
             },

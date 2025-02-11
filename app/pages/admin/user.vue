@@ -32,7 +32,11 @@
               </TableRow>
             </template>
           </template>
-
+          <TableRow v-if="table.getRowModel().rows?.length">
+            <TableCell :colspan="columns.length" class="h-24 text-center">
+              匿名投稿：<AnonymousHistorySheet :songs="anonyHisSheet!" />
+            </TableCell>
+          </TableRow>
           <TableRow v-else>
             <TableCell
               :colspan="columns.length"
@@ -88,6 +92,7 @@ import {
 import ChangeMaxSubmitSongs from '~/components/admin/user/ChangeMaxSubmitSongs.vue';
 import TablePermission from '~/components/admin/user/TablePermission.vue';
 
+import AnonymousHistorySheet from '~/components/song/AnonymousHistorySheet.vue';
 import HistorySheet from '~/components/song/HistorySheet.vue';
 import Button from '~/components/ui/button/Button.vue';
 import { valueUpdater } from '~/lib/utils';
@@ -104,6 +109,12 @@ const { data, suspense } = useQuery({
 });
 await suspense();
 
+const { data: anonyHisSheet, suspense: anonyHisSheetSuspense } = useQuery({
+  queryFn: () => $trpc.song.listSafe.query(),
+  queryKey: ['song.list'],
+});
+await anonyHisSheetSuspense();
+
 type a = RouterOutput['user']['list'][0];
 
 const columns: ColumnDef<a>[] = [
@@ -119,7 +130,7 @@ const columns: ColumnDef<a>[] = [
   },
   {
     accessorKey: 'songs',
-    header: '点歌记录',
+    header: '点歌记录(实名/匿名/总)',
     cell: ({ row }) => h(
       HistorySheet,
       { songs: row.original.songs },

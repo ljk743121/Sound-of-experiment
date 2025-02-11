@@ -2,21 +2,21 @@
   <Sheet>
     <SheetTrigger as-child>
       <Button variant="outline" size="xs" class="font-mono">
-        {{ songs.filter((song) => song.isRealName).length }}/{{ songs.filter((song) => !song.isRealName).length }}/{{ songs.length }}
+        {{ songs.filter((song) => !song.isRealName).length }}
       </Button>
     </SheetTrigger>
     <SheetContent class="overflow-scroll">
       <SheetHeader>
-        <SheetTitle class="flex gap-1">
-          <span>点歌记录</span>
+        <SheetTitle class="flex gap-2">
+          <span>匿名点歌记录</span>
           <Badge variant="secondary">
-            (实名) {{ songs.filter((song) => song.isRealName).length }} 首
+            {{ songs.filter((song) => !song.isRealName).length }} 首
           </Badge>
         </SheetTitle>
         <SheetDescription />
       </SheetHeader>
       <div class="flex flex-col gap-3">
-        <SongCard v-for="song in songs.filter((song) => song.isRealName)" :key="song.id" :song />
+        <SongCard v-for="song in songs.filter((song) => !song.isRealName)" :key="song.id" :song />
       </div>
     </SheetContent>
   </Sheet>
@@ -26,6 +26,6 @@
 import type { RouterOutput } from '~~/types';
 
 defineProps<{
-  songs: RouterOutput['user']['list'][0]['songs'];
+  songs: RouterOutput['song']['listSafe'];
 }>();
 </script>
