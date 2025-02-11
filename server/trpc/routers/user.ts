@@ -1,58 +1,125 @@
 import { TRPCError } from '@trpc/server';
+import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { protectedProcedure, publicProcedure, router } from '../trpc';
-import { passwordRegex } from '~/constants/index';
+import { db } from '~~/server/db';
+import { users } from '~~/server/db/schema';
+import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
 
 export const userRouter = router({
-
-  register: protectedProcedure
-    .input(z.object({
-      id: z.string().min(4, { message: '用户ID长度应至少为4' }).max(24, { message: '用户ID超出长度范围' }),
-      password: z.string().min(8, { message: '用户密码长度应至少为8' }).regex(passwordRegex, '密码必须包含大小写字母、数字与特殊符号'),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      const res = await ctx.userController.register({
-        id: input.id,
-        password: input.password,
-      });
-      if (!res.success)
-        throw new TRPCError({ code: 'BAD_REQUEST', message: res.message });
-      else return res;
-    }),
-
   login: publicProcedure
-    .input(z.object({ id: z.string(), password: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      const user = await ctx.userController.login(input.id, input.password);
+    .input(z.object({
+      id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
+      password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').trim(),
+    }))
+    .mutation(async ({ input }) => {
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, input.id),
+      });
+      // make sure registration is successful
       if (!user)
-        throw new TRPCError({ code: 'BAD_REQUEST', message: '用户名或密码错误' });
-      return user;
-    }),
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '登录失败' });
 
+      if (!(await verifyPassword(user.password!, input.password)))
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '登录失败' });
+
+      // banned
+      if (!user.permissions.includes('login'))
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: '无法登录' });
+
+      const accessToken = await produceAccessToken(user.id);
+      return {
+        ...user,
+        accessToken,
+      };
+    }),
+  register: publicProcedure
+    .input(z.object({
+      id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
+      username: z.string().min(2, '最少为2个字符').max(7, '最多为7个字符').regex(/[一-龥]+/, '输入必须为汉字').trim(),
+      // displayName: z.string(),
+      password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(/.*(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*/, '密码需包括至少1个大写字母,1个小写字母,1个数字,1个特殊字符').trim(),
+    }))
+    .mutation(async ({ input }) => {
+      let user = await db.query.users.findFirst({
+        where: eq(users.id, input.id),
+      });
+      // auto register
+      if (!user) {
+        const hashpwd = await hashPassword(input.password);
+        user = (
+          await db
+            .insert(users)
+            .values({
+              id: input.id,
+              name: input.username,
+              // displayName: input.displayName,
+              password: hashpwd,
+              permissions: ['login'],
+            })
+            .returning()
+        )[0];
+      } else {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '用户已存在' });
+      }
+
+      // make sure registration is successful
+      if (!user)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '注册成功,登录失败' });
+
+      // banned
+      if (!user.permissions.includes('login'))
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: '注册成功，无法登录' });
+
+      const accessToken = await produceAccessToken(user.id);
+      return {
+        ...user,
+        accessToken,
+      };
+    }),
   tokenValidity: protectedProcedure
     .query(() => { }), // protectedProcedure will check if user is logged in
 
-  refreshAccessToken: publicProcedure
-    .input(z.object({ id: z.string(), refreshToken: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const res = await ctx.userController.refreshAccessToken(input.refreshToken, input.id);
-      if (!res)
-        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Incorrect refresh token.' });
-      return res;
+  list: adminProcedure
+    .use(requirePermission(['manageUser']))
+    .query(async () => {
+      return await db.query.users.findMany({
+        orderBy: desc(users.createdAt),
+        with: {
+          songs: {
+            columns: {
+              id: true,
+              name: true,
+              creator: true,
+              message: true,
+              state: true,
+            },
+          },
+        },
+      });
     }),
 
-  modifyPassword: protectedProcedure
+  editPermission: adminProcedure
     .input(z.object({
-      oldPassword: z.string(),
-      newPassword: z
-        .string().min(8, { message: '用户密码长度应至少为8' })
-        .regex(passwordRegex, '密码必须包含大小写字母、数字与特殊符号'),
+      id: z.string(),
+      permissions: z.enum(['login', 'admin', 'review', 'arrange', 'manageUser', 'time', 'blockWords']).array(),
     }))
-    .mutation(async ({ ctx, input }) => {
-      const res = await ctx.userController.modifyPassword(ctx.user, input.oldPassword, input.newPassword);
-      if (!res.success)
-        throw new TRPCError({ code: 'BAD_REQUEST', message: res.message });
-      else
-        return res;
+    .use(requirePermission(['manageUser']))
+    .mutation(async ({ input }) => {
+      await db
+        .update(users)
+        .set({ permissions: input.permissions })
+        .where(eq(users.id, input.id));
+    }),
+  editMaxSongs: adminProcedure
+    .input(z.object({
+      id: z.string(),
+      maxSongs: z.number().min(0, '输入须大于等于0').max(10, '输入须小于等于10'),
+    }))
+    .use(requirePermission(['manageUser']))
+    .mutation(async ({ input }) => {
+      await db
+        .update(users)
+        .set({ maxSubmitSongs: input.maxSongs })
+        .where(eq(users.id, input.id));
     }),
 });

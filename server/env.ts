@@ -6,15 +6,13 @@ dotenv.config();
 dotenv.config({ path: '.env.local', override: true });
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
-  DATABASE_CONNECTION_TYPE: z.enum(['remote', 'local']),
-  NODE_ENV: z.enum(['development', 'production']),
+  TOKEN_EXPIRATION_TIME: z.string().optional().default('24h'),
   SIGN_PUBLIC_KEY: z.string(),
   SIGN_PRIVATE_KEY: z.string(),
   ENC_PUBLIC_KEY: z.string(),
   ENC_PRIVATE_KEY: z.string(),
   SIGN_KID: z.string(),
   ENC_KID: z.string(),
-  SERVER_URL: z.string(),
 });
 
 const envParse = envSchema.safeParse(process.env);
