@@ -21,4 +21,4 @@ A simple yet powerful song request system
 
 ## License
 
-[GPL v3](./LICENSE) &copy; 2024 the1068fm contributors
+[GPL v3](./LICENSE) &copy; 2025 Sound-of-Experiment contributors
