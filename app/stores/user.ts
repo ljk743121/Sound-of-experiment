@@ -47,10 +47,5 @@ export const useUserStore = defineStore('user', () => {
     changeRemainSongs,
   };
 }, {
-  persist: {
-    storage: piniaPluginPersistedstate.cookies({
-      // One month
-      maxAge: 30 * 24 * 60 * 60,
-    }),
-  },
+  persist: true,
 });

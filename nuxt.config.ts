@@ -15,6 +15,14 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
   ],
 
+  piniaPluginPersistedstate: {
+    storage: 'cookies',
+    cookieOptions: {
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 14,
+    },
+  },
+
   future: {
     compatibilityVersion: 4,
   },

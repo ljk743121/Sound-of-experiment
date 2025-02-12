@@ -6,6 +6,18 @@ import { songs, users } from '~~/server/db/schema';
 import { adminProcedure, protectedProcedure, requirePermission, router } from '../trpc';
 import { fitsInTime } from './time';
 
+function getISOWeekNumber(date: Date): number {
+  const target = new Date(date.valueOf());
+  const dayNr = (date.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.getTime();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+  }
+  return 1 + Math.ceil((firstThursday - target.getTime()) / (7 * 24 * 60 * 60 * 1000));
+}
+
 async function checkCanSubmit(userId: string) {
   if (!(await fitsInTime(new Date())))
     return false;
@@ -26,9 +38,13 @@ async function checkCanSubmit(userId: string) {
       maxSubmitSongs: true,
     },
   });
-  if (user!.remainSubmitSongs > 0)
+  if ((getISOWeekNumber(new Date()) - getISOWeekNumber(latestSubmission.createdAt!)) >= 1) {
+    await db.update(users).set({
+      remainSubmitSongs: (user!.maxSubmitSongs),
+    }).where(eq(users.id, userId));
     return true;
-  return false;
+  }
+  return (user!.remainSubmitSongs > 0);
 }
 
 export const songRouter = router({
