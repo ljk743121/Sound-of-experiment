@@ -63,6 +63,10 @@ import * as z from 'zod';
 
 const { $trpc } = useNuxtApp();
 
+definePageMeta({
+  middleware: 'guest',
+});
+
 const formSchema = toTypedSchema(
   z.object({
     id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
