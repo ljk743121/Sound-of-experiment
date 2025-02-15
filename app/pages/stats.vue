@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="container max-w-screen-lg select-none divide-y px-0 md:border-x">
     <div class="p-5">
       <h1 class="flex items-center gap-2 font-bold">
@@ -113,15 +113,15 @@
       </CardContent>
     </div>
   </div>
-</template>
+</template> -->
 
 <script setup lang="ts">
-import singerData from '~~/public/singerRank.json';
-import weekData from '~~/public/week.json';
-
 navigateTo('/');
 
-function getRatio(a?: number, b?: number) {
-  return (a ?? 0) / ((a ?? 0) + (b ?? 0)) * 100;
-}
+// import singerData from '~~/public/singerRank.json';
+// import weekData from '~~/public/week.json';
+
+// function getRatio(a?: number, b?: number) {
+//   return (a ?? 0) / ((a ?? 0) + (b ?? 0)) * 100;
+// }
 </script>

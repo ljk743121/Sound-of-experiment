@@ -6,7 +6,7 @@ dotenv.config();
 dotenv.config({ path: '.env.local', override: true });
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
-  TOKEN_EXPIRATION_TIME: z.string().optional().default('24h'),
+  TOKEN_EXPIRATION_TIME: z.string().optional().default('5d'),
   SIGN_PUBLIC_KEY: z.string(),
   SIGN_PRIVATE_KEY: z.string(),
   ENC_PUBLIC_KEY: z.string(),

@@ -175,7 +175,7 @@ export const songRouter = router({
       });
       const maxSongs = ctx.user.maxSubmitSongs;
       if (!latestSubmission)
-        return maxSongs;
+        return ctx.user.remainSubmitSongs;
       if (Date.now() - latestSubmission.createdAt.getTime() >= 5 * 24 * 60 * 60 * 1000) {
         await db
           .update(users)

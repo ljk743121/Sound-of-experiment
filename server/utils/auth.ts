@@ -16,7 +16,7 @@ export async function produceAccessToken(id: string) {
     .setSubject(id.toString())
     .setIssuedAt()
     .setExpirationTime(env.TOKEN_EXPIRATION_TIME)
-    .setIssuer('sms-tree')
+    .setIssuer('soe')
     .setJti(nanoid(32))
     .setProtectedHeader({
       alg: 'RS512',

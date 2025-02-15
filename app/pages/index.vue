@@ -201,7 +201,7 @@ const calendarAttr = computed(() => {
 });
 
 if (!userStore.loggedIn) {
-  navigateTo('/login');
+  navigateTo('/auth/login');
 } else {
   try {
     await $trpc.user.tokenValidity.query();
@@ -211,14 +211,14 @@ if (!userStore.loggedIn) {
     await arrangementListSuspense();
     await remainSubmitSongsSuspense();
   } catch {
-    navigateTo('/login');
+    navigateTo('/auth/login');
   }
 }
 
 function logout() {
   userStore.logout();
   toast.success('登出成功');
-  navigateTo('/login');
+  navigateTo('/auth/login');
 }
 
 type TLists = RouterOutput['song']['listSafe'];
