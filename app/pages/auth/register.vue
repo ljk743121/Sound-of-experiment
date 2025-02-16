@@ -73,9 +73,10 @@ import * as z from 'zod';
 
 const { $trpc } = useNuxtApp();
 
-definePageMeta({
-  middleware: 'guest',
-});
+try {
+  await $trpc.user.tokenValidity.query();
+  navigateTo('/');
+} catch {}
 
 const formSchema = toTypedSchema(
   z.object({
