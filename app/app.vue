@@ -10,8 +10,8 @@
 import '@ztl-uwu/v-calendar/style.css';
 
 useHeadSafe({
-  titleTemplate: (title?: string) => !title ? 'Sound of Experiment 点歌系统' : `${title} | Sound of Experiment 点歌系统`,
-  meta: [{ name: 'description', content: 'Sound of Experiment 点歌系统 Made by Ljk743121.' }],
+  titleTemplate: (title?: string) => !title ? 'Voice of SZSY 点歌系统' : `${title} | Voice of SZSY 点歌系统`,
+  meta: [{ name: 'description', content: 'Voice of SZSY 点歌系统 Made by Ljk743121.' }],
 });
 </script>
 

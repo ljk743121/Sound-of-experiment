@@ -3,7 +3,7 @@
     class="mx-auto flex max-w-screen-sm flex-col gap-4 p-5 lg:mx-auto lg:grid lg:h-screen lg:max-w-screen-xl lg:grid-cols-2 lg:gap-8 lg:p-10"
   >
     <section class="flex flex-col gap-3 lg:self-center">
-      <LogosSoelogo class="w-full" />
+      <LogosSoe class="w-full" />
 
       <div class="grid grid-cols-2 gap-3">
         <div class="grid grid-rows-2 gap-3">

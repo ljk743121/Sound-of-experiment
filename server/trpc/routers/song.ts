@@ -18,33 +18,10 @@ function getISOWeekNumber(date: Date): number {
   return 1 + Math.ceil((firstThursday - target.getTime()) / (7 * 24 * 60 * 60 * 1000));
 }
 
-async function checkCanSubmit(userId: string) {
+async function checkCanSubmit(userId: string, remainSongs: number) {
   if (!(await fitsInTime(new Date())))
     return false;
-
-  const latestSubmission = await db.query.songs.findFirst({
-    where: eq(songs.ownerId, userId),
-    orderBy: desc(songs.createdAt),
-  });
-
-  // no submission
-  if (!latestSubmission)
-    return true;
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: {
-      remainSubmitSongs: true,
-      maxSubmitSongs: true,
-    },
-  });
-  if ((getISOWeekNumber(new Date()) - getISOWeekNumber(latestSubmission.createdAt!)) >= 1) {
-    await db.update(users).set({
-      remainSubmitSongs: (user!.maxSubmitSongs),
-    }).where(eq(users.id, userId));
-    return true;
-  }
-  return (user!.remainSubmitSongs > 0);
+  return remainSongs > 0;
 }
 
 export const songRouter = router({
@@ -63,7 +40,7 @@ export const songRouter = router({
       message: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      if (!(await checkCanSubmit(ctx.user.id)))
+      if (!(await checkCanSubmit(ctx.user.id, ctx.user.remainSubmitSongs)))
         throw new TRPCError({ code: 'BAD_REQUEST', message: '您的剩余提交次数为0,请等5天后重置' });
 
       const chinese = `${input.name} ${input.creator} ${input.message}`.match(/[\u4E00-\u9FA5]+/g);
@@ -164,7 +141,7 @@ export const songRouter = router({
 
   canSubmit: protectedProcedure
     .query(async ({ ctx }) => {
-      return await checkCanSubmit(ctx.user.id);
+      return await checkCanSubmit(ctx.user.id, ctx.user.remainSubmitSongs);
     }),
 
   remainSubmitSongs: protectedProcedure
@@ -173,17 +150,27 @@ export const songRouter = router({
         where: eq(songs.ownerId, ctx.user.id),
         orderBy: desc(songs.createdAt),
       });
-      const maxSongs = ctx.user.maxSubmitSongs;
       if (!latestSubmission)
         return ctx.user.remainSubmitSongs;
+
+      // Check if it's a new week
+      if ((getISOWeekNumber(new Date()) - getISOWeekNumber(latestSubmission.createdAt!)) >= 1) {
+        await db
+          .update(users)
+          .set({
+            remainSubmitSongs: (ctx.user!.maxSubmitSongs),
+          })
+          .where(eq(users.id, ctx.user.id));
+      }
+      // Check if user have submitted songs in the last 5 days
       if (Date.now() - latestSubmission.createdAt.getTime() >= 5 * 24 * 60 * 60 * 1000) {
         await db
           .update(users)
           .set({
-            remainSubmitSongs: maxSongs,
+            remainSubmitSongs: ctx.user.maxSubmitSongs,
           })
           .where(eq(users.id, ctx.user.id));
-        return maxSongs;
+        return ctx.user.maxSubmitSongs;
       }
       return ctx.user.remainSubmitSongs;
     }),

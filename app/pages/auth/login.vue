@@ -7,7 +7,7 @@
             登录
           </h1>
           <p class="text-balance text-muted-foreground">
-            使用<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Sound of Experiment</span>账号登录
+            使用<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号登录
           </p>
         </div>
         <div class="grid gap-4">
@@ -40,7 +40,7 @@
         </div>
         <div class="mt-4 text-center text-sm">
           <p class="text-muted-foreground">
-            没有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Sound of Experiment</span>账号？
+            没有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
             <NuxtLink to="/auth/register" class="text-primary">
               注册
             </NuxtLink>
