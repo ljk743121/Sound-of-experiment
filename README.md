@@ -13,6 +13,26 @@ A simple yet powerful song request system
   <img src="https://img.shields.io/github/stars/ljk743121/the1068fm">
 </p>
 
+## Contributing
+
+### Local Setup
+
+Clone the repository and run on the root folder:
+
+```
+pnpm install
+pnpm run dev
+```
+
+#### Scripts available:
+
+Run the scrips with `npm run xxx`.
+
+1. `dev`: Start dev server
+2. `build`: Build for production
+3. `db:push`: Push schema changes to database
+4. `auth:genKey`: Generate public and private key,
+
 ## Contributors
 
 <a href="https://github.com/ljk743121/the1068fm/graphs/contributors">
@@ -21,4 +41,4 @@ A simple yet powerful song request system
 
 ## License
 
-[GPL v3](./LICENSE) &copy; 2024 the1068fm contributors
+[GPL v3](./LICENSE) &copy; 2025 Sound of Experiment contributors
