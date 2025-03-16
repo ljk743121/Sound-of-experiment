@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     'shadcn-nuxt',
     '@vee-validate/nuxt',
     '@nuxtjs/color-mode',
+    'radix-vue/nuxt',
   ],
 
   piniaPluginPersistedstate: {

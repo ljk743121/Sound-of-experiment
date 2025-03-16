@@ -59,29 +59,56 @@
       </div>
 
       <div class="mt-4 flex items-center gap-4">
-        <Avatar>
-          <Icon name="lucide:circle-user" size="20" />
-        </Avatar>
-
-        <div class="flex flex-col">
-          <span>{{ userStore.name }}</span>
-          <!-- <span class="text-xs text-gray-600">投稿显示名字：{{ userStore.displayName }}</span> -->
-          <span class="text-xs text-muted-foreground">
-            {{ userStore.id }}
-          </span>
-        </div>
-
-        <div class="ml-auto flex gap-2">
-          <DarkModeToggle />
-          <Button v-if="userStore.permissions.includes('admin')" variant="outline" size="sm" @click="navigateTo('/admin')">
-            <Icon name="lucide:user-cog" class="mr-1" />
-            管理
-          </Button>
-          <Button variant="outline" size="sm" @click="logout">
-            <Icon name="lucide:log-out" class="mr-1" />
-            登出
-          </Button>
-        </div>
+        <Dialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" class="w-full">
+                <Avatar class="rounded-lg">
+                  <Icon name="lucide:circle-user" size="20" />
+                </Avatar>
+                <div class="grid flex-1 text-left text-sm leading-tight">
+                  <span class="truncate font-semibold">{{ userStore.name }}</span>
+                  <span class="truncate text-xs">{{ userStore.id }}</span>
+                </div>
+                <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom"
+              :side-offset="4"
+            >
+              <DropdownMenuLabel class="p-0 font-normal">
+                <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar class="rounded-lg">
+                    <Icon name="lucide:circle-user" size="20" />
+                  </Avatar>
+                  <div class="grid flex-1 text-left text-sm leading-tight">
+                    <span class="truncate font-semibold">{{ userStore.name }}</span>
+                    <span class="truncate text-xs">{{ userStore.id }}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DialogTrigger as-child>
+                <DropdownMenuItem>
+                  <Icon name="lucide:lock" />
+                  修改密码
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DropdownMenuItem v-if="userStore.permissions.includes('admin')" @click="navigateTo('/admin')">
+                <Icon name="lucide:user-cog" />
+                管理
+              </DropdownMenuItem>
+              <DropdownMenuItem @click="logout">
+                <Icon name="lucide:log-out" />
+                登出
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <ModifyPasswordDialog />
+        </Dialog>
+        <div class="ml-auto flex gap-2" />
+        <DarkModeToggle />
       </div>
     </section>
 
@@ -111,16 +138,8 @@
         </TabsContent>
         <TabsContent value="arrangement">
           <DatePicker
-            v-model="selectedDate"
-            mode="date"
-            view="weekly"
-            borderless
-            expanded
-            title-position="left"
-            is-required
-            :attributes="calendarAttr"
-            :is-dark="isDark"
-            class="mb-4 !bg-background"
+            v-model="selectedDate" mode="date" view="weekly" borderless expanded title-position="left"
+            is-required :attributes="calendarAttr" :is-dark="isDark" class="mb-4 !bg-background"
           />
           <ul class="flex flex-col gap-3">
             <li v-for="song in arrangementListSongs" :key="song.id">
@@ -138,9 +157,9 @@
 
 <script setup lang="ts">
 import type { RouterOutput } from '~~/types';
-import { LogosSoelogo } from '#components';
 import { useFuse, type UseFuseOptions } from '@vueuse/integrations/useFuse';
 import { DatePicker } from '@ztl-uwu/v-calendar';
+import ModifyPasswordDialog from '~/components/admin/user/ModifyPasswordDialog.vue';
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();

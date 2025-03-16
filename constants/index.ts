@@ -19,3 +19,5 @@ export const breadCrumb: Record<string, string> = {
   words: '屏蔽词',
   songs: '全部歌曲',
 };
+
+export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;

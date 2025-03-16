@@ -78,25 +78,13 @@
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger as-child>
-                <SidebarMenuButton
-                  size="lg"
-                  class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar class="rounded-lg">
-                    <Icon name="lucide:circle-user" size="20" />
-                  </Avatar>
-                  <div class="grid flex-1 text-left text-sm leading-tight">
-                    <span class="truncate font-semibold">{{ userStore.name }}</span>
-                    <span class="truncate text-xs">{{ userStore.id }}</span>
-                  </div>
-                  <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom" align="end" :side-offset="4">
-                <DropdownMenuLabel class="p-0 font-normal">
-                  <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <Dialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <SidebarMenuButton
+                    size="lg"
+                    class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  >
                     <Avatar class="rounded-lg">
                       <Icon name="lucide:circle-user" size="20" />
                     </Avatar>
@@ -104,21 +92,47 @@
                       <span class="truncate font-semibold">{{ userStore.name }}</span>
                       <span class="truncate text-xs">{{ userStore.id }}</span>
                     </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem @click="logout">
-                  <Icon name="lucide:log-out" />
-                  登出
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom"
+                  :side-offset="4"
+                >
+                  <DropdownMenuLabel class="p-0 font-normal">
+                    <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                      <Avatar class="rounded-lg">
+                        <Icon name="lucide:circle-user" size="20" />
+                      </Avatar>
+                      <div class="grid flex-1 text-left text-sm leading-tight">
+                        <span class="truncate font-semibold">{{ userStore.name }}</span>
+                        <span class="truncate text-xs">{{ userStore.id }}</span>
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DialogTrigger as-child>
+                    <DropdownMenuItem>
+                      <Icon name="lucide:lock" />
+                      修改密码
+                    </DropdownMenuItem>
+                  </DialogTrigger>
+                  <DropdownMenuItem @click="logout">
+                    <Icon name="lucide:log-out" />
+                    登出
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <ModifyPasswordDialog />
+            </Dialog>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset>
-      <header class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+      <header
+        class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+      >
         <div class="flex w-full items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
@@ -150,6 +164,7 @@
 <script setup lang="ts">
 import { LogosSoelogo } from '#components';
 import { breadCrumb } from '~~/constants';
+import ModifyPasswordDialog from '~/components/admin/user/ModifyPasswordDialog.vue';
 
 const userStore = useUserStore();
 

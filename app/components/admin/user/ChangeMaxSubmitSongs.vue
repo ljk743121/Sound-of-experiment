@@ -13,32 +13,6 @@
           更改用户的每周最大提交次数。
         </DialogDescription>
       </DialogHeader>
-
-      <!-- <div class="flex gap-2">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                最大提交次数
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="permission in permissionNames" :key="permission.value">
-              <TableCell class="font-medium">
-                <Icon :name="permission.icon" class="mr-1" />
-                {{ permission.label }}
-              </TableCell>
-              <TableCell class="text-right">
-                <Switch
-                  :checked="editPermission.includes(permission.value)"
-                  @click="togglePermission(permission.value)"
-                />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div> -->
       <div class="grid w-full max-w-sm items-center gap-1.5">
         <Label for="maxTimes">最大提交次数</Label>
         <Input id="maxTimes" v-model="editMaxSongs" type="number" placeholder="Times" min="0" max="10" />

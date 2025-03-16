@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { pwRegex } from '~~/constants';
 import { db } from '~~/server/db';
 import { users } from '~~/server/db/schema';
 import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
@@ -37,7 +38,7 @@ export const userRouter = router({
       id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
       username: z.string().min(2, '最少为2个字符').max(7, '最多为7个字符').regex(/[一-龥]+/, '输入必须为汉字').trim(),
       // displayName: z.string(),
-      password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(/.*(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*/, '密码需包括至少1个大写字母,1个小写字母,1个数字,1个特殊字符').trim(),
+      password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(pwRegex, '密码需包括至少1个字母,1个数字').trim(),
     }))
     .mutation(async ({ input }) => {
       let user = await db.query.users.findFirst({
@@ -123,5 +124,25 @@ export const userRouter = router({
         .update(users)
         .set({ maxSubmitSongs: input.maxSongs })
         .where(eq(users.id, input.id));
+    }),
+  modifyPassword: protectedProcedure
+    .input(z.object({
+      oldPassword: z.string(),
+      newPassword: z
+        .string()
+        .min(8, { message: '用户密码长度应至少为8' })
+        .regex(pwRegex, '密码必须包含大小写字母、数字与特殊符号'),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (!await verifyPassword(ctx.user.password!, input.oldPassword))
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '旧密码不正确' });
+      if (input.newPassword === input.oldPassword)
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '新密码与旧密码相同' });
+
+      await db.update(users)
+        .set({
+          password: await hashPassword(input.newPassword),
+        })
+        .where(eq(users.id, ctx.user.id));
     }),
 });

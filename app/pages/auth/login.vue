@@ -60,6 +60,7 @@ import { vAutoAnimate } from '@formkit/auto-animate/vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
+import { pwRegex } from '~~/constants';
 
 const { $trpc } = useNuxtApp();
 
@@ -71,7 +72,7 @@ try {
 const formSchema = toTypedSchema(
   z.object({
     id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
-    password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').trim(),
+    password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(pwRegex, '密码需包括至少1个字母,1个数字').trim(),
   }),
 );
 
