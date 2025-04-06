@@ -64,6 +64,7 @@ export const songRouter = router({
         ownerId: ctx.user.id,
         isRealName,
         ownerDisplayName: displayName,
+        state: 'approved',
       });
       await db
         .update(users)

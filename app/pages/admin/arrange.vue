@@ -3,6 +3,9 @@
     <div class="flex w-max">
       <div class="sticky left-0 z-50 flex h-[calc(100svh-4rem)] w-min flex-col justify-between border-r bg-sidebar p-4">
         <div>
+          <div class="justify-center text-center text-sm text-muted-foreground">
+            排歌选取
+          </div>
           <RangeCalendar
             v-model="calendarValue"
             :is-date-unavailable="isDateUnavailable"
@@ -16,6 +19,26 @@
             <Icon name="lucide:arrow-right" size="14" />
             <Badge variant="outline">
               {{ calendarValue.end }}
+            </Badge>
+          </div>
+        </div>
+        <div>
+          <div class="justify-center text-center text-sm text-muted-foreground">
+            复制区段
+          </div>
+          <RangeCalendar
+            v-model="copyValue"
+            :is-date-unavailable="isDateAvailable"
+            locale="zh"
+            class="p-0"
+          />
+          <div v-if="copyValue.start && copyValue.end" class="mt-4 flex items-center justify-between">
+            <Badge variant="outline">
+              {{ copyValue.start }}
+            </Badge>
+            <Icon name="lucide:arrow-right" size="14" />
+            <Badge variant="outline">
+              {{ copyValue.end }}
             </Badge>
           </div>
         </div>
@@ -50,6 +73,12 @@
             <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
             <Icon name="lucide:play" class="mr-2" />
             自动排歌
+          </Button>
+          <Button
+            class="transition-all" @click="copyAllSongs(arrangementList)"
+          >
+            <Icon name="lucide:clipboard" class="mr-2" />
+            复制选定区域全部歌曲
           </Button>
         </div>
       </div>
@@ -136,6 +165,46 @@ const calendarValue = ref({
   end: _end,
 }) as Ref<DateRange>;
 
+const copyValue = ref({
+  start: _start,
+  end: _end,
+}) as Ref<DateRange>;
+
+async function copyAllSongs(list: RouterOutput['arrangements']['list']) {
+  if (!copyValue.value.start || !copyValue.value.end) {
+    toast.error('请选择有效的时间段');
+    return;
+  }
+  if (!list.length) {
+    toast.error('排歌表为空');
+    return;
+  }
+  const selectedDays = arrangementList.value?.filter((day) => {
+    const dayDate = new Date(day.date);
+    const startDate = copyValue.value.start.toDate(getLocalTimeZone());
+    const endDate = copyValue.value.end.toDate(getLocalTimeZone());
+    return dayDate >= startDate && dayDate <= endDate;
+  });
+  if (!selectedDays || selectedDays.length === 0) {
+    toast.error('所选时间段内没有歌曲');
+    return;
+  }
+  let info = '';
+  for (const day of selectedDays) {
+    for (const song of day.songs)
+      info += `《${song.name}》 ${song.creator}\n`;
+  }
+  try {
+    await useCopy(info.trim());
+    toast.success('复制成功');
+  } catch (e: any) {
+    if (e.message)
+      toast.error(e.message);
+    else
+      toast.error(e.toString());
+  }
+}
+
 const requirementList = computed<{
   label: string;
   value: boolean;
@@ -162,6 +231,10 @@ const songCount = ref(10);
 
 function isDateUnavailable(date: DateValue) {
   return arrangementList.value?.some(x => x.date === date.toString());
+}
+
+function isDateAvailable(date: DateValue) {
+  return !(arrangementList.value?.some(x => x.date === date.toString()));
 }
 
 const queryClient = useQueryClient();
