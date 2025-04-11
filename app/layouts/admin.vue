@@ -171,7 +171,7 @@ const userStore = useUserStore();
 function logout() {
   userStore.logout();
   toast.success('登出成功');
-  navigateTo('/login');
+  navigateTo('/auth/login');
 }
 
 interface Item {
