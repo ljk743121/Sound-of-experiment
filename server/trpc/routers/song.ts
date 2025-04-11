@@ -48,9 +48,9 @@ export const songRouter = router({
 
       const blockWords = await db.query.blockWords.findMany();
       if (chinese?.some(x => blockWords.some(y => x.includes(y.word))))
-        throw new TRPCError({ code: 'BAD_REQUEST', message: '投稿失败' });
+        throw new TRPCError({ code: 'BAD_REQUEST', message: '投稿失败，含有违禁词' });
       if (english?.some(x => blockWords.some(y => x === y.word)))
-        throw new TRPCError({ code: 'BAD_REQUEST', message: '投稿失败' });
+        throw new TRPCError({ code: 'BAD_REQUEST', message: '投稿失败，含有违禁词' });
       let isRealName = false;
       let displayName = '';
       if (input.submitType === 'realName') {
@@ -64,7 +64,6 @@ export const songRouter = router({
         ownerId: ctx.user.id,
         isRealName,
         ownerDisplayName: displayName,
-        state: 'approved',
       });
       await db
         .update(users)
