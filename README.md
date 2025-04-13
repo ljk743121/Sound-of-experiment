@@ -35,8 +35,8 @@ Run the scrips with `npm run xxx`.
 
 ## Contributors
 
-<a href="https://github.com/ljk743121/the1068fm/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=ljk743121/the1068fm" />
+<a href="https://github.com/ljk743121/Sound-of-experiment/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment" />
 </a>
 
 ## License
