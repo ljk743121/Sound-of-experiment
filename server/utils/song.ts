@@ -112,7 +112,7 @@ export async function searchSongsWy(key: string, type: string) {
     album: song.album.name,
     source: 'wy',
     imgId: song.album.picUrl.replace('https://','').replace('.jpg',''),
-    duration: song.duration / 1000,
+    duration: Math.floor(song.duration / 1000),
   }));
   return transformSongs;
 }
