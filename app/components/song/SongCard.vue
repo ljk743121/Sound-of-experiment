@@ -1,18 +1,24 @@
 <template>
-  <Card v-if="type === 'public'" class="hover:cursor-pointer" @click="isOpen = true">
+  <Card v-if="type === 'public'">
+    <!-- class="hover:cursor-pointer" @click="isOpen = true" -->
     <CardHeader>
       <div class="flex flex-row">
+        <Avatar class="size-12 rounded mr-4">
+          <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)" class="object-cover"
+            :alt="song.name" loading="lazy" />
+          <Icon name="lucide:music" size="24" />
+        </Avatar>
         <div>
           <CardTitle>
             {{ song.name }}
           </CardTitle>
           <CardDescription>
             歌手:{{ song.creator }}
-            <p>
+            <p class="mt-1">
               <Badge variant="outline">
                 {{ song.isRealName ? '实名' : '匿名' }}
               </Badge>
-              <span v-if="song.isRealName">提交者:{{ song.ownerDisplayName }}</span>
+              <span v-if="song.isRealName" class="ml-2">提交者:{{ song.ownerDisplayName }}</span>
             </p>
           </CardDescription>
         </div>
@@ -30,6 +36,10 @@
     <ClientOnly>
       <UseTemplate>
         <ul class="grid gap-3">
+          <li v-if="song.duration" class="flex justify-between">
+            <span class="min-w-20 text-sm text-muted-foreground">时长</span>
+            <span class="font-mono">{{ formatDuration(song.duration) }}</span>
+          </li>
           <li class="flex justify-between">
             <span class="min-w-20 text-sm text-muted-foreground">审核状态</span>
             <SongState :song hide-reason />
@@ -52,21 +62,34 @@
           </li>
         </ul>
       </UseTemplate>
-
       <Dialog v-if="isDesktop" v-model:open="isOpen">
-        <DialogTrigger as-child>
-          <slot />
-        </DialogTrigger>
+        <div class="flex justify-end">
+          <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
+            @click.prevent="$emit('songExport', song)">
+              <Icon name="lucide:play" class="mr-2" />
+              播放
+          </Button>
+          <DialogTrigger as-child>
+            <Button variant="outline" @click.stop="isOpen = true">
+              <Icon name="lucide:info" class="mr-2" />
+              详情
+            </Button>
+          </DialogTrigger>
+        </div>
         <DialogContent class="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{{ song.name }}</DialogTitle>
+            <DialogTitle>
+              <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)"
+                class="object-cover mb-2" :alt="song.name" loading="lazy" />
+              {{ song.name }}
+            </DialogTitle>
             <DialogDescription>
               歌手:{{ song.creator }}
-              <p>
+              <p class="mt-2">
                 <Badge variant="outline">
                   {{ song.isRealName ? '实名' : '匿名' }}
                 </Badge>
-                <span v-if="song.isRealName">提交者:{{ song.ownerDisplayName }}</span>
+                <span v-if="song.isRealName" class="ml-2">提交者:{{ song.ownerDisplayName }}</span>
               </p>
             </DialogDescription>
           </DialogHeader>
@@ -75,12 +98,25 @@
       </Dialog>
 
       <Drawer v-else v-model:open="isOpen">
-        <DrawerTrigger as-child>
-          <slot />
-        </DrawerTrigger>
+        <div class="flex justify-end">
+          <Button @click.prevent="$emit('songExport', song)">
+            <Icon name="lucide:play" class="mr-2" />
+            播放
+          </Button>
+          <DrawerTrigger as-child>
+            <Button variant="outline" @click.stop="isOpen = true">
+              <Icon name="lucide:info" class="mr-2" />
+              详情
+            </Button>
+          </DrawerTrigger>
+        </div>
         <DrawerContent>
           <DrawerHeader class="text-left">
-            <DrawerTitle>{{ song.name }}</DrawerTitle>
+            <DrawerTitle>
+              <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)"
+                class="object-cover mb-2" :alt="song.name" loading="lazy" />
+              {{ song.name }}
+            </DrawerTitle>
             <DrawerDescription>
               歌手:{{ song.creator }}
               <p>
@@ -97,11 +133,9 @@
       </Drawer>
     </ClientOnly>
   </Card>
-  <div
-    v-else-if="type === 'review'"
+  <div v-else-if="type === 'review'"
     class="h-auto w-full cursor-pointer rounded-lg border p-4 shadow-sm transition-colors hover:bg-muted"
-    :class="{ 'bg-muted': selected }"
-  >
+    :class="{ 'bg-muted': selected }">
     <CardTitle>
       {{ song.name }}
     </CardTitle>
@@ -115,9 +149,7 @@
       </p>
     </CardDescription>
   </div>
-  <Card
-    v-else-if="type === 'songs'"
-  >
+  <Card v-else-if="type === 'songs'">
     <CardHeader>
       <div class="flex flex-row">
         <div>
@@ -144,23 +176,14 @@
       </p>
 
       <div v-if="song.state !== 'used' && song.state !== 'dropped'" class="flex gap-1">
-        <Button
-          v-if="song.state !== 'approved' && song.id"
-          variant="outline"
-          :disable="approvePending"
-          size="xs"
-          @click="approve({ id: song.id })"
-        >
+        <Button v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="xs"
+          @click="approve({ id: song.id })">
           <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
           <Icon name="lucide:check" />
         </Button>
         <template v-if="song.state !== 'rejected' && song.id">
-          <Button
-            variant="outline"
-            :disable="rejectPending"
-            size="xs"
-            @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })"
-          >
+          <Button variant="outline" :disable="rejectPending" size="xs"
+            @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })">
             <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
             <Icon name="lucide:x" />
           </Button>
@@ -173,6 +196,7 @@
 
 <script setup lang="ts">
 import type { RouterOutput } from '~~/types';
+import { getImgUrl } from '~~/constants';
 
 const {
   song,
@@ -185,6 +209,10 @@ const {
   song: Partial<RouterOutput['song']['listMine'][0]>;
   isArrangement?: boolean;
 }>();
+
+const songExport = defineEmits<{
+  (e: 'songExport', songInformation: typeof song): void
+}>()
 
 const isOpen = ref(false);
 
@@ -211,4 +239,13 @@ const { mutate: reject, isPending: rejectPending } = useMutation({
 });
 
 const rejectMessage = ref('');
+
+const formatDuration = (seconds: number): string => {
+  if (!seconds || seconds <= 0) return '00:00:00';
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
+}
 </script>

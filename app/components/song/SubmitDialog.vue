@@ -24,6 +24,8 @@
         </FormItem>
       </FormField>
 
+      <FetchSongs :song="searchKey" />
+
       <FormField v-slot="{ componentField }" type="radio" name="submitType">
         <FormItem class="space-y-3">
           <FormLabel>投稿时名称</FormLabel>
@@ -125,18 +127,24 @@ const [UseTemplate, GridForm] = createReusableTemplate();
 const isDesktop = useMediaQuery('(min-width: 768px)');
 
 const isOpen = ref(false);
+const title = ref('');
+const creator = ref('');
+const searchKey = computed(() => `${title.value} ${creator.value}`);
 
 const formSchema = toTypedSchema(z.object({
   name: z.string({ required_error: '请输入歌名' })
     .min(1, '请输入歌名')
     .max(50, '歌名长度最大为50')
     .refine(
-      val => !(val.trim().startsWith('《') || val.trim().endsWith('》')),
+      val => (!(val.trim().startsWith('《') || val.trim().endsWith('》')) || (title.value = val.trim())),
       '歌曲名不需带书名号',
     ),
   creator: z.string({ required_error: '请输入歌手名' })
     .min(1, '请输入歌手名')
-    .max(20, '歌手长度最大为20'),
+    .max(20, '歌手长度最大为20')
+    .refine(
+      val => (creator.value = val.trim()),
+    ),
   submitType: z.enum(['realName', 'anonymous']).refine(
     val => (val === 'anonymous' || val === 'realName'),
     '请选择提交方式',

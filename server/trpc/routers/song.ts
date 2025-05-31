@@ -29,10 +29,14 @@ export const songRouter = router({
     .input(z.object({
       name: z.string()
         .min(1, '请输入歌名')
-        .max(50, '歌名长度最大为50'),
+        .max(128, '歌名长度最大为128'),
       creator: z.string()
         .min(1, '请输入歌手名')
-        .max(20, '歌手长度最大为20'),
+        .max(128, '歌手长度最大128'),
+      songId: z.string({ required_error: '请输入歌曲ID' }),
+      source: z.string(),// adapt more sources
+      imgId: z.string(),
+      duration: z.number().positive(),
       submitType: z.enum(['realName', 'anonymous']).refine(
         val => (val === 'anonymous' || val === 'realName'),
         '请选择提交方式',
@@ -61,6 +65,7 @@ export const songRouter = router({
       }
       await db.insert(songs).values({
         ...input,
+        songId: input.songId.toString(),
         ownerId: ctx.user.id,
         isRealName,
         ownerDisplayName: displayName,
@@ -82,6 +87,10 @@ export const songRouter = router({
           id: true,
           name: true,
           creator: true,
+          songId: true,
+          source: true,
+          imgId: true,
+          duration: true,
           ownerDisplayName: true,
           isRealName: true,
           message: true,
@@ -102,6 +111,10 @@ export const songRouter = router({
           id: true,
           name: true,
           creator: true,
+          songId: true,
+          source: true,
+          imgId: true,
+          duration: true,
           ownerDisplayName: true,
           isRealName: true,
           message: true,
@@ -121,6 +134,10 @@ export const songRouter = router({
           id: true,
           name: true,
           creator: true,
+          songId: true,
+          source: true,
+          imgId: true,
+          duration: true,
           ownerDisplayName: true,
           isRealName: true,
           state: true,
@@ -204,53 +221,4 @@ export const songRouter = router({
           .where(eq(songs.id, input.id));
       }),
   }),
-
-  qqSearch: adminProcedure
-    .input(z.object({
-      key: z.string(),
-    }))
-    .use(requirePermission(['review']))
-    .query(async ({ input }) => {
-      const searchBaseURL = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp';
-
-      interface TSearchDataItem {
-        albummid: string;
-        singer: { name: string }[];
-        songmid: string;
-        songname: string;
-      }
-
-      interface TSearchResponse {
-        code: number;
-        data: {
-          song: {
-            list: TSearchDataItem[];
-          };
-        };
-      }
-
-      const res = await $fetch<TSearchResponse>(searchBaseURL, {
-        method: 'GET',
-        params: {
-          w: input.key,
-          n: 5,
-          format: 'json',
-        },
-        parseResponse(responseText) {
-          try {
-            return JSON.parse(responseText);
-          } catch {
-            return responseText;
-          }
-        },
-      });
-
-      const songList = res.data.song.list.map(item => ({
-        mid: item.songmid,
-        name: item.songname,
-        singer: item.singer.map(singer => singer.name).join(', ').trim(),
-        pic: `https://y.qq.com/music/photo_new/T002R300x300M000${item.albummid}.jpg`,
-      }));
-      return songList;
-    }),
 });

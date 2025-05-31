@@ -19,7 +19,7 @@
             <TimeAvailability is-card />
           </TimeAvailabilityDialog>
         </div>
-        <ClientOnly>
+        <!-- <ClientOnly>
           <template #fallback>
             <Button class="size-full text-xl font-bold" :disabled="!canSubmit" variant="secondary">
               <Icon name="lucide:music-4" size="26" class="mr-2" />
@@ -32,7 +32,11 @@
               投稿<span class="text-sm">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span>
             </Button>
           </SongSubmitDialog>
-        </ClientOnly>
+        </ClientOnly> -->
+        <Button class="size-full text-xl font-bold" :disabled="!canSubmit" variant="secondary" @click.prevent="navigateTo('/submit')">
+          <Icon name="lucide:music-4" size="26" class="mr-2" />
+          投稿<span class="text-sm">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span>
+        </Button>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
@@ -110,6 +114,17 @@
         <div class="ml-auto flex gap-2" />
         <DarkModeToggle />
       </div>
+
+      <div class="grid gap-3">
+        <SongPlayer 
+          v-if=" songPlayingConfig.id.length > 0"
+          :id="songPlayingConfig.id"
+          :name="songPlayingConfig.name"
+          :artists=" songPlayingConfig.artists"
+          :source="songPlayingConfig.source"
+          :img-id="songPlayingConfig.imgId"
+        />
+      </div>
     </section>
 
     <section class="lg:overflow-auto lg:px-4">
@@ -134,7 +149,8 @@
           </div>
         </div>
         <TabsContent value="list" class="space-y-3">
-          <SongCard v-for="song in filteredList" :key="song.id" :song />
+          <SongCard v-for="song in filteredList" :key="song.id" :song @songExport="playMusic" />
+          <!-- ignore this number type problem, for id will not use there -->
         </TabsContent>
         <TabsContent value="arrangement">
           <DatePicker
@@ -142,13 +158,13 @@
             is-required :attributes="calendarAttr" :is-dark="isDark" class="mb-4 !bg-background"
           />
           <ul class="flex flex-col gap-3">
-            <li v-for="song in arrangementListSongs" :key="song.id">
+            <li v-for="song in arrangementListSongs" :key="song.id" :song @songExport="playMusic">
               <SongCard :song is-arrangement />
             </li>
           </ul>
         </TabsContent>
         <TabsContent value="mine" class="space-y-3">
-          <SongCard v-for="song in mySongList" :key="song.id" :song />
+          <SongCard v-for="song in mySongList" :key="song.id" :song @songExport="playMusic"/>
         </TabsContent>
       </Tabs>
     </section>
@@ -160,12 +176,14 @@ import type { RouterOutput } from '~~/types';
 import { useFuse, type UseFuseOptions } from '@vueuse/integrations/useFuse';
 import { DatePicker } from '@ztl-uwu/v-calendar';
 import ModifyPasswordDialog from '~/components/admin/user/ModifyPasswordDialog.vue';
+import SongPlayer from '~/components/song/SongPlayer.vue'
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
 const selectedDate = ref(new Date());
 const isDark = computed(() => useColorMode().preference === 'dark');
+const PlayerConfig = ref<RouterOutput['song']['listSafe'][0]>();
 
 const { data: songList, suspense: songListSuspense } = useQuery({
   queryFn: () => $trpc.song.listSafe.query(),
@@ -224,6 +242,10 @@ if (!userStore.loggedIn) {
 } else {
   try {
     await $trpc.user.tokenValidity.query();
+  } catch {
+    navigateTo('/auth/login');
+  }
+  try {
     await songListSuspense();
     await canSubmitSuspense();
     await mySongListSuspense();
@@ -258,4 +280,23 @@ const fuse = songList.value === undefined
 const filteredList = computed<TLists>(() => fuse.results.value.map(e => e.item));
 
 const selectedTab = ref<'list' | 'arrangement' | 'mine'>('list');
+
+const songPlayingConfig = ref({
+  id: '',
+  name: '',
+  source: '',
+  artists: '',
+  imgId: '',
+});
+function playMusic(song: RouterOutput['song']['listSafe'][0]){
+  if (song.songId === null || song.source === null){
+    toast.error('无歌曲数据');
+    return;
+  }
+  songPlayingConfig.value.id = song.songId;
+  songPlayingConfig.value.name = song.name;
+  songPlayingConfig.value.artists = song.creator;
+  songPlayingConfig.value.source = song.source;
+  songPlayingConfig.value.imgId = song.imgId === null ? '' : song.imgId;
+}
 </script>

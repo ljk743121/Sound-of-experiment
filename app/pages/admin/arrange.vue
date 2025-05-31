@@ -24,7 +24,7 @@
         </div>
         <div>
           <div class="justify-center text-center text-sm text-muted-foreground">
-            复制区段
+            选择下载CSV数据区段
           </div>
           <RangeCalendar
             v-model="copyValue"
@@ -78,7 +78,7 @@
             class="transition-all" @click="copyAllSongs(arrangementList)"
           >
             <Icon name="lucide:clipboard" class="mr-2" />
-            复制选定区域全部歌曲
+            下载选定区域全部歌曲CSV数据
           </Button>
         </div>
       </div>
@@ -92,7 +92,7 @@
             <span class="text-sm font-semibold">{{ day.date }}</span>
             <Button variant="outline" size="sm" @click="copySongInfo(day)">
               <Icon name="lucide:clipboard" class="mr-1" />
-              复制
+              下载CSV文件
             </Button>
           </div>
           <ul class="flex flex-col gap-3 p-4">
@@ -135,26 +135,38 @@ const { data: timeCurrently, suspense: timeSuspense } = useQuery({
 });
 await timeSuspense();
 
-const { copy: useCopy } = useClipboard({ legacy: true });
-async function copySongInfo(day: RouterOutput['arrangements']['list'][0]) {
-  if (!day.songs.length) {
-    toast.error('排歌表为空');
-    return;
-  }
-
-  let info = '';
-  for (const song of day.songs)
-    info += `《${song.name}》 ${song.creator}\n`;
-
+function downloadCsv(csvContent: string,){
   try {
-    await useCopy(info.trim());
-    toast.success('复制成功');
+    const today = new Date();
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `songs_${today.toISOString()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url); // 清理内存
+    toast.success('正在下载csv文件...');
   } catch (e: any) {
     if (e.message)
       toast.error(e.message);
     else
       toast.error(e.toString());
   }
+}
+
+// const { copy: useCopy } = useClipboard({ legacy: true });
+async function copySongInfo(day: RouterOutput['arrangements']['list'][0]) {
+  if (!day.songs.length) {
+    toast.error('排歌表为空');
+    return;
+  }
+
+  const csvHeader = "name,creator,source,songID\n";
+  let csvContent = csvHeader;
+  for (const song of day.songs) {
+    csvContent += `"${song.name}","${song.creator}","${song.source}","${song.songId}"\n`;
+  }
+  downloadCsv(csvContent);
 }
 
 const _start = startOfWeek(today(getLocalTimeZone()).add({ weeks: 1 }), 'zh-CN');
@@ -170,39 +182,35 @@ const copyValue = ref({
   end: _end,
 }) as Ref<DateRange>;
 
-async function copyAllSongs(list: RouterOutput['arrangements']['list']) {
-  if (!copyValue.value.start || !copyValue.value.end) {
-    toast.error('请选择有效的时间段');
+async function copyAllSongs(list: RouterOutput['arrangements']['list'] | undefined) {
+  if (!list) {
+    toast.error('排歌表为空');
     return;
   }
-  if (!list.length) {
-    toast.error('排歌表为空');
+  const dateRange = copyValue.value;
+  if ( !dateRange || !dateRange.start || !dateRange.end) {
+    toast.error('请选择有效的时间段');
     return;
   }
   const selectedDays = arrangementList.value?.filter((day) => {
     const dayDate = new Date(day.date);
-    const startDate = copyValue.value.start.toDate(getLocalTimeZone());
-    const endDate = copyValue.value.end.toDate(getLocalTimeZone());
+    const startDate = dateRange.start!.toDate(getLocalTimeZone());
+    const endDate = dateRange.end!.toDate(getLocalTimeZone());
     return dayDate >= startDate && dayDate <= endDate;
   });
   if (!selectedDays || selectedDays.length === 0) {
     toast.error('所选时间段内没有歌曲');
     return;
   }
-  let info = '';
+  const csvHeader = "name,creator,source,songID\n";
+  let csvContent = csvHeader;
+
   for (const day of selectedDays) {
-    for (const song of day.songs)
-      info += `《${song.name}》 ${song.creator}\n`;
+    for (const song of day.songs) {
+      csvContent += `"${song.name}","${song.creator}","${song.source}","${song.songId}"\n`;
+    }
   }
-  try {
-    await useCopy(info.trim());
-    toast.success('复制成功');
-  } catch (e: any) {
-    if (e.message)
-      toast.error(e.message);
-    else
-      toast.error(e.toString());
-  }
+  downloadCsv(csvContent);
 }
 
 const requirementList = computed<{

@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     '@vee-validate/nuxt',
     '@nuxtjs/color-mode',
     'radix-vue/nuxt',
+    'nuxt-musicfyplayer',
   ],
 
   piniaPluginPersistedstate: {

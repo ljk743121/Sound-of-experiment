@@ -7,6 +7,8 @@ dotenv.config();
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   DATABASE_URL_DEV: z.string().url().optional(),
+  WY_URL: z.string().url().optional(),
+  TX_URL: z.string().url().optional(),
   DB_ENV: z.enum(['development', 'production']).default('production'),
   TOKEN_EXPIRATION_TIME: z.string().optional().default('5d'),
   SIGN_PUBLIC_KEY: z.string(),

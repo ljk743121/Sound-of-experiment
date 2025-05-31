@@ -21,3 +21,24 @@ export const breadCrumb: Record<string, string> = {
 };
 
 export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;
+
+export const searchBaseURL = {
+  wySearch: 'https://music.163.com/api/search/get',
+  wyDetails: 'https://music.163.com/api/song/detail',
+  qqSearch: 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp',
+  qqPURL: 'https://u.y.qq.com/cgi-bin/musicu.fcg',
+};
+
+export const mediaBaseURL = {
+  wy: 'https://music.163.com/song/media/outer/url?id=',
+  qq: 'http://ws.stream.qqmusic.qq.com/',
+};
+
+export const imgBaseURL: Record<string, string> = {
+  wy: 'https://',//no imgId
+  tx: 'https://y.qq.com/music/photo_new/T002R300x300M000',
+}
+
+export function getImgUrl(imgId: string, source: string){
+  return `${imgBaseURL[source]}${imgId}.jpg`;
+}
