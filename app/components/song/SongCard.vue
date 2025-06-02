@@ -99,9 +99,10 @@
 
       <Drawer v-else v-model:open="isOpen">
         <div class="flex justify-end">
-          <Button @click.prevent="$emit('songExport', song)">
-            <Icon name="lucide:play" class="mr-2" />
-            播放
+          <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
+            @click.prevent="$emit('songExport', song)">
+              <Icon name="lucide:play" class="mr-2" />
+              播放
           </Button>
           <DrawerTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">

@@ -97,7 +97,7 @@
           </div>
           <ul class="flex flex-col gap-3 p-4">
             <li v-for="song in day.songs" :key="song.id">
-              <SongCard :song is-arrangement />
+              <SongCard :song is-arrangement type="review"/>
             </li>
           </ul>
         </ScrollArea>
