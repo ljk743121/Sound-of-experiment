@@ -6,6 +6,7 @@ import { statsRouter } from './stats';
 import { timeRouter } from './time';
 import { userRouter } from './user';
 import { blockWordsRouter } from './words';
+import { configRouter } from './config';
 
 export const appRouter = router({
   user: userRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   arrangements: arrangementsRouter,
   blockWords: blockWordsRouter,
   search: searchRouter,
+  config: configRouter,
 });
 
 export type AppRouter = typeof appRouter;

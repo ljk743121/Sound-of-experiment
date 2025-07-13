@@ -75,6 +75,11 @@ import { pwRegex } from '~~/constants';
 const { $trpc } = useNuxtApp();
 
 try {
+  const isRegisterOpen = await $trpc.config.get.mutate('isRegisterOpen');
+  if (!isRegisterOpen){
+    toast.error('注册已关闭');
+    navigateTo('/auth/login');
+  }
   await $trpc.user.tokenValidity.query();
   navigateTo('/');
 } catch {}

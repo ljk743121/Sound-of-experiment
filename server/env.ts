@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import { z } from 'zod';
 
 dotenv.config();
+dotenv.config({ path: '.env.local' })
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
@@ -17,6 +18,8 @@ const envSchema = z.object({
   ENC_PRIVATE_KEY: z.string(),
   SIGN_KID: z.string(),
   ENC_KID: z.string(),
+  EDGE_CONFIG_ID: z.string().optional(),
+  EDGE_CONFIG_TOKEN: z.string().optional(),
 });
 
 const envParse = envSchema.safeParse(process.env);
