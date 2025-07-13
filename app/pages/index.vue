@@ -158,8 +158,8 @@
             is-required :attributes="calendarAttr" :is-dark="isDark" class="mb-4 !bg-background"
           />
           <ul class="flex flex-col gap-3">
-            <li v-for="song in arrangementListSongs" :key="song.id" :song @songExport="playMusic">
-              <SongCard :song is-arrangement />
+            <li v-for="song in arrangementListSongs" :key="song.id">
+              <SongCard :song @songExport="playMusic" is-arrangement />
             </li>
           </ul>
         </TabsContent>

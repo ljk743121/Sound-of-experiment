@@ -249,21 +249,19 @@ definePageMeta({
 });
 const submitDisabled = ref(true);
 
-onBeforeMount(async () => {
-  try {
-    await $trpc.user.tokenValidity.query();
-  } catch {
-    navigateTo('/auth/login');
-  }
-  try {
-    const canSubmit = await $trpc.song.canSubmit.query();
-    if (!canSubmit)
-      navigateTo('/');
-    submitDisabled.value = false;
-  } catch {
+try {
+  await $trpc.user.tokenValidity.query();
+} catch {
+  navigateTo('/auth/login');
+}
+try {
+  const canSubmit = await $trpc.song.canSubmit.query();
+  if (!canSubmit)
     navigateTo('/');
-  }
-})
+  submitDisabled.value = false;
+} catch {
+  navigateTo('/');
+}
 
 // Reuse `form` section
 const [UseTemplate, GridForm] = createReusableTemplate();

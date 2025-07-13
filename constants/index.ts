@@ -36,7 +36,7 @@ export const mediaBaseURL = {
 
 export const imgBaseURL: Record<string, string> = {
   wy: 'https://',//no imgId
-  tx: 'https://y.qq.com/music/photo_new/T002R300x300M000',
+  tx: 'https://y.qq.com/music/photo_new/T002R1200x1200M000',
 }
 
 export function getImgUrl(imgId: string, source: string){
