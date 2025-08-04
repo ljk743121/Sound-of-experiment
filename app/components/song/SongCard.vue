@@ -18,7 +18,7 @@
               <Badge variant="outline">
                 {{ song.isRealName ? '实名' : '匿名' }}
               </Badge>
-              <span v-if="song.isRealName" class="ml-2">提交者:{{ song.ownerDisplayName }}</span>
+              <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
             </p>
           </CardDescription>
         </div>
@@ -66,8 +66,8 @@
         <div class="flex justify-end">
           <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
             @click.prevent="$emit('songExport', song)">
-              <Icon name="lucide:play" class="mr-2" />
-              播放
+            <Icon name="lucide:play" class="mr-2" />
+            播放
           </Button>
           <DialogTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
@@ -101,8 +101,8 @@
         <div class="flex justify-end">
           <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
             @click.prevent="$emit('songExport', song)">
-              <Icon name="lucide:play" class="mr-2" />
-              播放
+            <Icon name="lucide:play" class="mr-2" />
+            播放
           </Button>
           <DrawerTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
@@ -146,7 +146,7 @@
         <Badge variant="outline">
           {{ song.isRealName ? '实名' : '匿名' }}
         </Badge>
-        <span v-if="song.isRealName">提交者:{{ song.ownerDisplayName }}</span>
+        <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
       </p>
     </CardDescription>
   </div>
@@ -163,7 +163,7 @@
               <Badge variant="outline">
                 {{ song.isRealName ? '实名' : '匿名' }}
               </Badge>
-              <span v-if="song.isRealName">提交者:{{ song.ownerDisplayName }}</span>
+              <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
             </p>
           </CardDescription>
         </div>
@@ -211,7 +211,7 @@ const {
   isArrangement?: boolean;
 }>();
 
-const songExport = defineEmits<{
+defineEmits<{
   (e: 'songExport', songInformation: typeof song): void
 }>()
 

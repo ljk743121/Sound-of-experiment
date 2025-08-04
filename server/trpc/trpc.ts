@@ -89,7 +89,16 @@ export const loggedProcedure = t.procedure.use(async (opts) => {
     }
   } catch {}
 
-  return result;
+  // 添加安全头部到响应
+  return {
+    ...result,
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+    }
+  };
 });
 
 export const publicProcedure = loggedProcedure;

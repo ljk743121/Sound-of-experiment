@@ -1,5 +1,29 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app:{
+    head:{
+      htmlAttrs:{
+        lang: 'zh-CN',
+      },
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1',
+      meta: [
+        { name: 'description', content: 'Voice of SZSY 点歌系统,Made by Ljk743121。开源校园广播站管理系统,支持歌曲在线试听、在线投稿、智能审核、一键排歌和歌单导出' },
+        { name: 'keywords', content: '深圳实验,校园点歌系统,广播站,管理系统,点歌平台,开源广播系统,教育科技,Nuxt3,Vue3,Voice of SZSY,voszsy,Github项目,开源项目' },
+        { name: 'theme-color', content: '#007bff' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-title', content: 'Voice of SZSY' },
+        { name: 'author', content: 'Ljk743121 and contributors' },
+        { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
+      ],
+      link: [
+        { rel:'icon', type:'image/x-icon', href:'/favicon.ico'},
+        { rel: 'canonical', href: 'https://voszsy.ddns.net/' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicon.ico' },
+      ]
+    }
+  },
+
   devtools: { enabled: true },
 
   modules: [
@@ -22,6 +46,7 @@ export default defineNuxtConfig({
     cookieOptions: {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 14,
+      secure: process.env.DB_ENV === 'production',
     },
   },
 
@@ -72,6 +97,37 @@ export default defineNuxtConfig({
         target: 'esnext',
       },
     },
+    routeRules: {
+      '/api/**': {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+          'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '1; mode=block',
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        }
+      }
+    }
+  },
+
+  // markdownit: {
+  //   preset: 'default',
+  //   runtime: true,
+  //   linkify: true,
+  //   breaks: true,
+  //   use: [
+  //     'markdown-it-div',
+  //     'markdown-it-attrs'
+  //   ]
+  // },
+
+  runtimeConfig: {
+    //private
+    public: {
+      //public
+    }
   },
 
   compatibilityDate: '2024-10-03',

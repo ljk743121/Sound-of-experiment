@@ -1,16 +1,18 @@
-import type { TPermission } from '~~/types';
+import type { TPermission, TIdentity } from '~~/types';
 import { relations } from 'drizzle-orm';
 import { boolean, integer, json, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: text().primaryKey(),
-  name: text(),
-  displayName: text().default('invisible'),
-  password: text(),
+  name: text().notNull(),
+  displayName: text(),
+  password: text().notNull(),
   permissions: json().notNull().$type<TPermission[]>().default(['login']),
+  identity: text().notNull().$type<TIdentity>().default('student'),
   remainSubmitSongs: integer().notNull().default(2),
   maxSubmitSongs: integer().notNull().default(2),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  lastLoginAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
 export const arrangements = pgTable('arrangements', {
@@ -28,7 +30,7 @@ export const songs = pgTable('songs', {
   duration: integer(),
   ownerId: text().references(() => users.id, { onUpdate: 'cascade' }),
   isRealName: boolean().default(false),
-  ownerDisplayName: text().default('invisible'),
+  ownerDisplayName: text(),
   arrangementDate: text().references(() => arrangements.date, { onUpdate: 'cascade' }),
   state: text({ enum: ['pending', 'approved', 'rejected', 'used', 'dropped'] }).notNull().default('pending'),
   rejectMessage: text(),
@@ -67,5 +69,14 @@ export const songsRelations = relations(songs, ({ one }) => ({
 
 export const blockWords = pgTable('block-words', {
   word: text().primaryKey(),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+export const announcement = pgTable('announcement', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  markdown: text().notNull(),
+  creatorId: text().notNull(),
+  creatorName: text().notNull(),
+  visible: text().notNull().default('all'),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });

@@ -5,6 +5,8 @@ import { db } from '~~/server/db';
 import { songs, users } from '~~/server/db/schema';
 import { adminProcedure, protectedProcedure, requirePermission, router } from '../trpc';
 import { fitsInTime } from './time';
+import { hasBlockWord } from '~~/server/utils/universal';
+import { TMediaSource, TSubmitType } from '~~/types';
 
 function getISOWeekNumber(date: Date): number {
   const target = new Date(date.valueOf());
@@ -34,34 +36,28 @@ export const songRouter = router({
         .min(1, '请输入歌手名')
         .max(128, '歌手长度最大128'),
       songId: z.string({ required_error: '请输入歌曲ID' }),
-      source: z.string(),// adapt more sources
+      source: z.custom<TMediaSource>(),// adapt more sources
       imgId: z.string(),
       duration: z.number().positive(),
-      submitType: z.enum(['realName', 'anonymous']).refine(
-        val => (val === 'anonymous' || val === 'realName'),
-        '请选择提交方式',
-      ),
+      submitType: z.custom<TSubmitType>(),
       message: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       if (!(await checkCanSubmit(ctx.user.id, ctx.user.remainSubmitSongs)))
         throw new TRPCError({ code: 'BAD_REQUEST', message: '您的剩余提交次数为0,请等5天后重置' });
 
-      const chinese = `${input.name} ${input.creator} ${input.message}`.match(/[\u4E00-\u9FA5]+/g);
-      const english = `${input.name} ${input.creator} ${input.message}`.match(/[\da-zA-Z]+/g);
-
-      const blockWords = await db.query.blockWords.findMany();
-      if (chinese?.some(x => blockWords.some(y => x.includes(y.word))))
+      const content = `${input.name} ${input.creator} ${input.message || ''}`;
+      if (await hasBlockWord(content)){
         throw new TRPCError({ code: 'BAD_REQUEST', message: '投稿失败，含有违禁词' });
-      if (english?.some(x => blockWords.some(y => x === y.word)))
-        throw new TRPCError({ code: 'BAD_REQUEST', message: '投稿失败，含有违禁词' });
+      }
+      
       let isRealName = false;
-      let displayName = '';
+      let displayName = ctx.user.displayName;
       if (input.submitType === 'realName') {
         isRealName = true;
         displayName = ctx.user.name!;
       } else if (input.submitType === 'anonymous') {
-        displayName = 'anonymous';
+        displayName = '';
       }
       await db.insert(songs).values({
         ...input,
@@ -219,6 +215,17 @@ export const songRouter = router({
             rejectMessage: input.rejectMessage,
           })
           .where(eq(songs.id, input.id));
+      }),
+
+    acceptAll: adminProcedure
+      .use(requirePermission(['review']))
+      .mutation(async () => {
+        await db
+          .update(songs)
+          .set({
+            state: 'approved',
+          })
+          .where(eq(songs.state, 'pending'));
       }),
   }),
 });

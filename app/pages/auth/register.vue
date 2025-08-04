@@ -74,6 +74,14 @@ import { pwRegex } from '~~/constants';
 
 const { $trpc } = useNuxtApp();
 
+useHead({
+  title: 'Voice of SZSY 账号注册',
+  meta: [
+    { name: 'description', content: 'Voice of SZSY 注册页面' },
+    { name: 'keywords', content: '点歌,注册,用户注册,广播站系统' },
+  ],
+});
+
 try {
   const isRegisterOpen = await $trpc.config.get.mutate('isRegisterOpen');
   if (!isRegisterOpen){

@@ -92,36 +92,48 @@ export const arrangementsRouter = router({
       const start = parseDate(input.start);
       const end = parseDate(input.end);
 
-      await db.transaction(async (tx) => {
-        // get unused songs
-        const approvedSongs = await tx.query.songs.findMany({
-          where: eq(songs.state, 'approved'),
+      let dayTimes = end.compare(start)+1;
+
+      // get unused songs
+      const approvedSongs = await db.query.songs.findMany({
+        where: eq(songs.state, 'approved'),
+        orderBy: sql`RANDOM()`,
+        columns: {
+          id: true,
+        },
+      });
+
+      // get dropped songs
+      let droppedSongs: typeof approvedSongs = [];
+      // (only when insufficient unused songs is present)
+      if ((end.compare(start) + 1) * input.songCount > approvedSongs.length || input.songCount === 0) {
+        droppedSongs = await db.query.songs.findMany({
+          where: eq(songs.state, 'dropped'),
           orderBy: sql`RANDOM()`,
           columns: {
             id: true,
           },
         });
+      }
 
-        // get dropped songs
-        let droppedSongs: typeof approvedSongs = [];
-        // (only when insufficient unused songs is present)
-        if ((end.compare(start) + 1) * input.songCount > approvedSongs.length) {
-          droppedSongs = await tx.query.songs.findMany({
-            where: eq(songs.state, 'dropped'),
-            orderBy: sql`RANDOM()`,
-            columns: {
-              id: true,
-            },
-          });
-        }
+      const totalLength = approvedSongs.length + droppedSongs.length;
+      // throw new TRPCError({ code:'BAD_REQUEST', message: `已选择${totalLength}首歌曲`})
+      if (totalLength === 0){
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '没有歌曲可播放',
+        });
+      }
 
+      await db.transaction(async (tx) => {
         let songIndex = 0;
         let droppedSongIndex = 0;
+        let songCount = input.songCount === 0 ? Math.ceil(totalLength/dayTimes) : input.songCount;
         for (let date = start; date.compare(end) <= 0; date = date.add({ days: 1 })) {
           const dateString = date.toString();
           await tx.insert(arrangements).values({ date: dateString });
 
-          for (let i = 0; i < input.songCount; i++) {
+          for (let i = 0; i < songCount; i++) {
             if (songIndex < approvedSongs.length) {
               await tx
                 .update(songs)
@@ -143,6 +155,10 @@ export const arrangementsRouter = router({
 
               droppedSongIndex++;
             }
+          }
+
+          if (input.songCount===0){
+            songCount = (totalLength-songCount) >= 0 ? Math.ceil((totalLength-songCount)/(dayTimes-1)) : 0;
           }
         }
 

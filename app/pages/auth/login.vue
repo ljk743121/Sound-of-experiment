@@ -64,6 +64,14 @@ import { pwRegex } from '~~/constants';
 
 const { $trpc } = useNuxtApp();
 
+useHead({
+  title: '登录 - Voice of SZSY',
+  meta: [
+    { name: 'description', content: 'Voice of SZSY 登录' },
+    { name: 'keywords', content: '点歌系统,登录,用户登录,广播站系统' },
+  ],
+});
+
 try {
   await $trpc.user.tokenValidity.query();
   navigateTo('/');

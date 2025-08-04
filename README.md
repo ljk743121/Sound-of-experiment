@@ -44,9 +44,9 @@
 
 ## 用户界面
 
-<p><img width="100%" src="./images/0.png" alt="main ui"></p>
-<p><img width="100%" src="./images/1.png" alt="admin ui"></p>
-<p><img width="100%" src="./images/2.png" alt="submit ui"></p>
+<p><img width="100%" src="./public/images/0.png" alt="main ui"></p>
+<p><img width="100%" src="./public/images/1.png" alt="admin ui"></p>
+<p><img width="100%" src="./public/images/2.png" alt="submit ui"></p>
 
 ## 使用方法
 将本项目源代码克隆至本地，或下载release文件后解压，在文件目录内运行

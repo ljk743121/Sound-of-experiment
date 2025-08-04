@@ -53,7 +53,7 @@
             </div>
           </div>
 
-          <NumberField id="songCount" v-model="songCount" :default-value="10" :min="0">
+          <NumberField id="songCount" v-model="songCount" :default-value="0" :min="0">
             <Label for="songCount" class="text-xs font-medium">每日歌曲数目：</Label>
             <NumberFieldContent class="bg-background">
               <NumberFieldDecrement />
@@ -72,7 +72,7 @@
           >
             <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
             <Icon name="lucide:play" class="mr-2" />
-            自动排歌
+            {{ songCount ? "手动排歌" : "自动排歌" }}
           </Button>
           <Button
             class="transition-all" @click="copyAllSongs(arrangementList)"
@@ -235,7 +235,7 @@ const requirementList = computed<{
 
 const canArrange = computed(() => requirementList.value.every(x => x.value));
 
-const songCount = ref(10);
+const songCount = ref(0);
 
 function isDateUnavailable(date: DateValue) {
   return arrangementList.value?.some(x => x.date === date.toString());

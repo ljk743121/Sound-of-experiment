@@ -60,6 +60,14 @@
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </NuxtLink>
+             <NuxtLink v-if="userStore.permissions.includes('announcement')" to="/admin/announcement">
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <Icon name="lucide:bell" />
+                  <span>公告</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </NuxtLink>
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup v-if="userStore.permissions.includes('time')" class="border-t">
@@ -78,7 +86,6 @@
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Dialog>
               <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                   <SidebarMenuButton
@@ -90,6 +97,7 @@
                     </Avatar>
                     <div class="grid flex-1 text-left text-sm leading-tight">
                       <span class="truncate font-semibold">{{ userStore.name }}</span>
+                      <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
                       <span class="truncate text-xs">{{ userStore.id }}</span>
                     </div>
                     <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
@@ -106,25 +114,22 @@
                       </Avatar>
                       <div class="grid flex-1 text-left text-sm leading-tight">
                         <span class="truncate font-semibold">{{ userStore.name }}</span>
+                        <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
                         <span class="truncate text-xs">{{ userStore.id }}</span>
                       </div>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DialogTrigger as-child>
-                    <DropdownMenuItem>
-                      <Icon name="lucide:lock" />
-                      修改密码
-                    </DropdownMenuItem>
-                  </DialogTrigger>
+                  <DropdownMenuItem @click="navigateTo('/profile')">
+                    <Icon name="lucide:user-check" />
+                    个人资料
+                  </DropdownMenuItem>
                   <DropdownMenuItem @click="logout">
                     <Icon name="lucide:log-out" />
                     登出
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <ModifyPasswordDialog />
-            </Dialog>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
@@ -164,7 +169,7 @@
 <script setup lang="ts">
 import { LogosSoelogo } from '#components';
 import { breadCrumb } from '~~/constants';
-import ModifyPasswordDialog from '~/components/admin/user/ModifyPasswordDialog.vue';
+import ModifyPasswordDialog from '~/components/profile/ModifyPasswordDialog.vue';
 
 const userStore = useUserStore();
 

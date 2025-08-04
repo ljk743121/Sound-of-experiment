@@ -39,7 +39,7 @@
         </Button>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-3 gap-3">
         <HomeRule>
           <Button variant="outline">
             <Icon name="lucide:circle-help" class="mr-2" />
@@ -48,6 +48,17 @@
             </span>
           </Button>
         </HomeRule>
+
+        <Button variant="outline" disabled v-if="isAnnouncementListPending">
+            <Icon name="lucide:loader-2" size="20" class="animate-spin" />
+            公告
+        </Button>
+        <HomeAnnouncement v-else :announcement-list="announcementList!" >
+          <Button variant="outline" :disabled="isAnnouncementListPending">
+            <Icon name="lucide:bell" class="mr-2" />
+            公告
+          </Button>
+        </HomeAnnouncement>
 
         <HomeAboutUs>
           <Button variant="outline" class="w-full">
@@ -63,7 +74,6 @@
       </div>
 
       <div class="mt-4 flex items-center gap-4">
-        <Dialog>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button variant="ghost" class="w-full">
@@ -72,6 +82,7 @@
                 </Avatar>
                 <div class="grid flex-1 text-left text-sm leading-tight">
                   <span class="truncate font-semibold">{{ userStore.name }}</span>
+                  <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
                   <span class="truncate text-xs">{{ userStore.id }}</span>
                 </div>
                 <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
@@ -88,17 +99,16 @@
                   </Avatar>
                   <div class="grid flex-1 text-left text-sm leading-tight">
                     <span class="truncate font-semibold">{{ userStore.name }}</span>
+                    <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
                     <span class="truncate text-xs">{{ userStore.id }}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DialogTrigger as-child>
-                <DropdownMenuItem>
-                  <Icon name="lucide:lock" />
-                  修改密码
-                </DropdownMenuItem>
-              </DialogTrigger>
+              <DropdownMenuItem @click="navigateTo('/profile')">
+                <Icon name="lucide:user-check" />
+                个人资料
+              </DropdownMenuItem>
               <DropdownMenuItem v-if="userStore.permissions.includes('admin')" @click="navigateTo('/admin')">
                 <Icon name="lucide:user-cog" />
                 管理
@@ -110,7 +120,6 @@
             </DropdownMenuContent>
           </DropdownMenu>
           <ModifyPasswordDialog />
-        </Dialog>
         <div class="ml-auto flex gap-2" />
         <DarkModeToggle />
       </div>
@@ -175,7 +184,7 @@
 import type { RouterOutput } from '~~/types';
 import { useFuse, type UseFuseOptions } from '@vueuse/integrations/useFuse';
 import { DatePicker } from '@ztl-uwu/v-calendar';
-import ModifyPasswordDialog from '~/components/admin/user/ModifyPasswordDialog.vue';
+import ModifyPasswordDialog from '~/components/profile/ModifyPasswordDialog.vue';
 import SongPlayer from '~/components/song/SongPlayer.vue'
 
 const userStore = useUserStore();
@@ -217,6 +226,11 @@ const { data: arrangementList, suspense: arrangementListSuspense } = useQuery({
   refetchIntervalInBackground: false,
 });
 
+const { data: announcementList, suspense: listSuspense, isPending: isAnnouncementListPending } = useQuery({
+  queryFn: () => $trpc.announcement.listSafe.query(),
+  queryKey: ['announcement.listSafe'],
+})
+
 function getDateString(date: Date) {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 }
@@ -253,6 +267,22 @@ if (!userStore.loggedIn) {
     await remainSubmitSongsSuspense();
   } catch {
     navigateTo('/auth/login');
+  }
+  await listSuspense();
+  if (announcementList.value &&
+    announcementList.value.length > 0 &&
+    userStore.lastLoginAt &&
+    announcementList.value[0])
+  {
+    const lastLoginTime = new Date(userStore.lastLoginAt).getTime();
+    const announcementTime = announcementList.value[0].createdAt.getTime();
+    if (lastLoginTime < announcementTime) {
+      toast.info("有新的公告等待查看",{ style: { background: 'red'}});
+      userStore.lastLoginAt = new Date();
+      $trpc.user.updateLoginTime.mutate();
+    }else{
+      userStore.lastLoginAt = new Date();
+    };
   }
 }
 

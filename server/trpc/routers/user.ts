@@ -5,6 +5,8 @@ import { pwRegex } from '~~/constants';
 import { db } from '~~/server/db';
 import { users } from '~~/server/db/schema';
 import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
+import type { TPermission } from '~~/types';
+import { hasBlockWord } from '~~/server/utils/universal';
 
 export const userRouter = router({
   login: publicProcedure
@@ -80,6 +82,9 @@ export const userRouter = router({
   tokenValidity: protectedProcedure
     .query(() => { }), // protectedProcedure will check if user is logged in
 
+  adminValidity: adminProcedure
+    .query(() => {}),
+
   list: adminProcedure
     .use(requirePermission(['manageUser']))
     .query(async () => {
@@ -104,7 +109,7 @@ export const userRouter = router({
   editPermission: adminProcedure
     .input(z.object({
       id: z.string(),
-      permissions: z.enum(['login', 'admin', 'review', 'arrange', 'manageUser', 'time', 'blockWords']).array(),
+      permissions: z.custom<TPermission>().array(),
     }))
     .use(requirePermission(['manageUser']))
     .mutation(async ({ input }) => {
@@ -144,5 +149,26 @@ export const userRouter = router({
           password: await hashPassword(input.newPassword),
         })
         .where(eq(users.id, ctx.user.id));
+    }),
+  modifyAlias: protectedProcedure
+    .input(z.object({
+      alias: z.string().trim().min(1, '最少为1个字符').max(32, '最多为32个字符'),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (await hasBlockWord(input.alias)){
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '昵称包含违禁词' });
+      }
+      await db.update(users)
+        .set({
+          displayName: input.alias,
+        })
+        .where(eq(users.id, ctx.user.id));
+    }),
+  updateLoginTime: protectedProcedure.mutation(async ({ ctx }) => {
+    await db.update(users)
+      .set({
+        lastLoginAt: new Date(),
+      })
+      .where(eq(users.id, ctx.user.id));
     }),
 });

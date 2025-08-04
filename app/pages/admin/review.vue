@@ -5,6 +5,10 @@
         <div class="sticky top-0 flex h-16 items-center border-b bg-background px-4">
           <Icon name="lucide:list-music" size="17" class="mr-2" />
           <span class="text-sm font-semibold">待审核歌曲</span>
+          <Button variant="secondary" class="ml-auto" @click.prevent="acceptAll" :disabled="acceptAllPending || !songList || songList.length === 0">
+            <Icon name="lucide:check-circle" size="17" class="mr-2" />
+            通过全部歌曲
+          </Button>
         </div>
         <TransitionGroup name="list" tag="ul" class="flex flex-col gap-3 p-4">
           <li v-for="song in songList" :key="song.id">
@@ -35,6 +39,7 @@ definePageMeta({
 });
 
 const { $trpc } = useNuxtApp();
+const queryClient = useQueryClient();
 const layout = useCookie<number[]>('review-resizable:layout', {
   default: () => [35, 65],
 });
@@ -50,4 +55,14 @@ const selectedSong = ref<RouterOutput['song']['listReview'][0] | undefined>(song
 watch(songList, () => {
   selectedSong.value = songList.value?.[0];
 });
+
+const { mutate: acceptAll, isPending: acceptAllPending } = useMutation({
+  mutationFn: $trpc.song.review.acceptAll.mutate,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['song.listReview'] });
+    toast.success('已通过所有歌曲');
+  },
+  onError: err => useErrorHandler(err),
+});
+
 </script>

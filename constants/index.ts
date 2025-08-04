@@ -8,6 +8,7 @@ export const permissionNames: ({ value: TPermission; label: string; icon: string
   { value: 'review', label: '审核歌曲', icon: 'lucide:music-4' },
   { value: 'time', label: '开放时间', icon: 'lucide:clock' },
   { value: 'blockWords', label: '屏蔽词', icon: 'lucide:ban' },
+  { value: 'announcement', label: '公告管理', icon: 'lucide:message-square' }
 ];
 
 export const breadCrumb: Record<string, string> = {

@@ -163,14 +163,14 @@
                   匿名
                 </FormLabel>
               </FormItem>
-              <!-- <FormItem class="flex items-center space-y-0 gap-x-3">
+              <FormItem class="flex items-center space-y-0 gap-x-3">
                 <FormControl>
-                  <RadioGroupItem value="none" />
+                  <RadioGroupItem value="alias" :disabled="!userStore.displayName" />
                 </FormControl>
                 <FormLabel class="font-normal">
-                  自定义
+                  昵称 <span v-if="userStore.displayName">({{ userStore.displayName }})</span>
                 </FormLabel>
-              </FormItem> -->
+              </FormItem>
             </RadioGroup>
           </FormControl>
           <FormMessage />
@@ -199,7 +199,7 @@
     <CardHeader>
       <div class="flex justify-end">
         <Button variant="outline" size="icon" @click.prevent="navigateTo('/')">
-          <Icon name="lucide:arrow-left" class="h-4 w-4" />
+          <Icon name="lucide:arrow-right" class="h-4 w-4" />
         </Button>
       </div>
       <CardTitle class="text-lg font-semibold">
@@ -236,7 +236,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { RouterOutput } from '~~/types';
+import type { TMediaSource, RouterOutput, TSubmitType } from '~~/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import SongPlayer from '~/components/song/SongPlayer.vue';
 import * as z from 'zod';
@@ -263,6 +263,8 @@ try {
   navigateTo('/');
 }
 
+const userStore = useUserStore();
+
 // Reuse `form` section
 const [UseTemplate, GridForm] = createReusableTemplate();
 
@@ -284,12 +286,9 @@ const formSchema = toTypedSchema(z.object({
     .max(128, '歌手长度最大为128'),
   songId: z.string({ required_error: '请输入歌曲ID' }).trim().min(1, '请输入歌曲ID'),
   imgId: z.string().trim(),
-  source: z.enum(['wy', 'tx']),
+  source: z.custom<TMediaSource>(),
   duration: z.number().positive(),
-  submitType: z.enum(['realName', 'anonymous']).refine(
-    val => (val === 'anonymous' || val === 'realName'),
-    '请选择提交方式',
-  ),
+  submitType: z.custom<TSubmitType>(),
   message: z.string().trim().optional(),
 }));
 
@@ -334,7 +333,7 @@ const onSubmit = form.handleSubmit((values) => {
     name: selectedSong.value.name || values.name,
     creator: selectedSong.value.creator || values.creator,
     songId: selectedSong.value.songId || values.songId,
-    source: (selectedSong.value.source as 'wy' | 'tx') || values.source,
+    source: (selectedSong.value.source as TMediaSource) || values.source,
     imgId: selectedSong.value.imgId || values.imgId,
     duration: selectedSong.value.duration || values.duration,
   };
