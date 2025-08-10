@@ -120,6 +120,5 @@ export default {
   plugins: [
     animate,
     typography(),
-      require("tailwindcss-animate")
 ],
 } satisfies Config;
