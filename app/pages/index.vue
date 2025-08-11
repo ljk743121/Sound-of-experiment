@@ -159,7 +159,6 @@
         </div>
         <TabsContent value="list" class="space-y-3">
           <SongCard v-for="song in filteredList" :key="song.id" :song @songExport="playMusic" />
-          <!-- ignore this number type problem, for id will not use there -->
         </TabsContent>
         <TabsContent value="arrangement">
           <DatePicker
@@ -192,7 +191,6 @@ const { $trpc } = useNuxtApp();
 
 const selectedDate = ref(new Date());
 const isDark = computed(() => useColorMode().preference === 'dark');
-const PlayerConfig = ref<RouterOutput['song']['listSafe'][0]>();
 
 const { data: songList, suspense: songListSuspense } = useQuery({
   queryFn: () => $trpc.song.listSafe.query(),
@@ -318,15 +316,15 @@ const songPlayingConfig = ref({
   artists: '',
   imgId: '',
 });
-function playMusic(song: RouterOutput['song']['listSafe'][0]){
+function playMusic(song: Partial<RouterOutput['song']['listSafe'][0]>){
   if (song.songId === null || song.source === null){
     toast.error('无歌曲数据');
     return;
   }
-  songPlayingConfig.value.id = song.songId;
-  songPlayingConfig.value.name = song.name;
-  songPlayingConfig.value.artists = song.creator;
-  songPlayingConfig.value.source = song.source;
-  songPlayingConfig.value.imgId = song.imgId === null ? '' : song.imgId;
+  songPlayingConfig.value.id = song.songId!;
+  songPlayingConfig.value.name = song.name!;
+  songPlayingConfig.value.artists = song.creator!;
+  songPlayingConfig.value.source = song.source!;
+  songPlayingConfig.value.imgId = song.imgId || '';
 }
 </script>
