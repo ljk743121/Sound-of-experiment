@@ -34,14 +34,19 @@
           </SongSubmitDialog>
         </ClientOnly> -->
         <Button class="size-full text-xl font-bold" :disabled="!canSubmit" variant="secondary" @click.prevent="navigateTo('/submit')">
-          <Icon name="lucide:music-4" size="26" class="mr-2" />
-          投稿<span class="text-sm">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span>
+          <div class="flex flex-col items-center">
+            <span>
+              <Icon name="lucide:music-4" size="26" class="mr-2" />
+              投稿
+            </span>
+            <span class="text-sm font-normal">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span>
+          </div>
         </Button>
       </div>
 
-      <div class="grid grid-cols-3 gap-3">
+      <div class="hidden sm:grid sm:grid-cols-4 gap-3">
         <HomeRule>
-          <Button variant="outline">
+          <Button variant="outline" class="w-full">
             <Icon name="lucide:circle-help" class="mr-2" />
             <span>
               规则介绍
@@ -49,16 +54,21 @@
           </Button>
         </HomeRule>
 
-        <Button variant="outline" disabled v-if="isAnnouncementListPending">
+        <Button variant="outline" disabled v-if="isAnnouncementListPending" class="w-full">
             <Icon name="lucide:loader-2" size="20" class="animate-spin" />
             公告
         </Button>
-        <HomeAnnouncement v-else :announcement-list="announcementList!" >
-          <Button variant="outline" :disabled="isAnnouncementListPending">
+        <HomeAnnouncement v-else :announcement-list="announcementList!" class="w-full">
+          <Button variant="outline" :disabled="isAnnouncementListPending" class="w-full">
             <Icon name="lucide:bell" class="mr-2" />
             公告
           </Button>
         </HomeAnnouncement>
+
+        <Button variant="outline" @click.prevent="navigateTo('/stats')" class="w-full">
+          <Icon name="lucide:info" class="mr-2" />
+          数据统计
+        </Button>
 
         <HomeAboutUs>
           <Button variant="outline" class="w-full">
@@ -66,11 +76,39 @@
             关于我们
           </Button>
         </HomeAboutUs>
+      </div>
+      
+      <!-- 小屏幕显示的2x2网格布局 -->
+      <div class="grid grid-cols-2 gap-3 sm:hidden">
+        <HomeRule>
+          <Button variant="outline" class="w-full">
+            <Icon name="lucide:circle-help" class="mr-2" />
+            规则介绍
+          </Button>
+        </HomeRule>
+        
+        <Button variant="outline" disabled v-if="isAnnouncementListPending" class="w-full">
+            <Icon name="lucide:loader-2" size="20" class="animate-spin" />
+            公告
+        </Button>
+        <HomeAnnouncement v-else :announcement-list="announcementList!" class="w-full">
+          <Button variant="outline" :disabled="isAnnouncementListPending" class="w-full">
+            <Icon name="lucide:bell" class="mr-2" />
+            公告
+          </Button>
+        </HomeAnnouncement>
 
-        <!-- <Button variant="outline" class="w-full" @click="navigateTo('/stats')">
-          <Icon name="lucide:star" class="mr-2" />
-          数据回顾
-        </Button> -->
+        <Button variant="outline" @click.prevent="navigateTo('/stats')" class="w-full">
+          <Icon name="lucide:info" class="mr-2" />
+          数据统计
+        </Button>
+
+        <HomeAboutUs>
+          <Button variant="outline" class="w-full">
+            <Icon name="lucide:info" class="mr-2" />
+            关于我们
+          </Button>
+        </HomeAboutUs>
       </div>
 
       <div class="mt-4 flex items-center gap-4">

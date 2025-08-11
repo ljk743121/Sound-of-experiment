@@ -34,7 +34,7 @@
             <NuxtLink to="https://github.com/SMS-COSMO/the1068fm" class="font-bold">
               <span>the1068fm</span>
             </NuxtLink>
-            的分支，由
+            的二次开发项目，原项目由
             <NuxtLink to="https://github.com/SMS-COSMO" class="font-bold">
               <span>SMS-COSMO</span>
             </NuxtLink>
