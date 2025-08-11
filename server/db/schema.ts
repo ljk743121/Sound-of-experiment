@@ -1,4 +1,4 @@
-import type { TPermission, TIdentity } from '~~/types';
+import type { TPermission, TIdentity, TSongState } from '~~/types';
 import { relations } from 'drizzle-orm';
 import { boolean, integer, json, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
@@ -32,7 +32,7 @@ export const songs = pgTable('songs', {
   isRealName: boolean().default(false),
   ownerDisplayName: text(),
   arrangementDate: text().references(() => arrangements.date, { onUpdate: 'cascade' }),
-  state: text({ enum: ['pending', 'approved', 'rejected', 'used', 'dropped'] }).notNull().default('pending'),
+  state: text().$type<TSongState>().notNull().default('pending'),
   rejectMessage: text(),
   message: text(),
   msgPublic: text(),
