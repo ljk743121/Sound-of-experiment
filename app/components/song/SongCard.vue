@@ -27,8 +27,8 @@
           {{ useTimeAgo(song.createdAt) }}
         </span>
       </div>
-      <p v-if="song.message" class="text-xs text-muted-foreground">
-        留言: {{ song.message }}
+      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
+        留言: {{ song.msgPublic }}
       </p>
       <SongState v-if="!isArrangement" :song />
     </CardHeader>
@@ -52,8 +52,12 @@
             <span class="min-w-20 text-sm text-muted-foreground">播放时间</span>
             <span class="font-mono">{{ song.arrangementDate }}</span>
           </li>
-          <li v-if="song.message" class="flex justify-between">
+          <li v-if="song.msgPublic" class="flex justify-between">
             <span class="min-w-20 text-sm text-muted-foreground">留言</span>
+            <span>{{ song.msgPublic }}</span>
+          </li>
+          <li v-if="song.message" class="flex justify-between">
+            <span class="min-w-20 text-sm text-muted-foreground">私密留言</span>
             <span>{{ song.message }}</span>
           </li>
           <li v-if="song.createdAt" class="flex justify-between">
@@ -148,6 +152,9 @@
         </Badge>
         <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
       </p>
+      <p v-if="song.message" class="text-xs text-muted-foreground">
+        私密留言: {{ song.message }}
+      </p>
     </CardDescription>
   </div>
   <Card v-else-if="type === 'songs'">
@@ -173,7 +180,10 @@
         </span>
       </div>
       <p v-if="song.message" class="text-xs text-muted-foreground">
-        留言: {{ song.message }}
+        私密留言: {{ song.message }}
+      </p>
+      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
+        公开留言: {{ song.msgPublic }}
       </p>
 
       <div v-if="song.state !== 'used' && song.state !== 'dropped'" class="flex gap-1">

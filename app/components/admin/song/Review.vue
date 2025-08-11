@@ -12,8 +12,8 @@
     <Input v-model="rejectMessage" placeholder="拒绝理由（≥ 4个字符）" />
   </div>
   <div v-if="song.message">
-    <div class="text-2xl text-center text-foreground m-5">留言</div>
-    <div class="text-base text-center m-2">{{ song.message }}</div>
+    <div class="text-2xl text-left text-foreground m-5">私密留言</div>
+    <div class="text-base text-left m-8">{{ song.message }}</div>
   </div>
   <SongPlayer :id="song.songId" :name="song.name" :artists="song.creator" :source="song.source" :img-id="song.imgId" />
 </template>

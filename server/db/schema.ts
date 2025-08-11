@@ -35,6 +35,7 @@ export const songs = pgTable('songs', {
   state: text({ enum: ['pending', 'approved', 'rejected', 'used', 'dropped'] }).notNull().default('pending'),
   rejectMessage: text(),
   message: text(),
+  msgPublic: text(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 

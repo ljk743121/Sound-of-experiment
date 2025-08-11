@@ -179,7 +179,17 @@
 
       <FormField v-slot="{ componentField }" name="message">
         <FormItem>
-          <FormLabel>投稿留言（可选）</FormLabel>
+          <FormLabel>私密留言（可选）</FormLabel>
+          <FormControl>
+            <Textarea v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <FormField v-slot="{ componentField }" name="msgPublic">
+        <FormItem>
+          <FormLabel>公开留言（可选）</FormLabel>
           <FormControl>
             <Textarea v-bind="componentField" />
           </FormControl>
@@ -290,6 +300,7 @@ const formSchema = toTypedSchema(z.object({
   duration: z.number().positive(),
   submitType: z.custom<TSubmitType>(),
   message: z.string().trim().optional(),
+  msgPublic: z.string().trim().optional(),
 }));
 
 const form = useForm({

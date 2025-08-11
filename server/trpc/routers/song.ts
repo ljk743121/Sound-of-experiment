@@ -36,17 +36,18 @@ export const songRouter = router({
         .min(1, '请输入歌手名')
         .max(128, '歌手长度最大128'),
       songId: z.string({ required_error: '请输入歌曲ID' }),
-      source: z.custom<TMediaSource>(),// adapt more sources
+      source: z.custom<TMediaSource>(),
       imgId: z.string(),
       duration: z.number().positive(),
       submitType: z.custom<TSubmitType>(),
-      message: z.string().optional(),
+      message: z.string().trim().optional(),
+      msgPublic: z.string().trim().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       if (!(await checkCanSubmit(ctx.user.id, ctx.user.remainSubmitSongs)))
         throw new TRPCError({ code: 'BAD_REQUEST', message: '您的剩余提交次数为0,请等5天后重置' });
 
-      const content = `${input.name} ${input.creator} ${input.message || ''}`;
+      const content = `${input.name} ${input.creator} ${input.message || ''} ${input.msgPublic || ''}`;
       if (await hasBlockWord(content)){
         throw new TRPCError({ code: 'BAD_REQUEST', message: '投稿失败，含有违禁词' });
       }
@@ -90,6 +91,7 @@ export const songRouter = router({
           ownerDisplayName: true,
           isRealName: true,
           message: true,
+          msgPublic: true,
           createdAt: true,
           state: true,
           rejectMessage: true,
@@ -140,6 +142,7 @@ export const songRouter = router({
           rejectMessage: true,
           arrangementDate: true,
           createdAt: true,
+          msgPublic: true,
         },
       });
     }),
