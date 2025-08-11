@@ -6,35 +6,50 @@
       </CardHeader>
       <CardContent>
         <div class="space-y-6">
-          <div v-if="!isEditing.status" class="border rounded-lg p-4 space-y-4">
-            <h3 class="font-semibold">发布公告</h3>
-            <MdEditor v-model="newAnnouncement" language="zh-CN" noUploadImg :toolbars="toolbars" />
-            <Select v-model="newAnnouncementVisibility">
-              <SelectTrigger>
-                <SelectValue placeholder="选择可见性" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="admin">
-                    仅管理人员可见
-                  </SelectItem>
-                  <SelectItem value="all">
-                    所有人可见
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Button @click="postAnnouncement" :disabled="isPostPending">发布</Button>
-          </div>
-          <div v-else class="border rounded-lg p-4 space-y-4">
-            <h3 class="font-semibold">编辑公告</h3>
-            <p>创建者：{{ isEditing.creatorId }}</p>
-            <p>创建时间：{{ isEditing.createAt }}</p>
-            <!-- <p>最后修改时间：{{ isEditing.updateAt }}</p> -->
-            <MdEditor v-model="isEditing.markdown" language="zh-CN" noUploadImg :toolbars="toolbars"
-              previewTheme="github" noImgZoomIn />
-            <Button @click="updateAnnouncement" :disabled="isUpdatePending">确认修改</Button>
-            <Button @click="cancelEdit">取消修改</Button>
+          <div v-if="!isPending">
+            <div v-if="!isEditing || !isEditing.status" class="border rounded-lg p-4 space-y-4">
+              <h3 class="font-semibold">发布公告</h3>
+              <MdEditor v-model="newAnnouncement" language="zh-CN" noUploadImg :toolbars="toolbars"
+                :read-only="isPending || isPostPending" />
+              <Accordion type="single" collapsible>
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>发布时显示的名称是什么？</AccordionTrigger>
+                  <AccordionContent>
+                    默认显示你设置的昵称，如果没有设置则默认使用您的真名。
+                    以前发布的公告的昵称不会因为昵称被修改而改变。
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+              <Select v-model="newAnnouncementVisibility">
+                <SelectTrigger>
+                  <SelectValue placeholder="选择可见性" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="admin">
+                      仅管理人员可见
+                    </SelectItem>
+                    <SelectItem value="all">
+                      所有人可见
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Button @click="postAnnouncement" :disabled="isPostPending">
+                <Icon v-if="isPostPending" name="lucide:loader-2" size="20" class="animate-spin" />
+                发布
+              </Button>
+            </div>
+            <div v-else class="border rounded-lg p-4 space-y-4">
+              <h3 class="font-semibold">编辑公告</h3>
+              <p>创建者：{{ isEditing.creatorId }}</p>
+              <p>创建时间：{{ isEditing.createAt }}</p>
+              <!-- <p>最后修改时间：{{ isEditing.updateAt }}</p> -->
+              <MdEditor v-model="isEditing.markdown" language="zh-CN" noUploadImg :toolbars="toolbars"
+                previewTheme="github" noImgZoomIn />
+              <Button @click="updateAnnouncement" :disabled="isUpdatePending">确认修改</Button>
+              <Button @click="cancelEdit">取消修改</Button>
+            </div>
           </div>
           <div class="overflow-x-auto">
             <div v-if="isPending">
@@ -86,7 +101,10 @@
                       <!-- <Button size="sm" @click="editAnnouncement" :disabled="userStore.id !== item.creatorId">编辑</Button> -->
                       <AlertDialog>
                         <AlertDialogTrigger as-child>
-                          <Button size="sm" variant="destructive" :disable="isRemovePending">删除</Button>
+                          <Button size="sm" variant="destructive" :disable="isRemovePending">
+                            <Icon v-if="isRemovePending" name="lucide:loader-2" size="20" class="animate-spin" />
+                            删除
+                          </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
@@ -98,7 +116,9 @@
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>取消</AlertDialogCancel>
-                            <AlertDialogAction @click="removePost(item.id)" :disabled="isRemovePending">确定
+                            <AlertDialogAction @click="removePost(item.id)" :disabled="isRemovePending">
+                              <Icon v-if="isRemovePending" name="lucide:loader-2" size="20" class="animate-spin" />
+                              确定
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -122,6 +142,7 @@ import 'md-editor-v3/lib/style.css';
 const { $trpc } = useNuxtApp();
 const { $mdRenderer } = useNuxtApp();
 const userStore = useUserStore();
+const queryClient = useQueryClient();
 
 definePageMeta({
   layout: 'admin',
@@ -142,7 +163,7 @@ const toolbars:ToolbarNames[] = [
   'task',
   '-',
   'codeRow',
-  // 'code',
+  'code',
   'link',
   // 'image',
   'table',
@@ -176,7 +197,7 @@ const formatDate = (date: Date): string => {
   });
 };
 
-const { data: announcementList, suspense: listSuspense, isPending } = useQuery({
+const { data: announcementList, isPending } = useQuery({
   queryFn: () => $trpc.announcement.list.query(),
   queryKey: ['announcement.list'],
   refetchOnWindowFocus: true,
@@ -185,10 +206,10 @@ const { data: announcementList, suspense: listSuspense, isPending } = useQuery({
 const { mutate: post, isPending: isPostPending } = useMutation({
   mutationFn: $trpc.announcement.create.mutate,
   onSuccess: async () => {
-    toast.success('发布成功');
     newAnnouncement.value = '';
     newAnnouncementVisibility.value = '';
-    await listSuspense();
+    queryClient.invalidateQueries({ queryKey: ['announcement.list'] });
+    toast.success('发布成功');
   },
   onError: err => useErrorHandler(err),
 })
@@ -211,8 +232,8 @@ const postAnnouncement = async () => {
 const { mutate: remove, isPending: isRemovePending } = useMutation({
   mutationFn: $trpc.announcement.remove.mutate,
   onSuccess: async () => {
+    queryClient.invalidateQueries({ queryKey: ['announcement.list'] });
     toast.success('删除成功');
-    await listSuspense();
   },
   onError: err => useErrorHandler(err),
 })
@@ -241,8 +262,8 @@ const { mutate: update, isPending: isUpdatePending } = useMutation({
   mutationFn: $trpc.announcement.update.mutate,
   onSuccess: async () => {
     cancelEdit();
+    queryClient.invalidateQueries({ queryKey: ['announcement.list'] });
     toast.success('更新成功');
-    await listSuspense();
   },
   onError: err => useErrorHandler(err),
 })
