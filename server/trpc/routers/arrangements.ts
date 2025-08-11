@@ -4,7 +4,7 @@ import { desc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '~~/server/db';
 import { arrangements, songs } from '~~/server/db/schema';
-import { adminProcedure, protectedProcedure, requirePermission, router } from '../trpc';
+import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
 import { fitsInTime } from './time';
 
 async function reviewAll() {
@@ -172,5 +172,32 @@ export const arrangementsRouter = router({
           songIndex++;
         }
       });
+    }),
+
+    today: publicProcedure
+    .query(async () => {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const arrangement = await db.query.arrangements.findFirst({
+        where: eq(arrangements.date, today),
+        columns: {
+          date: true,
+        },
+        with: {
+          songs: {
+            orderBy: desc(songs.createdAt),
+            columns: {
+              creator: true,
+              name: true,
+              songId: true,
+              source: true,
+              imgId: true,
+              message: true,
+            },
+          },
+        },
+      });
+      
+      return arrangement;
     }),
 });
