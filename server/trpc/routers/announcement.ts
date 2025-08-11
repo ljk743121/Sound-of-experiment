@@ -16,7 +16,7 @@ export const announcementRouter = router({
       await db.insert(announcement).values({
         markdown: input.markdown,
         creatorId: ctx.user.id,
-        creatorName: ctx.user.name,
+        creatorName: ctx.user.displayName || ctx.user.name,
         visible: input.visible,
       });
     }),
