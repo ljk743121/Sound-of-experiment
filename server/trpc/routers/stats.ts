@@ -40,7 +40,7 @@ function splitSingerNames(creator: string): string[] {
     }
     // seems if it has a secondary name, it's probably not a group of singers
   } else {
-    creator.split(/, |；|;/).forEach(part => {
+    creator.split(/, |；|;|\//).forEach(part => {
       const trimmed = part.trim();
       if (trimmed) results.push(trimmed);
     });

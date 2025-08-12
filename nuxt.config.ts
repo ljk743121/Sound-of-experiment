@@ -45,7 +45,7 @@ export default defineNuxtConfig({
     storage: 'cookies',
     cookieOptions: {
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 14,
+      maxAge: 60 * 60 * 24 * 7,
       secure: process.env.DB_ENV === 'production',
     },
   },
@@ -97,31 +97,7 @@ export default defineNuxtConfig({
         target: 'esnext',
       },
     },
-    routeRules: {
-      '/api/**': {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
-          'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
-          'X-XSS-Protection': '1; mode=block',
-          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-        }
-      }
-    }
   },
-
-  // markdownit: {
-  //   preset: 'default',
-  //   runtime: true,
-  //   linkify: true,
-  //   breaks: true,
-  //   use: [
-  //     'markdown-it-div',
-  //     'markdown-it-attrs'
-  //   ]
-  // },
 
   runtimeConfig: {
     //private
