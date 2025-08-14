@@ -120,11 +120,15 @@ const formatDate = (date: Date): string => {
 const { data, suspense } = useQuery({
   queryFn: () => $trpc.stats.dashboard.query(),
   queryKey: ['stats.dashboard'],
+  refetchOnWindowFocus: false,
+  refetchIntervalInBackground: false,
 });
 
 const { data: announcementList, suspense: listSuspense, isPending } = useQuery({
   queryFn: () => $trpc.announcement.listAdmin.query(),
   queryKey: ['announcement.listAdmin'],
+  refetchOnWindowFocus: false,
+  refetchIntervalInBackground: false,
 })
 
 

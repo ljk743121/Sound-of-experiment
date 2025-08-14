@@ -6,7 +6,7 @@
           <FormLabel>歌曲名</FormLabel>
           <FormControl>
             <Input v-bind="componentField" type="text" disabled
-              class="cursor-not-allowed bg-gray-100 dark:bg-gray-800" />
+              class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -17,7 +17,7 @@
           <FormLabel>歌手</FormLabel>
           <FormControl>
             <Input v-bind="componentField" type="text" disabled
-              class="cursor-not-allowed bg-gray-100 dark:bg-gray-800" />
+              class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -28,7 +28,7 @@
           <FormLabel>歌曲ID</FormLabel>
           <FormControl>
             <Input v-bind="componentField" type="text" disabled
-              class="cursor-not-allowed bg-gray-100 dark:bg-gray-800" />
+              class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -205,7 +205,7 @@
   </UseTemplate>
 
   <Card
-    class="mx-auto max-w-screen-md border border-gray-200 bg-white/60 backdrop-blur-sm dark:border-gray-800 dark:bg-slate-900">
+    class="mx-auto max-w-screen-md border backdrop-blur-sm">
     <CardHeader>
       <div class="flex justify-end">
         <Button variant="outline" size="icon" @click.prevent="navigateTo('/')">

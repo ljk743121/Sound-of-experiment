@@ -93,7 +93,7 @@
                 <Badge variant="outline">
                   {{ song.isRealName ? '实名' : '匿名' }}
                 </Badge>
-                <span v-if="song.isRealName" class="ml-2">提交者:{{ song.ownerDisplayName }}</span>
+                <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
               </p>
             </DialogDescription>
           </DialogHeader>
@@ -128,7 +128,7 @@
                 <Badge variant="outline">
                   {{ song.isRealName ? '实名' : '匿名' }}
                 </Badge>
-                <span v-if="song.isRealName">提交者:{{ song.ownerDisplayName }}</span>
+                <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
               </p>
             </DrawerDescription>
           </DrawerHeader>

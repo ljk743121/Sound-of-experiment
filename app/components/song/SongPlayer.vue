@@ -21,6 +21,9 @@
           <h4 class="max-w-md truncate text-2xl font-bold">
             {{ props.name }}
           </h4>
+          <Badge v-if="isVip" variant="destructive">
+              VIP
+            </Badge>
         </div>
 
         <div>
@@ -109,6 +112,7 @@ const config = ref(useMusicfyPlayer({
     detect: true,
   },
 }));
+const isVip = ref(false);
 
 watchEffect(async () => {
   if (props.id === '' || props.source === ''){
@@ -124,8 +128,9 @@ watchEffect(async () => {
       }),
     });
 
-    if (data) {
-      config.value.audioSrc = data;
+    if (data.url) {
+      isVip.value = data.pay;
+      config.value.audioSrc = data.url;
       config.value.imageSrc = getImgUrl(props.imgId!, props.source);
       SearchCount.value++;
     }

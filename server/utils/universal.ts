@@ -2,7 +2,6 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db';
 import { users } from '../db/schema';
 import { TRPCError } from '@trpc/server';
-import { has } from 'markdown-it/lib/common/utils.mjs';
 
 export async function getUserDetailById(id: string) {
   if (!id) throw new TRPCError({ code: 'BAD_REQUEST', message: '用户ID不能为空' });

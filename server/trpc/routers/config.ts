@@ -12,9 +12,15 @@ export const configRouter = router({
     return value;
   }),
   update: adminProcedure
-    .use(requirePermission(['admin', 'manageUser']))
+    .use(requirePermission(['manageUser']))
     .input(z.object({ key: z.string(), value: z.any() }))
     .mutation(async ({ ctx, input }) => {
+      if (!(env.EDGE_CONFIG_TOKEN && env.EDGE_CONFIG_ID)){
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: '未配置边缘配置',
+        });
+      }
       try {
         const updateEdgeConfig = await fetch(
           `https://api.vercel.com/v1/edge-config/${env.EDGE_CONFIG_ID}/items`,

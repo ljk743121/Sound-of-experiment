@@ -2,21 +2,21 @@
   <Sheet>
     <SheetTrigger as-child>
       <Button variant="outline" size="xs" class="font-mono">
-        {{ songs.filter((song) => song.isRealName).length }}/{{ songs.filter((song) => !song.isRealName).length }}/{{ songs.length }}
+        {{ songs.length }}
       </Button>
     </SheetTrigger>
     <SheetContent class="overflow-scroll">
       <SheetHeader>
-        <SheetTitle class="flex gap-1">
+        <SheetTitle class="flex gap-2">
           <span>点歌记录</span>
           <Badge variant="secondary">
-            (实名) {{ songs.filter((song) => song.isRealName).length }} 首
+            {{ songs.length }} 首
           </Badge>
         </SheetTitle>
         <SheetDescription />
       </SheetHeader>
       <div class="flex flex-col gap-3">
-        <SongCard v-for="song in songs.filter((song) => song.isRealName)" :key="song.id" :song />
+        <SongCard v-for="song in songs" :key="song.id" :song />
       </div>
     </SheetContent>
   </Sheet>

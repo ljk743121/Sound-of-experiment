@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import * as searchApi from '~~/server/utils/song';
 import { protectedProcedure, requirePermission, router } from '../trpc';
+import { url } from 'node:inspector';
 
 export const searchRouter = router({
   mixSearch: protectedProcedure
@@ -27,32 +28,32 @@ export const searchRouter = router({
     .query(async ({ ctx, input }) => {
       if (!input.id)
         throw new TRPCError({ code: 'BAD_REQUEST', message: '缺少ID参数' });
-      let url = '';
+      let songInfo = {url: '', pay: false};
       if (input.source === 'wy') {
         try {
-          url = await searchApi.getSongUrlWy(input.id);
+          songInfo = await searchApi.getSongUrlWy(input.id);
         } catch (e: any) {
           if (e.message === '歌曲为VIP歌曲') {
-            url = await searchApi.getSongUrlWyVip(input.id, ctx.user);
+            songInfo = await searchApi.getSongUrlWyVip(input.id, ctx.user);
           } else {
-            throw new TRPCError({ code: 'BAD_REQUEST', message: `获取歌曲链接失败:${e.message}` });
+            throw new TRPCError({ code: 'BAD_REQUEST', message: `失败:${e.message}` });
           }
         }
       } else if (input.source === 'tx') {
         try {
-          url = await searchApi.getSongUrlQQ(input.id);
+          songInfo = await searchApi.getSongUrlQQ(input.id);
         } catch (e: any) {
           if (e.message === '歌曲为VIP歌曲') {
-            url = await searchApi.getSongUrlQQVip(input.id, ctx.user);
+            songInfo = await searchApi.getSongUrlQQVip(input.id, ctx.user);
           } else {
-            throw new TRPCError({ code: 'BAD_REQUEST', message: `获取歌曲链接失败:${e.message}` });
+            throw new TRPCError({ code: 'BAD_REQUEST', message: `失败:${e.message}` });
           }
         }
       } else {
         throw new TRPCError({ code: 'BAD_REQUEST', message: '未知的源' });
       }
-      if (!url)
+      if (!songInfo.url)
         throw new TRPCError({ code: 'BAD_REQUEST', message: '歌曲链接为空' });
-      return url;
+      return songInfo;
     }),
 });

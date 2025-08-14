@@ -21,26 +21,28 @@ export async function fitsInTime(t: Date) {
       if (t < time.startAt || time.endAt < t)
         continue;
     } else {
-      const dhms = (d: Date) => ({
-        d: d.getDay() === 0 ? 7 : d.getDay(),
-        h: d.getHours(),
-        m: d.getMinutes(),
-        s: d.getSeconds(),
-      });
-      const date2num = (d: ReturnType<typeof dhms>) => d.d * 1000000 + d.h * 10000 + d.m * 100 + d.s;
+      const getDayOfWeek = (date: Date) => {
+        return date.getDay() === 0 ? 7 : date.getDay();
+      };
+      const getTimeNumber = (date: Date) => {
+        return getDayOfWeek(date) * 1000000 + 
+               date.getHours() * 10000 + 
+               date.getMinutes() * 100 + 
+               date.getSeconds();
+      };
 
-      const start = dhms(time.startAt);
-      const end = dhms(time.endAt);
-      const current = dhms(t);
+      const startTime = getTimeNumber(time.startAt);
+      const endTime = getTimeNumber(time.endAt);
+      const currentTime = getTimeNumber(t);
 
-      if ((start.d < end.d && (current.d < start.d || end.d < current.d)) || (start.d > end.d && current.d < start.d))
-        continue;
-      if (start.d === end.d && (date2num(current) < date2num(start) || date2num(current) > date2num(end)))
-        continue;
-      if (current.d === start.d && date2num(current) < date2num(start))
-        continue;
-      if (current.d === end.d && date2num(current) > date2num(end))
-        continue;
+      let inRange = false;
+      if (startTime <= endTime) {
+        inRange = startTime <= currentTime && currentTime <= endTime;
+      } else {
+        inRange = currentTime >= startTime || currentTime <= endTime;
+      }
+
+      if (!inRange) continue;
     }
     return true;
   }

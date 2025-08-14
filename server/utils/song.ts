@@ -176,7 +176,10 @@ export async function getSongUrlWy(id: string) {
   } else if (res.url === 'https://music.163.com/404') {
     throw new TRPCError({ code: 'BAD_REQUEST', message: '歌曲为VIP歌曲' });
   } else {
-    return res.url;
+    return {
+      url: res.url,
+      pay: false,
+    };
   };
 }
 
@@ -217,7 +220,10 @@ export async function getSongUrlQQ(mid: string) {
   if (resPURL.req_0.data.midurlinfo[0].purl.length < 1)
     throw new TRPCError({ code: 'BAD_REQUEST', message: '歌曲为VIP歌曲' });
 
-  return `${serverBaseURL}${resPURL.req_0.data.midurlinfo[0].purl}`;
+  return {
+    url: `${serverBaseURL}${resPURL.req_0.data.midurlinfo[0].purl}`,
+    pay: false,
+  };
 }
 
 export async function getSongUrlWyVip(id: string, user: User) {
@@ -246,10 +252,10 @@ export async function getSongUrlWyVip(id: string, user: User) {
     },
   });
   if (resSongsUrl.code !== 200) {
-    throw new TRPCError({ code: 'BAD_REQUEST', message: '获取歌曲链接失败' });
+    throw new TRPCError({ code: 'BAD_REQUEST', message: '你的请求可能为VIP歌曲，服务器繁忙，请稍后再试' });
   }
   if (!resSongsUrl.data.url) {
-    throw new TRPCError({ code: 'BAD_REQUEST', message: '获取歌曲链接失败' });
+    throw new TRPCError({ code: 'BAD_REQUEST', message: '获取VIP歌曲链接失败' });
   }
   consola.log(
     (new Date()).toLocaleString('zh-CN'),
@@ -263,7 +269,10 @@ export async function getSongUrlWyVip(id: string, user: User) {
     '|',
     id,
   );
-  return resSongsUrl.data.url;
+  return {
+    url: resSongsUrl.data.url,
+    pay: true,
+  };
 }
 
 export async function getSongUrlQQVip(mid: string, user: User) {
@@ -293,10 +302,10 @@ export async function getSongUrlQQVip(mid: string, user: User) {
     },
   });
   if (resSongsUrl.code !== 200) {
-    throw new TRPCError({ code: 'BAD_REQUEST', message: '服务器繁忙，请稍后再试' });
+    throw new TRPCError({ code: 'BAD_REQUEST', message: '你的请求可能为VIP歌曲，服务器繁忙，请稍后再试' });
   }
   if (!resSongsUrl.data.url) {
-    throw new TRPCError({ code: 'BAD_REQUEST', message: '获取歌曲链接失败' });
+    throw new TRPCError({ code: 'BAD_REQUEST', message: '获取VIP歌曲链接失败' });
   }
   consola.log(
     (new Date()).toLocaleString('zh-CN'),
@@ -310,5 +319,8 @@ export async function getSongUrlQQVip(mid: string, user: User) {
     '|',
     mid,
   );
-  return resSongsUrl.data.url;
+  return {
+    url: resSongsUrl.data.url,
+    pay: true,
+  };
 }

@@ -130,7 +130,7 @@ const columns: ColumnDef<a>[] = [
   },
   {
     accessorKey: 'songs',
-    header: '点歌记录(实名/匿名/总)',
+    header: '点歌记录',
     cell: ({ row }) => h(
       HistorySheet,
       { songs: row.original.songs },

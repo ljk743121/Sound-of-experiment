@@ -240,6 +240,7 @@ const { data: songList, suspense: songListSuspense } = useQuery({
 const { data: mySongList, suspense: mySongListSuspense } = useQuery({
   queryFn: () => $trpc.song.listMine.query(),
   queryKey: ['song.listMine'],
+  refetchIntervalInBackground: false,
 });
 
 const { data: canSubmit, suspense: canSubmitSuspense } = useQuery({
@@ -252,19 +253,22 @@ const { data: canSubmit, suspense: canSubmitSuspense } = useQuery({
 const { data: remainSubmitSongs, suspense: remainSubmitSongsSuspense } = useQuery({
   queryFn: () => $trpc.song.remainSubmitSongs.query(),
   queryKey: ['song.remainSubmitSongs'],
-  refetchInterval: 10000,
   refetchIntervalInBackground: false,
+  refetchOnWindowFocus: true,
 });
 
 const { data: arrangementList, suspense: arrangementListSuspense } = useQuery({
   queryFn: () => $trpc.arrangements.listSafe.query(),
   queryKey: ['arrangements.listSafe'],
   refetchIntervalInBackground: false,
+  refetchOnWindowFocus: false,
 });
 
 const { data: announcementList, suspense: listSuspense, isPending: isAnnouncementListPending } = useQuery({
   queryFn: () => $trpc.announcement.listSafe.query(),
   queryKey: ['announcement.listSafe'],
+  refetchIntervalInBackground: false,
+  refetchOnWindowFocus: false,
 })
 
 function getDateString(date: Date) {
