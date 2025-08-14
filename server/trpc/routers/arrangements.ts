@@ -23,23 +23,6 @@ export const arrangementsRouter = router({
         columns: {
           date: true,
         },
-        with: {
-          songs: {
-            orderBy: desc(songs.createdAt),
-            columns: {
-              id: true,
-              creator: true,
-              name: true,
-              songId: true,
-              source: true,
-              imgId: true,
-              rejectMessage: true,
-              state: true,
-              createdAt: true,
-              message: true,
-            },
-          },
-        },
       });
     }),
 
@@ -56,11 +39,14 @@ export const arrangementsRouter = router({
             columns: {
               id: true,
               creator: true,
+              ownerDisplayName: true,
               name: true,
               songId: true,
               source: true,
               imgId: true,
+              duration: true,
               rejectMessage: true,
+              msgPublic: true,
               state: true,
               createdAt: true,
             },
@@ -174,7 +160,8 @@ export const arrangementsRouter = router({
       });
     }),
 
-    today: publicProcedure
+    today: protectedProcedure
+    .use(requirePermission(['robot']))
     .query(async () => {
       const today = new Date().toISOString().split('T')[0];
       

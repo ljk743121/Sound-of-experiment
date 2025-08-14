@@ -8,14 +8,14 @@ import { env } from '../env';
 const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
 const decode = TextDecoder.prototype.decode.bind(new TextDecoder());
 
-export async function produceAccessToken(id: string) {
+export async function produceAccessToken(id: string, days: string = env.TOKEN_EXPIRATION_TIME) {
   const encPublicKey = await jose.importSPKI(env.ENC_PUBLIC_KEY, 'RSA-OAEP-256');
   const signPrivateKey = await jose.importPKCS8(env.SIGN_PRIVATE_KEY, 'RS512');
 
   const jwt = await new jose.SignJWT({})
     .setSubject(id.toString())
     .setIssuedAt()
-    .setExpirationTime(env.TOKEN_EXPIRATION_TIME)
+    .setExpirationTime(days)
     .setIssuer('soe')
     .setJti(nanoid(32))
     .setProtectedHeader({

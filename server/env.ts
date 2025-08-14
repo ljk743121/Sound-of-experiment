@@ -11,7 +11,7 @@ const envSchema = z.object({
   WY_URL: z.string().url().optional(),
   TX_URL: z.string().url().optional(),
   DB_ENV: z.enum(['development', 'production']).default('production'),
-  TOKEN_EXPIRATION_TIME: z.string().optional().default('5d'),
+  TOKEN_EXPIRATION_TIME: z.string().optional().default('7d'),
   SIGN_PUBLIC_KEY: z.string(),
   SIGN_PRIVATE_KEY: z.string(),
   ENC_PUBLIC_KEY: z.string(),
@@ -20,6 +20,7 @@ const envSchema = z.object({
   ENC_KID: z.string(),
   EDGE_CONFIG_ID: z.string().optional(),
   EDGE_CONFIG_TOKEN: z.string().optional(),
+  CF_TOKEN: z.string().optional(),
 });
 
 const envParse = envSchema.safeParse(process.env);

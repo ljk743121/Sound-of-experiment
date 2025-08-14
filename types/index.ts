@@ -12,7 +12,8 @@ export type TPermission =
   'time' | // set opening time
   'blockWords' | // manage block words
   'manageUser' | // manage users (listing, banning, ...)
-  'announcement'; //manage announcement
+  'announcement'| //manage announcement
+  'robot'; 
 
 export type TSongState = 'pending' | 'approved' | 'rejected' | 'used' | 'dropped';
 
