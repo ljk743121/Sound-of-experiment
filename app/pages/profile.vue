@@ -1,6 +1,6 @@
 <template>
-  <div class="flex items-center justify-center h-screen">
-    <Card class="mx-auto max-w-2xl my-auto">
+  <div class="flex items-center justify-center h-screen w-full lg:grid lg:min-h-[600px] xl:min-h-[800px]">
+    <Card class="mx-auto grid w-[350px] gap-6">
       <CardHeader>
         <div class="flex justify-end">
           <Button variant="outline" size="icon" @click.prevent="navigateTo('/')">
@@ -15,15 +15,15 @@
         <div class="grid gap-4">
           <div class="grid gap-2">
             你的ID：
-            <span>{{ userStore.id }}</span>
+            <span class="text-muted-foreground">{{ userStore.id }}</span>
           </div>
           <div class="grid gap-2">
             你的姓名：
-            <span>{{ userStore.name }}</span>
+            <span class="text-muted-foreground">{{ userStore.name }}</span>
           </div>
           <div class="grid gap-2">
             你的昵称：
-            <span>{{ userStore.displayName ? userStore.displayName : "你还没有设置自己的昵称呢" }}</span>
+            <span class="text-muted-foreground">{{ userStore.displayName ? userStore.displayName : "你还没有设置自己的昵称呢" }}</span>
           </div>
           <div class="grid gap-2">
             你的权限：

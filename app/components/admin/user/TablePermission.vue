@@ -55,8 +55,8 @@
   </Dialog>
 
   <Badge v-for="permission in permissions" :key="permission" variant="outline">
-    <Icon :name="permissionNames.find(x => x.value === permission)!.icon" class="mr-1" />
-    {{ permissionNames.find(x => x.value === permission)?.label }}
+    <Icon :name="permissionNames.find(x => x.value === permission)?.icon || 'lucide:help-circle'" class="mr-1" />
+    {{ permissionNames.find(x => x.value === permission)?.label || permission }}
   </Badge>
 </template>
 

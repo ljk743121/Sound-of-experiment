@@ -117,23 +117,25 @@ definePageMeta({
 });
 
 const { $trpc } = useNuxtApp();
-const { data: arrangementList, suspense } = useQuery({
+const { data: arrangementList } = useQuery({
   queryFn: () => $trpc.arrangements.list.query(),
   queryKey: ['arrangements.list'],
+  refetchIntervalInBackground: false,
+  refetchOnWindowFocus: false,
 });
-await suspense();
 
-const { data: reviewAll, suspense: reviewAllSuspense } = useQuery({
+const { data: reviewAll } = useQuery({
   queryFn: () => $trpc.arrangements.reviewAll.query(),
   queryKey: ['arrangements.reviewAll'],
+  refetchIntervalInBackground: false,
+  refetchOnWindowFocus: false,
 });
-await reviewAllSuspense();
 
-const { data: timeCurrently, suspense: timeSuspense } = useQuery({
+const { data: timeCurrently } = useQuery({
   queryFn: () => $trpc.time.currently.query(),
   queryKey: ['time.currently'],
+  refetchIntervalInBackground: false,
 });
-await timeSuspense();
 
 function downloadCsv(csvContent: string,){
   try {

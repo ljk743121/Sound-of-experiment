@@ -158,6 +158,12 @@ export const userRouter = router({
       if (await hasBlockWord(input.alias)){
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '昵称包含违禁词' });
       }
+      const user = await db.query.users.findFirst({
+        where: eq(users.displayName, input.alias),
+      });
+      if (user) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '昵称已存在' });
+      }
       await db.update(users)
         .set({
           displayName: input.alias,

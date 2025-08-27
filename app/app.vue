@@ -1,6 +1,6 @@
 <template>
   <NuxtLoadingIndicator :color="false" class="z-100 bg-primary/80" />
-  <Toaster position="top-center" />
+  <Toaster position="top-right" class="pointer-events-auto" closeButton richColors :duration="7000" expand :visibleToasts="5" />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

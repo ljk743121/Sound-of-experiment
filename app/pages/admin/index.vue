@@ -71,17 +71,7 @@
           </div>
         </div>
         <div v-else-if="announcementList && announcementList.length" v-for="item in announcementList">
-          <Card class="p-4">
-            <CardTitle>
-              {{ formatDate(item.createdAt) }}
-            </CardTitle>
-            <CardDescription>
-              <p>发布人：{{ item.creatorName }}</p>
-            </CardDescription>
-            <CardContent>
-            <div class="prose-xl prose-blue prose-pre:bg-zinc-300 prose-pre:text-gray-800 text-sm m-1 p-3" v-html="$mdRenderer.render(item.markdown)" ></div>
-            </CardContent>
-          </Card>
+          <<HomeAnnouncement :announcement-list="announcementList!"/>
         </div>
         <div v-else> 
           无公告
@@ -105,33 +95,17 @@ try{
   navigateTo('/')
 }
 
-const { $mdRenderer } = useNuxtApp();
-const formatDate = (date: Date): string => {
-  return new Date(date).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-};
-
-const { data, suspense } = useQuery({
+const { data } = useQuery({
   queryFn: () => $trpc.stats.dashboard.query(),
   queryKey: ['stats.dashboard'],
   refetchOnWindowFocus: false,
   refetchIntervalInBackground: false,
 });
 
-const { data: announcementList, suspense: listSuspense, isPending } = useQuery({
+const { data: announcementList, isPending } = useQuery({
   queryFn: () => $trpc.announcement.listAdmin.query(),
   queryKey: ['announcement.listAdmin'],
   refetchOnWindowFocus: false,
   refetchIntervalInBackground: false,
 })
-
-
-await suspense();
-await listSuspense();
 </script>

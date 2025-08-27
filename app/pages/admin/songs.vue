@@ -53,12 +53,11 @@ definePageMeta({
 });
 
 const { $trpc } = useNuxtApp();
-const { data: songList, suspense } = useQuery({
+const { data: songList } = useQuery({
   queryFn: () => $trpc.song.list.query(),
   queryKey: ['song.list'],
   refetchOnWindowFocus: false,
 });
-await suspense();
 
 const panels = ref([
   {

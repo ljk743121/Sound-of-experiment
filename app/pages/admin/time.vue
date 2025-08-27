@@ -47,11 +47,10 @@ const layout = useCookie<number[]>('time-resizable:layout', {
 
 const rightPanel = ref<'unset' | 'create' | 'edit'>('unset');
 
-const { data: timeList, suspense: timeListSuspense } = useQuery({
+const { data: timeList } = useQuery({
   queryFn: () => $trpc.time.list.query(),
   queryKey: ['time.list'],
 });
-await timeListSuspense();
 
 const selectedTime = ref<RouterOutput['time']['list'][0]>();
 </script>

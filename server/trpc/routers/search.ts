@@ -2,7 +2,6 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import * as searchApi from '~~/server/utils/song';
 import { protectedProcedure, requirePermission, router } from '../trpc';
-import { url } from 'node:inspector';
 
 export const searchRouter = router({
   mixSearch: protectedProcedure

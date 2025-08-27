@@ -44,12 +44,11 @@ const layout = useCookie<number[]>('review-resizable:layout', {
   default: () => [35, 65],
 });
 
-const { data: songList, suspense } = useQuery({
+const { data: songList } = useQuery({
   queryFn: () => $trpc.song.listReview.query(),
   queryKey: ['song.listReview'],
   refetchOnWindowFocus: false,
 });
-await suspense();
 
 const selectedSong = ref<RouterOutput['song']['listReview'][0] | undefined>(songList.value?.[0]);
 watch(songList, () => {

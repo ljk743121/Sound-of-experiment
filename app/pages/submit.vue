@@ -3,9 +3,9 @@
     <form class="mx-auto grid max-w-screen-md grid-cols-1 gap-6 p-4 md:p-6" @submit="onSubmit">
       <FormField v-slot="{ componentField }" name="name">
         <FormItem>
-          <FormLabel>歌曲名</FormLabel>
+          <FormLabel>歌曲名: {{ form.values.name }}</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" type="text" disabled
+            <Input v-bind="componentField" type="hidden" disabled
               class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
@@ -14,9 +14,9 @@
 
       <FormField v-slot="{ componentField }" name="creator">
         <FormItem>
-          <FormLabel>歌手</FormLabel>
+          <FormLabel>歌手：{{ form.values.creator }}</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" type="text" disabled
+            <Input v-bind="componentField" type="hidden" disabled
               class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
@@ -25,9 +25,9 @@
 
       <FormField v-slot="{ componentField }" name="songId">
         <FormItem>
-          <FormLabel>歌曲ID</FormLabel>
+          <FormLabel>歌曲ID：{{ form.values.songId }}</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" type="text" disabled
+            <Input v-bind="componentField" type="hidden" disabled
               class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
@@ -251,6 +251,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import SongPlayer from '~/components/song/SongPlayer.vue';
 import * as z from 'zod';
 import { getImgUrl } from '~~/constants';
+// import { songFetching } from '~/composables/ClientSearch';
 
 const { $trpc } = useNuxtApp();
 
@@ -278,7 +279,7 @@ const userStore = useUserStore();
 // Reuse `form` section
 const [UseTemplate, GridForm] = createReusableTemplate();
 
-const tabStatus = ref('search');
+const tabStatus = ref<'search' | 'id'>('search');
 
 
 const formSchema = toTypedSchema(z.object({
@@ -372,7 +373,13 @@ function onSearch() {
   }
 }
 
+const searchExport = ref({
+  songs: [] as RouterOutput['search']['mixSearch'],
+  isFetching: false,
+})
+
 const queryClient = useQueryClient();
+// const songsList = ref<RouterOutput['search']['mixSearch']>([]);
 const { isFetching: songFetching, data: songsList } = useQuery({
   queryFn: () => $trpc.search.mixSearch.query({
     key: SearchKey.value,
@@ -387,8 +394,12 @@ const { isFetching: songFetching, data: songsList } = useQuery({
 // new song selected
 watch(
   [() => SearchKey.value, () => form.values.source],
-  () => {
+  async () => {
+    if (SearchKey.value.trim().length === 0 || !form.values.source || !tabStatus.value){
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ['search.mixSearch'] });
+    // songsList.value = await searchSongs(SearchKey.value, tabStatus.value as 'search' | 'id', form.values.source!);
   },
 );
 

@@ -61,7 +61,7 @@ export async function searchSongsWy(key: string, type: string) {
         s: key,
         type: 1,
         offset: 0,
-        limit: 5,
+        limit: 10,
         total: true,
       },
       parseResponse(responseText) {
@@ -144,7 +144,7 @@ export async function searchSongsQQ(key: string, type: string) {
     method: 'GET',
     params: {
       w: key,
-      n: 5,
+      n: 10,
       format: 'json',
     },
     parseResponse(responseText) {

@@ -34,11 +34,11 @@ definePageMeta({
 });
 const { $trpc } = useNuxtApp();
 
-const { data, suspense } = useQuery({
+const { data } = useQuery({
   queryFn: () => $trpc.blockWords.list.query(),
   queryKey: ['blockWords.list'],
+  refetchOnWindowFocus: false,
 });
-await suspense();
 
 const newWord = ref('');
 
