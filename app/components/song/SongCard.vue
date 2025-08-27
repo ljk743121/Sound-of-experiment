@@ -73,6 +73,32 @@
             <Icon name="lucide:play" class="mr-2" />
             播放
           </Button>
+          <span v-if="song.likes && !isArrangement">
+            <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
+              :disabled="isDisVoting">
+              <Icon name="lucide:heart" class="mr-2 fill-red-500 text-red-500" />
+              取消点赞
+              <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
+            </Button>
+            <Button v-else variant="outline" @click.prevent="vote(song.id!)"
+              :disabled="isVoting || !userStore.loggedIn">
+              <Icon name="lucide:heart" class="mr-2" />
+              点赞
+              <Badge v-if="song.likes" variant="destructive">{{ song.likes.length || 0 }}</Badge>
+            </Button>
+            <!-- <HomeLikes v-if="song.likes" :idList="song.likes">
+            <Button v-if="isMine" variant="ghost" class="text-sm text-muted-foreground" >
+              <Icon name="lucide:info" class="mr-2" />
+              点赞详情
+            </Button>
+          </HomeLikes> -->
+          </span>
+          <span v-if="isArrangement">
+            <Button variant="outline" disabled>
+              <Icon name="lucide:heart" class="mr-2" />
+              <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录以查看点赞数" }}</Badge>
+            </Button>
+          </span>
           <DialogTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
               <Icon name="lucide:info" class="mr-2" />
@@ -108,6 +134,26 @@
             <Icon name="lucide:play" class="mr-2" />
             播放
           </Button>
+          <span v-if="song.likes">
+            <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
+              :disabled="isDisVoting">
+              <Icon name="lucide:heart" class="mr-2 fill-red-500 text-red-500" />
+              取消点赞
+              <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
+            </Button>
+            <Button v-else variant="outline" @click.prevent="vote(song.id!)"
+              :disabled="isVoting || !userStore.loggedIn">
+              <Icon name="lucide:heart" class="mr-2" />
+              点赞
+              <Badge v-if="song.likes" variant="destructive">{{ Array.from(song.likes).length || 0 }}</Badge>
+            </Button>
+          </span>
+          <span v-if="isArrangement">
+            <Button variant="outline" disabled>
+              <Icon name="lucide:heart" class="mr-2" />
+              <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录以查看点赞数" }}</Badge>
+            </Button>
+          </span>
           <DrawerTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
               <Icon name="lucide:info" class="mr-2" />
@@ -214,11 +260,13 @@ const {
   type = 'public',
   selected = false,
   isArrangement = false,
+  isMine = false,
 } = defineProps<{
   type?: 'public' | 'review' | 'songs';
   selected?: boolean;
   song: Partial<RouterOutput['song']['listMine'][0]>;
   isArrangement?: boolean;
+  isMine?: boolean;
 }>();
 
 defineEmits<{
@@ -231,6 +279,7 @@ const isDesktop = useMediaQuery('(min-width: 768px)');
 const [UseTemplate, SongDrawer] = createReusableTemplate();
 
 const { $trpc } = useNuxtApp();
+const userStore = useUserStore();
 
 const queryClient = useQueryClient();
 const { mutate: approve, isPending: approvePending } = useMutation({
@@ -259,4 +308,26 @@ const formatDuration = (seconds: number): string => {
   const pad = (num: number) => num.toString().padStart(2, '0');
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
 }
+
+const { mutate: vote, isPending: isVoting } = useMutation({
+  mutationFn: $trpc.song.vote.mutate,
+  onSuccess: () => {
+    toast.success('点赞成功');
+    queryClient.invalidateQueries({ queryKey: ['song.listMine'] });
+    queryClient.invalidateQueries({ queryKey: ['song.listSafe'] });
+    queryClient.invalidateQueries({ queryKey: ['arrangement.listSafe']});
+  },
+  onError: err => useErrorHandler(err),
+})
+
+const { mutate: disvote, isPending: isDisVoting } = useMutation({
+  mutationFn: $trpc.song.disvote.mutate,
+  onSuccess: () => {
+    toast.success('取消点赞成功');
+    queryClient.invalidateQueries({ queryKey: ['song.listMine'] });
+    queryClient.invalidateQueries({ queryKey: ['song.listSafe'] });
+    queryClient.invalidateQueries({ queryKey: ['arrangement.listSafe']});
+  },
+  onError: err => useErrorHandler(err),
+})
 </script>

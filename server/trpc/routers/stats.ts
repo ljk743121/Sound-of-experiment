@@ -109,4 +109,30 @@ export const statsRouter = router({
 
       return Array.from(map, ([name, count]) => ({ name, count })).toSorted((a, b) => b.count - a.count);
     }),
+
+  like: protectedProcedure
+    .query(async () => {
+      const songs = await db.query.songs.findMany({
+        columns: {
+          name: true,
+          imgId: true,
+          source: true,
+          likes: true,
+        },
+      });
+
+      const map = new Map<string, { count: number, source: string | null, imgId: string | null }>();
+      for (const song of songs) {
+        if (!song.likes||!song.likes.length) continue;
+        const likes = song.likes.length ?? 0;
+        const existing = map.get(song.name);
+        const newCount = (existing?.count ?? 0) + likes;
+        map.set(song.name, { 
+          count: newCount, 
+          source: existing?.source ?? song.source ?? null, 
+          imgId: existing?.imgId ?? song.imgId ?? null 
+        });
+      }
+      return Array.from(map, ([name, data]) => ({ name, ...data })).toSorted((a, b) => b.count - a.count);
+    })
 });

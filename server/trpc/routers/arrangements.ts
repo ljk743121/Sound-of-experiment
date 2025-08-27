@@ -23,6 +23,25 @@ export const arrangementsRouter = router({
         columns: {
           date: true,
         },
+        with: {
+          songs: {
+            orderBy: desc(songs.createdAt),
+            columns: {
+              id: true,
+              creator: true,
+              ownerDisplayName: true,
+              name: true,
+              songId: true,
+              source: true,
+              imgId: true,
+              duration: true,
+              rejectMessage: true,
+              message: true,
+              state: true,
+              createdAt: true,
+            }
+          }
+        }
       });
     }),
 
@@ -45,6 +64,7 @@ export const arrangementsRouter = router({
               source: true,
               imgId: true,
               duration: true,
+              likes: true,
               rejectMessage: true,
               msgPublic: true,
               state: true,
@@ -53,6 +73,30 @@ export const arrangementsRouter = router({
           },
         },
       });
+    }),
+
+  listGuest: publicProcedure
+    .query(async () => {
+      return await db.query.arrangements.findMany({
+        orderBy: desc(arrangements.date),
+        columns: {
+          date: true,
+        },
+        with: {
+          songs: {
+            orderBy: desc(songs.createdAt),
+            columns: {
+              id: true,
+              creator: true,
+              name: true,
+              imgId: true,
+              source: true,
+              state: true,
+              createdAt: true,
+            }
+          }
+        }
+      })
     }),
 
   reviewAll: adminProcedure

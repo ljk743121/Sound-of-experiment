@@ -2,7 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '~~/server/db';
 import { times } from '~~/server/db/schema';
-import { adminProcedure, protectedProcedure, requirePermission, router } from '../trpc';
+import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
 
 export async function fitsInTime(t: Date) {
   const list = await db.query.times.findMany({
@@ -72,12 +72,12 @@ export const timeRouter = router({
       await db.delete(times).where(eq(times.id, input));
     }),
 
-  currently: protectedProcedure
+  currently: publicProcedure
     .query(async () => {
       return await fitsInTime(new Date());
     }),
 
-  listSafe: protectedProcedure
+  listSafe: publicProcedure
     .query(async () => {
       return await db.query.times.findMany({
         where: eq(times.isActive, true),

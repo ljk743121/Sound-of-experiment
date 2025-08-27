@@ -3,7 +3,7 @@ import { desc, eq, gt } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '~~/server/db';
 import { songs, users } from '~~/server/db/schema';
-import { adminProcedure, protectedProcedure, requirePermission, router } from '../trpc';
+import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
 import { fitsInTime } from './time';
 import { hasBlockWord } from '~~/server/utils/universal';
 import { TMediaSource, TSubmitType } from '~~/types';
@@ -80,22 +80,6 @@ export const songRouter = router({
     .query(async () => {
       return await db.query.songs.findMany({
         orderBy: desc(songs.createdAt),
-        columns: {
-          id: true,
-          name: true,
-          creator: true,
-          songId: true,
-          source: true,
-          imgId: true,
-          duration: true,
-          ownerDisplayName: true,
-          isRealName: true,
-          message: true,
-          msgPublic: true,
-          createdAt: true,
-          state: true,
-          rejectMessage: true,
-        },
       });
     }),
 
@@ -126,7 +110,7 @@ export const songRouter = router({
   listSafe: protectedProcedure
     .query(async () => {
       return await db.query.songs.findMany({
-        where: gt(songs.createdAt, new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)), // One week
+        where: gt(songs.createdAt, new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)), // One month
         orderBy: desc(songs.createdAt),
         columns: {
           id: true,
@@ -139,10 +123,29 @@ export const songRouter = router({
           ownerDisplayName: true,
           isRealName: true,
           state: true,
+          likes: true,
           rejectMessage: true,
           arrangementDate: true,
           createdAt: true,
           msgPublic: true,
+        },
+      });
+    }),
+
+  listGuest: publicProcedure
+    .query(async ({ ctx }) => { 
+      return await db.query.songs.findMany({
+        where: gt(songs.createdAt, new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)),
+        orderBy: desc(songs.createdAt),
+        columns: { 
+          id: true,
+          name: true,
+          creator: true,
+          source: true,
+          imgId: true,
+          state: true,
+          arrangementDate: true,
+          createdAt: true,
         },
       });
     }),
@@ -189,6 +192,53 @@ export const songRouter = router({
         return ctx.user.maxSubmitSongs;
       }
       return ctx.user.remainSubmitSongs;
+    }),
+  
+  vote: protectedProcedure
+    .input(
+      z.number()
+    )
+    .mutation(async ({ input: id, ctx }) => { 
+      const song = await db.query.songs.findFirst({
+        where: eq(songs.id, id),
+      });
+      if (!song) throw new TRPCError({ code: 'NOT_FOUND', message: '歌曲不存在' });
+      if (song.likes.includes(ctx.user.id)) throw new TRPCError({ code: 'BAD_REQUEST', message: '您已点过赞' });
+      await db.update(songs)
+        .set({
+          likes: [...song.likes, ctx.user.id],
+        })
+        .where(eq(songs.id, id));
+    }),
+
+  disvote: protectedProcedure
+    .input(
+      z.number()
+    )
+    .mutation(async ({ input: id, ctx }) => { 
+      const song = await db.query.songs.findFirst({
+        where: eq(songs.id, id),
+      });
+      if (!song) throw new TRPCError({ code: 'NOT_FOUND', message: '歌曲不存在' });
+      if (!song.likes.includes(ctx.user.id)) throw new TRPCError({ code: 'BAD_REQUEST', message: '您没有点赞此歌曲' });
+      await db.update(songs)
+        .set({
+          likes: song.likes.filter(like => like !== ctx.user.id),
+        })
+        .where(eq(songs.id, id));
+    }),
+
+  idToName: protectedProcedure
+    .input(
+      z.array(z.string())
+    )
+    .query(async ({ input }) => { 
+      let list = [];
+      console.log(input)
+      for (const id of input){
+        list.push((await getUserDetailById(id)).name)
+      }
+      return list;
     }),
 
   review: router({

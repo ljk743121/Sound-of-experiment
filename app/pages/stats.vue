@@ -26,16 +26,14 @@
         <div class="flex gap-2 overflow-x-auto">
           <div v-for="(week, i) of weekData" :key="week.date" class="flex flex-col gap-2">
             <div class="relative flex h-[500px] w-8 flex-col justify-end md:h-[600px] md:w-16">
-              <div
-                v-if="week.count"
-                :style="{ height: `${(week.count ?? 0) / weekMax * 100}%` }"
+              <div v-if="week.count" :style="{ height: `${(week.count ?? 0) / weekMax * 100}%` }"
                 class="flex justify-center rounded text-xs text-white"
-                :class="[i % 2 === 0 ? 'bg-green-800' : 'bg-green-700']"
-              >
+                :class="[i % 2 === 0 ? 'bg-green-800 dark:bg-green-700' : 'bg-green-700 dark:bg-green-600']">
                 <span class="py-0.5 font-mono md:py-2">{{ week.count }}</span>
               </div>
             </div>
-            <div class="self-center font-mono text-xs text-muted-foreground [writing-mode:vertical-lr] md:[writing-mode:lr]">
+            <div
+              class="self-center font-mono text-xs text-muted-foreground [writing-mode:vertical-lr] md:[writing-mode:lr]">
               {{ week.date }}
             </div>
           </div>
@@ -49,22 +47,18 @@
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea class="h-[500px]" type="always">
+        <ScrollArea class="h-max-[500px]" type="always">
           <div class="flex flex-col gap-2">
             <div v-for="(singer, i) of singerData" :key="singer.name" class="items-center gap-3 md:flex">
               <div class="truncate text-xs text-muted-foreground md:w-40 md:text-right">
                 {{ singer.name }}
               </div>
               <div class="flex w-full">
-                <div
-                  v-if="singer.count"
-                  :style="{ width: `${(singer.count ?? 0) / singerMax * 100}%` }"
-                  class="flex h-6 items-center rounded text-xs text-white"
-                  :class="[
+                <div v-if="singer.count" :style="{ width: `${(singer.count ?? 0) / singerMax * 100}%` }"
+                  class="flex h-6 items-center rounded text-xs text-white" :class="[
                     (singer.count ?? 0) === 0 && 'rounded-r',
-                    i % 2 === 0 ? 'bg-blue-600' : 'bg-blue-500',
-                  ]"
-                >
+                    i % 2 === 0 ? 'bg-blue-600 dark:bg-blue-500' : 'bg-blue-500 dark:bg-blue-400',
+                  ]">
                   <span class="px-0.5 font-mono md:px-2">{{ singer.count }}</span>
                 </div>
               </div>
@@ -72,35 +66,82 @@
           </div>
         </ScrollArea>
         <div class="mt-4 text-center text-xs text-muted-foreground">
-          * 部分歌曲为更新后提交，不一定能确认歌手
+          * 部分歌曲为更新前提交，不一定能确认歌手
         </div>
+      </CardContent>
+    </div>
+    <div>
+      <CardHeader>
+        <CardTitle>
+          <span class="text-muted-foreground">#3</span> 热门歌曲统计(点赞量)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea class="h-max-[500px]" type="always">
+          <div class="flex flex-col gap-2">
+            <div v-for="(song, i) of likeData" :key="song.name" class="items-center gap-3 md:flex">
+              <div class="flex items-center truncate text-xs text-muted-foreground md:w-40 md:text-right">
+                <Avatar class="size-12 rounded mr-2">
+                  <NuxtImg 
+                    v-if="song.imgId && song.source" 
+                    :src="getImgUrl(song.imgId, song.source)" 
+                    class="object-cover"
+                    :alt="song.name" 
+                    loading="lazy" 
+                  />
+                  <Icon v-else name="lucide:music" size="12" />
+                </Avatar>
+                <span class="truncate">{{ song.name }}</span>
+              </div>
+              <div class="flex w-full">
+                <div v-if="song.count" :style="{ width: `${(song.count ?? 0) / likeMax * 100}%` }"
+                  class="flex h-6 items-center rounded text-xs text-white" :class="[
+                    (song.count ?? 0) === 0 && 'rounded-r',
+                    i % 2 === 0 ? 'bg-blue-600 dark:bg-blue-500' : 'bg-blue-500 dark:bg-blue-400',
+                  ]">
+                  <span class="px-0.5 font-mono md:px-2">{{ song.count }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
       </CardContent>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { getImgUrl } from '~~/constants';
+
 const { $trpc } = useNuxtApp();
-const { data: weekData, suspense: weekDataSuspense } = useQuery({
+const { data: weekData } = useQuery({
   queryFn: () => $trpc.stats.song.query(),
   queryKey: ['stats.song'],
   refetchIntervalInBackground: false,
+  refetchInterval: 60000,
 });
-await weekDataSuspense();
-const weekMax = Math.max(...weekData.value?.map(week => week.count) ?? []);
+const weekMax = computed(() => Math.max(...(weekData.value?.map(week => week.count) ?? [0])));
 
-const { data: singerData, suspense: singerDataSuspense } = useQuery({
+const { data: singerData } = useQuery({
   queryFn: () => $trpc.stats.singer.query(),
   queryKey: ['stats.singer'],
   refetchIntervalInBackground: false,
+  refetchInterval: 60000,
 });
-await singerDataSuspense();
-const singerMax = Math.max(...singerData.value?.map(singer => singer.count) ?? []);
+const singerMax = computed(() => Math.max(...(singerData.value?.map(singer => singer.count) ?? [0])));
 
-const { data: countData, suspense: countDataSuspense } = useQuery({
+const { data: countData } = useQuery({
   queryFn: () => $trpc.stats.count.query(),
   queryKey: ['stats.count'],
   refetchIntervalInBackground: false,
+  refetchInterval: 60000,
 });
-await countDataSuspense();
+
+const { data: likeData } = useQuery({
+  queryFn: () => $trpc.stats.like.query(),
+  queryKey: ['stats.like'],
+  refetchIntervalInBackground: false,
+  refetchInterval: 60000,
+});
+const likeMax = computed(() => Math.max(...(likeData.value?.map(like => like.count) ?? [0])));
 </script>

@@ -37,6 +37,7 @@ export const announcementRouter = router({
         createdAt: true,
         markdown: true,
         creatorName: true,
+        type: true,
       }
     });
   }),

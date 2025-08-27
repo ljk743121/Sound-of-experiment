@@ -33,6 +33,7 @@ export const songs = pgTable('songs', {
   ownerDisplayName: text(),
   arrangementDate: text().references(() => arrangements.date, { onUpdate: 'cascade' }),
   state: text().$type<TSongState>().notNull().default('pending'),
+  likes: json().notNull().$type<string[]>().default([]),
   rejectMessage: text(),
   message: text(),
   msgPublic: text(),
@@ -79,5 +80,6 @@ export const announcement = pgTable('announcement', {
   creatorId: text().notNull(),
   creatorName: text().notNull(),
   visible: text().notNull().default('all'),
+  type: text().notNull().default('notification'),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
