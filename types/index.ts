@@ -12,6 +12,8 @@ export type TPermission =
   'time' | // set opening time
   'blockWords' | // manage block words
   'manageUser' | // manage users (listing, banning, ...)
+  'deleteUser' |
+  'editPermissions' |
   'announcement'| //manage announcement
   'robot'; 
 

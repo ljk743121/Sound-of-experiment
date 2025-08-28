@@ -9,7 +9,9 @@ export const permissionNames: ({ value: TPermission; label: string; icon: string
   { value: 'time', label: '开放时间', icon: 'lucide:clock' },
   { value: 'blockWords', label: '屏蔽词', icon: 'lucide:ban' },
   { value: 'announcement', label: '公告管理', icon: 'lucide:message-square' },
-  { value: 'robot', label: '机器人', icon: 'lucide:computer' }
+  { value: 'robot', label: '机器人', icon: 'lucide:bot' },
+  { value: 'deleteUser', label: '删除用户', icon: 'lucide:user-minus' },
+  { value: 'editPermissions', label: '编辑权限', icon: 'lucide:edit' },
 ];
 
 export const breadCrumb: Record<string, string> = {
@@ -20,6 +22,11 @@ export const breadCrumb: Record<string, string> = {
   time: '开放时间',
   words: '屏蔽词',
   songs: '全部歌曲',
+  announcement: '公告管理',
+  notifications: '通知',
+  general: '通用界面',
+  watchSongs: '查看点歌情况',
+  editPermissions: '编辑权限',
 };
 
 export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;

@@ -79,17 +79,52 @@ export const userRouter = router({
         accessToken,
       };
     }),
+  delete: adminProcedure
+    .input(z.object({
+      id: z.string(),
+      pwd: z.string().trim(),
+    }))
+    .use(requirePermission(['manageUser','deleteUser']))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.id === input.id){
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '无法删除自己' });
+      }
+      if (!(await verifyPassword(ctx.user.password, input.pwd))){
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '密码错误' });
+      }
+      await db.delete(users).where(eq(users.id, input.id));
+  }),
+
   tokenValidity: protectedProcedure
     .query(() => { }), // protectedProcedure will check if user is logged in
 
   adminValidity: adminProcedure
     .query(() => {}),
 
+  
   list: adminProcedure
     .use(requirePermission(['manageUser']))
     .query(async () => {
       return await db.query.users.findMany({
         orderBy: desc(users.createdAt),
+        with: {
+          songs: true,
+        }
+      })
+  }),
+  listSongs: adminProcedure
+    .use(requirePermission(['manageUser']))
+    .query(async () => {
+      return await db.query.users.findMany({
+        orderBy: desc(users.createdAt),
+        columns: {
+          id: true,
+          name: true,
+          displayName: true,
+          maxSubmitSongs: true,
+          remainSubmitSongs: true,
+          createdAt: true,
+        },
         with: {
           songs: {
             columns: {
@@ -98,12 +133,41 @@ export const userRouter = router({
               creator: true,
               ownerDisplayName: true,
               isRealName: true,
+              imgId: true,
+              source: true,
               message: true,
+              rejectMessage: true,
               state: true,
             },
           },
         },
       });
+    }),
+  listPermission: adminProcedure
+    .use(requirePermission(['manageUser','editPermissions']))
+    .query(async () => {
+      return await db.query.users.findMany({
+        orderBy: desc(users.createdAt),
+        columns: {
+          id: true,
+          name: true,
+          displayName: true,
+          permissions: true,
+          createdAt: true,
+        }
+      })
+    }),
+  listUser: adminProcedure
+    .use(requirePermission(['manageUser']))
+    .query(async () => {
+      return await db.query.users.findMany({
+        orderBy: desc(users.createdAt),
+        columns: {
+          id: true,
+          name: true,
+          displayName: true,
+        }
+      })
     }),
 
   editPermission: adminProcedure
@@ -128,6 +192,19 @@ export const userRouter = router({
       await db
         .update(users)
         .set({ maxSubmitSongs: input.maxSongs })
+        .where(eq(users.id, input.id));
+    }),
+  resetRemainSongs: adminProcedure
+    .input(z.object({
+      id: z.string(),
+      maxSongs: z.number().min(0, '输入须大于等于0').max(10, '输入须小于等于10'),
+    })
+    )
+    .use(requirePermission(['manageUser']))
+    .mutation(async ({ input }) => {
+      await db
+        .update(users)
+        .set({ remainSubmitSongs: input.maxSongs })
         .where(eq(users.id, input.id));
     }),
   modifyPassword: protectedProcedure

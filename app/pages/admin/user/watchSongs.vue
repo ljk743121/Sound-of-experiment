@@ -32,11 +32,6 @@
               </TableRow>
             </template>
           </template>
-          <!-- <TableRow v-if="table.getRowModel().rows?.length">
-            <TableCell :colspan="columns.length" class="h-24 text-center">
-              匿名投稿：<AnonymousHistorySheet :songs="anonyHisSheet!" />
-            </TableCell>
-          </TableRow> -->
           <TableRow v-else>
             <TableCell
               :colspan="columns.length"
@@ -90,12 +85,9 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 import ChangeMaxSubmitSongs from '~/components/admin/user/ChangeMaxSubmitSongs.vue';
-import TablePermission from '~/components/admin/user/TablePermission.vue';
-
-// import AnonymousHistorySheet from '~/components/song/AnonymousHistorySheet.vue';
 import HistorySheet from '~/components/song/HistorySheet.vue';
-import Button from '~/components/ui/button/Button.vue';
 import { valueUpdater } from '~/lib/utils';
+import ResetRemainSubmitSongs from '~/components/admin/user/ResetRemainSubmitSongs.vue';
 
 definePageMeta({
   layout: 'admin',
@@ -104,18 +96,12 @@ definePageMeta({
 const { $trpc } = useNuxtApp();
 
 const { data, suspense } = useQuery({
-  queryFn: () => $trpc.user.list.query(),
-  queryKey: ['user.list'],
+  queryFn: () => $trpc.user.listSongs.query(),
+  queryKey: ['user.listSongs'],
 });
 await suspense();
 
-// const { data: anonyHisSheet, suspense: anonyHisSheetSuspense } = useQuery({
-//   queryFn: () => $trpc.song.list.query(),
-//   queryKey: ['song.list'],
-// });
-// await anonyHisSheetSuspense();
-
-type a = RouterOutput['user']['list'][0];
+type a = RouterOutput['user']['listSongs'][0];
 
 const columns: ColumnDef<a>[] = [
   {
@@ -148,20 +134,16 @@ const columns: ColumnDef<a>[] = [
       }),
     ),
   },
-  {
+    {
     accessorKey: 'remainSubmitSongs',
-    header: '当前剩余点歌数',
-    cell: ({ row }) => h('span', { class: 'font-mono' }, row.getValue('remainSubmitSongs')),
-  },
-  {
-    accessorKey: 'permissions',
-    header: '权限',
+    header: '剩余点歌数',
     cell: ({ row }) => h(
       'div',
       { class: 'flex gap-1' },
-      h(TablePermission, {
+      h(ResetRemainSubmitSongs, {
         id: row.original.id,
-        permissions: row.original.permissions,
+        remainSongs: row.original.remainSubmitSongs,
+        maxSongs: row.original.maxSubmitSongs,
       }),
     ),
   },

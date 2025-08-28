@@ -33,7 +33,7 @@
       <div class="grid grid-cols-3 gap-3">
         <HomeRule>
           <Button variant="outline" class="w-full">
-            <Icon name="lucide:circle-help" class="mr-2" />
+            <Icon name="lucide:circle-help" class="mr-1" size="16" />
             <span>
               规则介绍
             </span>
@@ -41,13 +41,13 @@
         </HomeRule>
 
         <Button variant="outline" @click.prevent="navigateTo('/stats')" class="w-full" :disabled="!userStore.loggedIn">
-          <Icon name="lucide:chart-column" class="mr-2" />
+          <Icon name="lucide:chart-column" class="mr-1" size="16" />
           数据统计
         </Button>
 
         <HomeAboutUs>
           <Button variant="outline" class="w-full">
-            <Icon name="lucide:info" class="mr-2" />
+            <Icon name="lucide:info" class="mr-1" size="16" />
             关于我们
           </Button>
         </HomeAboutUs>
@@ -122,8 +122,12 @@
             <TabsTrigger value="list">
               歌曲列表
             </TabsTrigger>
-            <TabsTrigger value="notification" :disabled="!userStore.loggedIn">
+            <TabsTrigger value="notification" :disabled="!userStore.loggedIn" @click="hasNewAnnouncement=false">
               通知
+              <span v-if="hasNewAnnouncement" class="absolute right-2 top-2 flex h-2 w-2">
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
+              </span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -185,6 +189,7 @@ const { $trpc } = useNuxtApp();
 
 const selectedDate = ref(new Date());
 const isDark = computed(() => useColorMode().preference === 'dark');
+const hasNewAnnouncement = ref(false);
 
 const { data: songList, refetch: songListRefetch } = useQuery({
   queryFn: () => $trpc.song.listSafe.query(),
@@ -315,6 +320,7 @@ if (!userStore.loggedIn) {
       const lastLoginTime = new Date(userStore.lastLoginAt).getTime();
       const announcementTime = announcementList.value[0].createdAt.getTime();
       if (lastLoginTime < announcementTime) {
+        hasNewAnnouncement.value = true;
         toast.warning("有新的公告等待查看");
         userStore.lastLoginAt = new Date();
         $trpc.user.updateLoginTime.mutate();

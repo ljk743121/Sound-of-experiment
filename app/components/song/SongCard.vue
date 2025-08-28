@@ -68,7 +68,7 @@
       </UseTemplate>
       <Dialog v-if="isDesktop" v-model:open="isOpen">
         <div class="flex justify-end">
-          <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
+          <Button v-if="(song.songId && song.source && song.songId.length > 0)"
             @click.prevent="$emit('songExport', song)">
             <Icon name="lucide:play" class="mr-1" />
             播放

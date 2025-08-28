@@ -1,17 +1,12 @@
 <template>
-  <div class="overflow-x-auto md:w-[calc(100vw-16rem)]">
+  <div class="overflow-x-auto min-w-max">
     <div class="flex w-max">
-      <div class="sticky left-0 z-50 flex h-[calc(100svh-4rem)] w-min flex-col justify-between border-r bg-sidebar p-4">
+      <div class="flex h-full w-min flex-col justify-between border-r bg-sidebar p-4">
         <div>
           <div class="justify-center text-center text-sm text-muted-foreground">
             排歌选取
           </div>
-          <RangeCalendar
-            v-model="calendarValue"
-            :is-date-unavailable="isDateUnavailable"
-            locale="zh"
-            class="p-0"
-          />
+          <RangeCalendar v-model="calendarValue" :is-date-unavailable="isDateUnavailable" locale="zh" class="p-0" />
           <div v-if="calendarValue.start && calendarValue.end" class="mt-4 flex items-center justify-between">
             <Badge variant="outline">
               {{ calendarValue.start }}
@@ -26,12 +21,7 @@
           <div class="justify-center text-center text-sm text-muted-foreground">
             选择下载CSV数据区段
           </div>
-          <RangeCalendar
-            v-model="copyValue"
-            :is-date-unavailable="isDateAvailable"
-            locale="zh"
-            class="p-0"
-          />
+          <RangeCalendar v-model="copyValue" :is-date-unavailable="isDateAvailable" locale="zh" class="p-0" />
           <div v-if="copyValue.start && copyValue.end" class="mt-4 flex items-center justify-between">
             <Badge variant="outline">
               {{ copyValue.start }}
@@ -62,44 +52,48 @@
             </NumberFieldContent>
           </NumberField>
 
-          <Button
-            :disabled="!canArrange || isPending"
-            class="transition-all" @click="arrange({
+          <Button :disabled="!canArrange || isPending" class="transition-all" @click="arrange({
               start: calendarValue.start!.toString(),
               end: calendarValue.end!.toString(),
               songCount,
-            })"
-          >
+            })">
             <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
             <Icon name="lucide:play" class="mr-2" />
             {{ songCount ? "手动排歌" : "自动排歌" }}
           </Button>
-          <Button
-            class="transition-all" @click="copyAllSongs(arrangementList)"
-          >
+          <Button class="transition-all" @click="copyAllSongs(arrangementList)">
             <Icon name="lucide:clipboard" class="mr-2" />
             下载选定区域全部歌曲CSV数据
           </Button>
         </div>
       </div>
-      <div
-        v-for="day in arrangementList"
-        :key="day.date"
-        class="w-[400px] flex-shrink-0 border-r"
-      >
-        <ScrollArea class="h-[calc(100svh-4rem)]">
-          <div class="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background px-4">
-            <span class="text-sm font-semibold">{{ day.date }}</span>
-            <Button variant="outline" size="sm" @click="copySongInfo(day)">
-              <Icon name="lucide:clipboard" class="mr-1" />
-              下载CSV文件
+      <Carousel class="flex justify-end max-w-screen-md border-r h-svh" @init-api="setApi">
+        <CarouselContent>
+          <CarouselItem v-for="(day, index) in arrangementList" :key="index" class="pl-1 basis-full">
+            <div class="flex h-16 items-center justify-between border-b bg-background px-4">
+              <span class="text-sm font-semibold">{{ day.date }}</span>
+              <Button variant="outline" size="sm" @click="copySongInfo(day)">
+                <Icon name="lucide:clipboard" class="mr-1" />
+                下载CSV文件
+              </Button>
+            </div>
+            <ul class="flex flex-col gap-3 p-4">
+              <li v-for="song in day.songs" :key="song.id">
+                <SongCard :song="song" is-arrangement type="review" />
+              </li>
+            </ul>
+          </CarouselItem>
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext class="z-10" />
+      </Carousel>
+      <div class=" w-[20%]">
+        <ScrollArea class="h-svh"> 
+          <Card class="mb-4" v-for="(day, index) in arrangementList"> 
+            <Button variant="outline" class="w-full" @click="onThumbClick(index)">
+                {{ day.date }}
             </Button>
-          </div>
-          <ul class="flex flex-col gap-3 p-4">
-            <li v-for="song in day.songs" :key="song.id">
-              <SongCard :song is-arrangement type="review"/>
-            </li>
-          </ul>
+          </Card>
         </ScrollArea>
       </div>
     </div>
@@ -111,10 +105,38 @@ import type { DateRange } from 'radix-vue';
 import type { RouterOutput } from '~~/types';
 import { RangeCalendar } from '@/components/ui/range-calendar';
 import { type DateValue, getLocalTimeZone, startOfWeek, today } from '@internationalized/date';
+import type { CarouselApi } from "@/components/ui/carousel"
+import { watchOnce } from "@vueuse/core"
 
 definePageMeta({
   layout: 'admin',
 });
+
+const api = ref<CarouselApi>()
+const totalCount = ref(0)
+const current = ref(0)
+
+function setApi(val: CarouselApi) {
+  api.value = val
+}
+
+function onThumbClick(index: number) {
+  if (!api.value)
+    return
+  api.value.scrollTo(index)
+}
+
+watchOnce(api, (api) => {
+  if (!api)
+    return
+
+  totalCount.value = api.scrollSnapList().length
+  current.value = api.selectedScrollSnap() + 1
+
+  api.on("select", () => {
+    current.value = api.selectedScrollSnap() + 1
+  })
+})
 
 const { $trpc } = useNuxtApp();
 const { data: arrangementList } = useQuery({

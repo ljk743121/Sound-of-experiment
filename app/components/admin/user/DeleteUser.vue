@@ -1,33 +1,31 @@
 <template>
-  <span class="text-muted-foreground mr-2 my-auto">
-    {{ maxSongs }}
-  </span>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="outline" size="xs">
-        <Icon name="lucide:square-pen" />
+      <Button variant="destructive" size="xs">
+        <Icon name="lucide:trash" />
       </Button>
     </DialogTrigger>
 
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>修改每周最大提交次数</DialogTitle>
+        <DialogTitle>删除用户</DialogTitle>
         <DialogDescription>
-          更改用户的每周最大提交次数。
+          确定要删除
+          <span class="font-semibold">{{ name }}</span>
+          用户吗？
         </DialogDescription>
       </DialogHeader>
       <div class="grid w-full max-w-sm items-center gap-1.5">
-        <Label for="maxTimes">最大提交次数</Label>
-        <Input id="maxTimes" v-model="editMaxSongs" type="number" placeholder="Times" min="0" max="10" />
+        <Label for="pwd">输入你的密码</Label>
+        <Input id="pwd" v-model="pwd" type="password" placeholder="密码"/>
       </div>
-
       <DialogFooter>
         <DialogClose as-child>
           <Button type="button" variant="secondary">
             取消
           </Button>
         </DialogClose>
-        <Button :disable="isPending" @click="mutate({ id, maxSongs: editMaxSongs })">
+        <Button variant="destructive" :disable="isPending" @click="mutate({ id, pwd })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
           确认
         </Button>
@@ -37,29 +35,22 @@
 </template>
 
 <script setup lang="ts">
-const { maxSongs } = defineProps<{
+const { id,name } = defineProps<{
   id: string;
-  maxSongs: number;
+  name: string;
 }>();
 
 const { $trpc } = useNuxtApp();
 
 const isOpen = ref(false);
-
-const editMaxSongs = ref(maxSongs);
-
-watch(isOpen, (v) => {
-  if (!v)
-    editMaxSongs.value = maxSongs;
-});
+const pwd = ref('');
 
 const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
-  mutationFn: $trpc.user.editMaxSongs.mutate,
+  mutationFn: $trpc.user.delete.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user.listSongs'] });
-    toast.success('修改成功');
-    editMaxSongs.value = maxSongs;
+    await queryClient.invalidateQueries({ queryKey: ['user.listUser'] });
+    toast.success('删除成功');
     isOpen.value = false;
   },
   onError: err => useErrorHandler(err),

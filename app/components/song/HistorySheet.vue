@@ -26,6 +26,6 @@
 import type { RouterOutput } from '~~/types';
 
 defineProps<{
-  songs: RouterOutput['user']['list'][0]['songs'];
+  songs: RouterOutput['user']['listSongs'][0]['songs'];
 }>();
 </script>

@@ -84,8 +84,9 @@ const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.user.editPermission.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user.list'] });
+    await queryClient.invalidateQueries({ queryKey: ['user.listPermission'] });
     editPermission.value = Array.from(permissions);
+    toast.success('修改成功');
     isOpen.value = false;
   },
   onError: err => useErrorHandler(err),
