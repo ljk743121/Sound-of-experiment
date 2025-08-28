@@ -248,7 +248,6 @@
 <script lang="ts" setup>
 import type { TMediaSource, RouterOutput, TSubmitType } from '~~/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import SongPlayer from '~/components/song/SongPlayer.vue';
 import * as z from 'zod';
 import { getImgUrl } from '~~/constants';
 // import { songFetching } from '~/composables/ClientSearch';
@@ -272,11 +271,14 @@ try {
 try {
   const canSubmit = await $trpc.song.canSubmit.query();
   if (!canSubmit)
+    toast.error('您没有可投稿歌曲次数了');
     navigateTo('/');
   submitDisabled.value = false;
 } catch {
   navigateTo('/');
 }
+
+import SongPlayer from '~/components/song/SongPlayer.vue';
 
 // Reuse `form` section
 const [UseTemplate, GridForm] = createReusableTemplate();
@@ -375,10 +377,10 @@ function onSearch() {
   }
 }
 
-const searchExport = ref({
-  songs: [] as RouterOutput['search']['mixSearch'],
-  isFetching: false,
-})
+// const searchExport = ref({
+//   songs: [] as RouterOutput['search']['mixSearch'],
+//   isFetching: false,
+// })
 
 const queryClient = useQueryClient();
 // const songsList = ref<RouterOutput['search']['mixSearch']>([]);

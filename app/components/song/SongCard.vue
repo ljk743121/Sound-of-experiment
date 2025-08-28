@@ -100,10 +100,9 @@
               <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录查看点赞数" }}</Badge>
             </Button>
           </span>
-          <Button v-if="isMine&&song.state&&song.state!=='used'" variant="destructive" @click.prevent="handleMineDelete" :disabled="deleteMinePending">
-            <Icon name="lucide:trash" class="mr-1" />
-            删除
-          </Button>
+          <template v-if="isMine&&song.state&&song.state!=='used'">
+            <SongDeleteMySong :song="song" />
+          </template>
           <DialogTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
               <Icon name="lucide:info" class="mr-1" />
@@ -154,6 +153,9 @@
               <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录以查看点赞数" }}</Badge>
             </Button>
           </span>
+          <template v-if="isMine&&song.state&&song.state!=='used'">
+            <SongDeleteMySong :song="song" />
+          </template>
           <DrawerTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
               <Icon name="lucide:info" class="mr-1" />
@@ -334,25 +336,10 @@ const { mutate: disvote, isPending: isDisVoting } = useMutation({
   onError: err => useErrorHandler(err),
 })
 
-const { mutate: deleteMineSong, isPending: deleteMinePending } = useMutation({
-  mutationFn: $trpc.song.deleteMine.mutate,
-  onSuccess: () => {
-    toast.success('删除成功');
-    queryClient.invalidateQueries({ queryKey: ['song.listMine'] });
-    queryClient.invalidateQueries({ queryKey: ['song.listSafe'] });
-  },
-  onError: err => useErrorHandler(err),
-})
-
 const handleAvatarClick = (e: Event) => {
   e.stopPropagation();
   if (song.songId && song.source && song.songId.length > 0) {
     emit('songExport', song);
   }
-}
-
-const handleMineDelete = () => {
-  if (!song.id) return;
-  deleteMineSong({ songId: song.id });
 }
 </script>

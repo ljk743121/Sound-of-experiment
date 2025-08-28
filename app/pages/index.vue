@@ -234,6 +234,7 @@ const { data: remainSubmitSongs, refetch: remainSubmitSongsRefetch } = useQuery(
   refetchIntervalInBackground: false,
   refetchInterval: 10000,
   refetchOnMount: false,
+  enabled: userStore.loggedIn,
 });
 
 const { data: arrangementList, refetch: arrangementListRefetch } = useQuery({

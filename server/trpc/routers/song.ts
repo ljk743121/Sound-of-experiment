@@ -76,16 +76,16 @@ export const songRouter = router({
     }),
   deleteMine: protectedProcedure
     .input(z.object({
-      songId: z.number(),
+      id: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
       const song = await db.query.songs.findFirst({
-        where: eq(songs.id, input.songId),
+        where: eq(songs.id, input.id),
       });
       if (!song) throw new TRPCError({ code: 'NOT_FOUND', message: '歌曲不存在' })
       if (song.ownerId !== ctx.user.id) throw new TRPCError({ code: 'BAD_REQUEST', message: '你不能删除他人的歌曲' });
       if (song.state === 'used') throw new TRPCError({ code: 'BAD_REQUEST', message: '该歌曲已被使用' });
-      await db.delete(songs).where(eq(songs.id, input.songId));
+      await db.delete(songs).where(eq(songs.id, input.id));
     }),
   delete: adminProcedure
     .input(z.object({
@@ -200,16 +200,17 @@ export const songRouter = router({
       if (!latestSubmission)
         return ctx.user.remainSubmitSongs;
 
-      // Check if it's a new week
-      if ((getISOWeekNumber(new Date()) - getISOWeekNumber(latestSubmission.createdAt!)) >= 1) {
-        await db
-          .update(users)
-          .set({
-            remainSubmitSongs: (ctx.user!.maxSubmitSongs),
-          })
-          .where(eq(users.id, ctx.user.id));
-        return ctx.user.remainSubmitSongs;
-      }
+      // // Check if it's a new week
+      // if ((getISOWeekNumber(new Date()) - getISOWeekNumber(latestSubmission.createdAt!)) >= 1) {
+      //   await db
+      //     .update(users)
+      //     .set({
+      //       remainSubmitSongs: (ctx.user.maxSubmitSongs),
+      //     })
+      //     .where(eq(users.id, ctx.user.id));
+      //   return ctx.user.maxSubmitSongs;
+      // }
+      
       // Check if user have submitted songs in the last 5 days
       if (Date.now() - latestSubmission.createdAt.getTime() >= 5 * 24 * 60 * 60 * 1000) {
         await db
@@ -218,7 +219,7 @@ export const songRouter = router({
             remainSubmitSongs: ctx.user.maxSubmitSongs,
           })
           .where(eq(users.id, ctx.user.id));
-        return ctx.user.remainSubmitSongs;
+        return ctx.user.maxSubmitSongs;
       }
       return ctx.user.remainSubmitSongs;
     }),
