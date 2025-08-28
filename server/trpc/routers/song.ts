@@ -20,7 +20,7 @@ function getISOWeekNumber(date: Date): number {
   return 1 + Math.ceil((firstThursday - target.getTime()) / (7 * 24 * 60 * 60 * 1000));
 }
 
-async function checkCanSubmit(userId: string, remainSongs: number) {
+async function checkCanSubmit(remainSongs: number) {
   if (!(await fitsInTime(new Date())))
     return false;
   return remainSongs > 0;
@@ -44,7 +44,7 @@ export const songRouter = router({
       msgPublic: z.string().trim().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      if (!(await checkCanSubmit(ctx.user.id, ctx.user.remainSubmitSongs)))
+      if (!(await checkCanSubmit(ctx.user.remainSubmitSongs)))
         throw new TRPCError({ code: 'BAD_REQUEST', message: '您的剩余提交次数为0,请等5天后重置' });
 
       const content = `${input.name} ${input.creator} ${input.message || ''} ${input.msgPublic || ''}`;
@@ -60,17 +60,20 @@ export const songRouter = router({
       } else if (input.submitType === 'anonymous') {
         displayName = '';
       }
+      const now = new Date();
       await db.insert(songs).values({
         ...input,
         songId: input.songId.toString(),
         ownerId: ctx.user.id,
         isRealName,
         ownerDisplayName: displayName,
+        createdAt: now,
       });
       await db
         .update(users)
         .set({
           remainSubmitSongs: (ctx.user.remainSubmitSongs - 1),
+          lastSubmitAt: now,
         })
         .where(eq(users.id, ctx.user.id));
     }),
@@ -185,7 +188,7 @@ export const songRouter = router({
 
   canSubmit: protectedProcedure
     .query(async ({ ctx }) => {
-      return await checkCanSubmit(ctx.user.id, ctx.user.remainSubmitSongs);
+      return await checkCanSubmit(ctx.user.remainSubmitSongs);
     }),
 
   remainSubmitSongs: protectedProcedure
@@ -193,26 +196,21 @@ export const songRouter = router({
       if (ctx.user.remainSubmitSongs===ctx.user.maxSubmitSongs){
         return ctx.user.maxSubmitSongs;
       }
-      const latestSubmission = await db.query.songs.findFirst({
-        where: eq(songs.ownerId, ctx.user.id),
-        orderBy: desc(songs.createdAt),
-      });
-      if (!latestSubmission)
-        return ctx.user.remainSubmitSongs;
 
-      // // Check if it's a new week
-      // if ((getISOWeekNumber(new Date()) - getISOWeekNumber(latestSubmission.createdAt!)) >= 1) {
-      //   await db
-      //     .update(users)
-      //     .set({
-      //       remainSubmitSongs: (ctx.user.maxSubmitSongs),
-      //     })
-      //     .where(eq(users.id, ctx.user.id));
-      //   return ctx.user.maxSubmitSongs;
-      // }
+      // Check if it's a new week
+      if ((getISOWeekNumber(new Date()) - getISOWeekNumber(ctx.user.lastLoginAt)) >= 1) {
+        await db
+          .update(users)
+          .set({
+            remainSubmitSongs: (ctx.user.maxSubmitSongs),
+            lastLoginAt: new Date(),
+          })
+          .where(eq(users.id, ctx.user.id));
+        return ctx.user.maxSubmitSongs;
+      }
       
       // Check if user have submitted songs in the last 5 days
-      if (Date.now() - latestSubmission.createdAt.getTime() >= 5 * 24 * 60 * 60 * 1000) {
+      if (Date.now() - ctx.user.lastSubmitAt.getTime() >= 5 * 24 * 60 * 60 * 1000) {
         await db
           .update(users)
           .set({
@@ -221,6 +219,7 @@ export const songRouter = router({
           .where(eq(users.id, ctx.user.id));
         return ctx.user.maxSubmitSongs;
       }
+
       return ctx.user.remainSubmitSongs;
     }),
   

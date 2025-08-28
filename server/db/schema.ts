@@ -13,6 +13,7 @@ export const users = pgTable('users', {
   maxSubmitSongs: integer().notNull().default(2),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   lastLoginAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  lastSubmitAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
 export const arrangements = pgTable('arrangements', {
