@@ -13,6 +13,7 @@ export const permissionNames: ({ value: TPermission; label: string; icon: string
   { value: 'deleteUser', label: '删除用户', icon: 'lucide:user-minus' },
   { value: 'editPermissions', label: '编辑权限', icon: 'lucide:edit' },
   { value: 'resetPassword', label: '重置密码', icon: 'lucide:key' },
+  { value: 'deleteSong', label: '删除歌曲', icon: 'lucide:trash' },
 ];
 
 export const breadCrumb: Record<string, string> = {
@@ -22,7 +23,7 @@ export const breadCrumb: Record<string, string> = {
   arrange: '排歌列表',
   time: '开放时间',
   words: '屏蔽词',
-  songs: '全部歌曲',
+  songs: '歌曲',
   announcement: '公告管理',
   notifications: '通知',
   general: '通用界面',

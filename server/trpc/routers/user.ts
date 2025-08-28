@@ -99,7 +99,7 @@ export const userRouter = router({
       id: z.string(),
       pwd: z.string().trim(),
     }))
-    .use(requirePermission(['manageUser']))
+    .use(requirePermission(['manageUser','resetPassword']))
     .mutation(async ({ input, ctx }) => {
       if (ctx.user.id === input.id){
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '请在个人资料中修改你的密码' });
@@ -193,7 +193,7 @@ export const userRouter = router({
       id: z.string(),
       permissions: z.custom<TPermission>().array(),
     }))
-    .use(requirePermission(['manageUser']))
+    .use(requirePermission(['manageUser','editPermissions']))
     .mutation(async ({ input }) => {
       await db
         .update(users)

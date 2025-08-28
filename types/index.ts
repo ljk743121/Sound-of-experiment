@@ -16,6 +16,7 @@ export type TPermission =
   'editPermissions' |
   'resetPassword' |
   'announcement'| //manage announcement
+  'deleteSong' |
   'robot'; 
 
 export type TSongState = 'pending' | 'approved' | 'rejected' | 'used' | 'dropped';

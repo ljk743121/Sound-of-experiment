@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { desc, eq, gt } from 'drizzle-orm';
+import { desc, eq, gt, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '~~/server/db';
 import { songs, users } from '~~/server/db/schema';
@@ -74,6 +74,31 @@ export const songRouter = router({
         })
         .where(eq(users.id, ctx.user.id));
     }),
+  deleteMine: protectedProcedure
+    .input(z.object({
+      songId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const song = await db.query.songs.findFirst({
+        where: eq(songs.id, input.songId),
+      });
+      if (!song) throw new TRPCError({ code: 'NOT_FOUND', message: '歌曲不存在' })
+      if (song.ownerId !== ctx.user.id) throw new TRPCError({ code: 'BAD_REQUEST', message: '你不能删除他人的歌曲' });
+      if (song.state === 'used') throw new TRPCError({ code: 'BAD_REQUEST', message: '该歌曲已被使用' });
+      await db.delete(songs).where(eq(songs.id, input.songId));
+    }),
+  delete: adminProcedure
+    .input(z.object({
+      id: z.number(),
+    }))
+    .use(requirePermission(['review','deleteSong']))
+    .mutation(async ({ input, ctx }) => {
+      const song = await db.query.songs.findFirst({
+        where: eq(songs.id, input.id),
+      });
+      if (!song) throw new TRPCError({ code: 'NOT_FOUND', message: '歌曲不存在' })
+      await db.delete(songs).where(eq(songs.id, input.id));
+    }),
 
   list: adminProcedure
     .use(requirePermission(['review']))
@@ -133,7 +158,7 @@ export const songRouter = router({
     }),
 
   listGuest: publicProcedure
-    .query(async ({ ctx }) => { 
+    .query(async () => { 
       return await db.query.songs.findMany({
         where: gt(songs.createdAt, new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)),
         orderBy: desc(songs.createdAt),
@@ -165,6 +190,9 @@ export const songRouter = router({
 
   remainSubmitSongs: protectedProcedure
     .query(async ({ ctx }) => {
+      if (ctx.user.remainSubmitSongs===ctx.user.maxSubmitSongs){
+        return ctx.user.maxSubmitSongs;
+      }
       const latestSubmission = await db.query.songs.findFirst({
         where: eq(songs.ownerId, ctx.user.id),
         orderBy: desc(songs.createdAt),
@@ -180,6 +208,7 @@ export const songRouter = router({
             remainSubmitSongs: (ctx.user!.maxSubmitSongs),
           })
           .where(eq(users.id, ctx.user.id));
+        return ctx.user.remainSubmitSongs;
       }
       // Check if user have submitted songs in the last 5 days
       if (Date.now() - latestSubmission.createdAt.getTime() >= 5 * 24 * 60 * 60 * 1000) {
@@ -189,7 +218,7 @@ export const songRouter = router({
             remainSubmitSongs: ctx.user.maxSubmitSongs,
           })
           .where(eq(users.id, ctx.user.id));
-        return ctx.user.maxSubmitSongs;
+        return ctx.user.remainSubmitSongs;
       }
       return ctx.user.remainSubmitSongs;
     }),

@@ -4,6 +4,7 @@ import type { TPermission } from '~~/types';
 import NavUser from './NavUser.vue';
 import NavMain from './NavMain.vue';
 import TimeSetting from './TimeSetting.vue';
+import { item } from '@unovis/ts/components/bullet-legend/style';
 
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -38,22 +39,29 @@ const data = {
       ],
     },
     {
-      title: "歌曲审核",
-      url: "/admin/review",
+      title: "歌曲管理",
       icon: "lucide:music-4",
-      permissions: ['review'] as TPermission[],
-    },
-    {
-      title: "全部歌曲",
-      url: "/admin/songs",
-      icon: "lucide:list-music",
-      permissions: ['review'] as TPermission[],
-    },
-    {
-      title: "排歌列表",
-      url: "/admin/arrange",
-      icon: "lucide:arrow-down-wide-narrow",
-      permissions: ['arrange'] as TPermission[],
+      isActive: true,
+      items: [
+        {
+          title: "歌曲审核",
+          url: "/admin/songs/review",
+          icon: "lucide:music-4",
+          permissions: ['review'] as TPermission[],
+        },
+        {
+          title: "管理歌曲",
+          icon: "lucide:list-music",
+          url: "/admin/songs",
+          permissions: ['review'] as TPermission[],
+        },
+        {
+          title: "排歌列表",
+          url: "/admin/songs/arrange",
+          icon: "lucide:arrow-down-wide-narrow",
+          permissions: ['arrange'] as TPermission[],
+        },
+      ],
     },
     {
       title: "用户管理",

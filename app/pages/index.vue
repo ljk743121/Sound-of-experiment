@@ -232,9 +232,8 @@ const { data: remainSubmitSongs, refetch: remainSubmitSongsRefetch } = useQuery(
   queryFn: () => $trpc.song.remainSubmitSongs.query(),
   queryKey: ['song.remainSubmitSongs'],
   refetchIntervalInBackground: false,
-  refetchOnWindowFocus: false,
+  refetchInterval: 10000,
   refetchOnMount: false,
-  enabled: false,
 });
 
 const { data: arrangementList, refetch: arrangementListRefetch } = useQuery({

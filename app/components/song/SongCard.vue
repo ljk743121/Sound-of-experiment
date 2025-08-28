@@ -3,10 +3,16 @@
     <!-- class="hover:cursor-pointer" @click="isOpen = true" -->
     <CardHeader>
       <div class="flex flex-row">
-        <Avatar class="size-12 rounded mr-4">
+        <Avatar class="size-12 rounded mr-4 relative overflow-hidden" :class="{ 'cursor-pointer': song.songId && song.source && song.songId.length > 0, 'cursor-not-allowed opacity-50': !(song.songId && song.source && song.songId.length > 0) }" @click.stop="handleAvatarClick">
           <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)" class="object-cover"
             :alt="song.name" loading="lazy" />
           <Icon name="lucide:music" size="24" />
+          <div 
+            v-if="song.songId && song.source && song.songId.length > 0"
+            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+          >
+            <Icon name="lucide:play" size="24" class="text-white" />
+          </div>
         </Avatar>
         <div>
           <CardTitle>
@@ -68,11 +74,6 @@
       </UseTemplate>
       <Dialog v-if="isDesktop" v-model:open="isOpen">
         <div class="flex justify-end">
-          <Button v-if="(song.songId && song.source && song.songId.length > 0)"
-            @click.prevent="$emit('songExport', song)">
-            <Icon name="lucide:play" class="mr-1" />
-            播放
-          </Button>
           <span v-if="song.likes && !isArrangement">
             <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
               :disabled="isDisVoting">
@@ -99,6 +100,10 @@
               <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录查看点赞数" }}</Badge>
             </Button>
           </span>
+          <Button v-if="isMine&&song.state&&song.state!=='used'" variant="destructive" @click.prevent="handleMineDelete" :disabled="deleteMinePending">
+            <Icon name="lucide:trash" class="mr-1" />
+            删除
+          </Button>
           <DialogTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
               <Icon name="lucide:info" class="mr-1" />
@@ -129,11 +134,6 @@
 
       <Drawer v-else v-model:open="isOpen">
         <div class="flex justify-end">
-          <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
-            @click.prevent="$emit('songExport', song)">
-            <Icon name="lucide:play" class="mr-1" />
-            播放
-          </Button>
           <span v-if="song.likes && !isArrangement">
             <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
               :disabled="isDisVoting">
@@ -231,8 +231,9 @@
       <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
         公开留言: {{ song.msgPublic }}
       </p>
-
-      <div v-if="song.state !== 'used' && song.state !== 'dropped'" class="flex gap-1">
+      
+      <div class="flex gap-1">
+        <template v-if="song.state !== 'used' && song.state !== 'dropped'">
         <Button v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="xs"
           @click="approve({ id: song.id })">
           <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -246,6 +247,8 @@
           </Button>
           <Input v-model="rejectMessage" placeholder="拒绝理由" class="h-7 rounded-sm text-xs" />
         </template>
+        </template>
+        <AdminSongDeleteSong v-if="userStore.permissions.includes('deleteSong')" :song="song" />
       </div>
     </CardHeader>
   </Card>
@@ -269,7 +272,7 @@ const {
   isMine?: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'songExport', songInformation: typeof song): void
 }>()
 
@@ -330,4 +333,26 @@ const { mutate: disvote, isPending: isDisVoting } = useMutation({
   },
   onError: err => useErrorHandler(err),
 })
+
+const { mutate: deleteMineSong, isPending: deleteMinePending } = useMutation({
+  mutationFn: $trpc.song.deleteMine.mutate,
+  onSuccess: () => {
+    toast.success('删除成功');
+    queryClient.invalidateQueries({ queryKey: ['song.listMine'] });
+    queryClient.invalidateQueries({ queryKey: ['song.listSafe'] });
+  },
+  onError: err => useErrorHandler(err),
+})
+
+const handleAvatarClick = (e: Event) => {
+  e.stopPropagation();
+  if (song.songId && song.source && song.songId.length > 0) {
+    emit('songExport', song);
+  }
+}
+
+const handleMineDelete = () => {
+  if (!song.id) return;
+  deleteMineSong({ songId: song.id });
+}
 </script>

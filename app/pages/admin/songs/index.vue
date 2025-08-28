@@ -53,6 +53,7 @@ definePageMeta({
 });
 
 const { $trpc } = useNuxtApp();
+
 const { data: songList } = useQuery({
   queryFn: () => $trpc.song.list.query(),
   queryKey: ['song.list'],
