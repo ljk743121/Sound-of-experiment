@@ -12,6 +12,7 @@ export const permissionNames: ({ value: TPermission; label: string; icon: string
   { value: 'robot', label: '机器人', icon: 'lucide:bot' },
   { value: 'deleteUser', label: '删除用户', icon: 'lucide:user-minus' },
   { value: 'editPermissions', label: '编辑权限', icon: 'lucide:edit' },
+  { value: 'resetPassword', label: '重置密码', icon: 'lucide:key' },
 ];
 
 export const breadCrumb: Record<string, string> = {
@@ -28,9 +29,12 @@ export const breadCrumb: Record<string, string> = {
   watchSongs: '查看点歌情况',
   editPermissions: '编辑权限',
   deleteUser: '删除用户',
+  resetPassword: '重置密码',
 };
 
 export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;
+
+export const resetPassword = "Abc123456";
 
 export const searchBaseURL = {
   wySearch: 'https://music.163.com/api/search/get',

@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { pwRegex } from '~~/constants';
+import { pwRegex, resetPassword } from '~~/constants';
 import { db } from '~~/server/db';
 import { users } from '~~/server/db/schema';
 import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
@@ -94,6 +94,24 @@ export const userRouter = router({
       }
       await db.delete(users).where(eq(users.id, input.id));
   }),
+  resetPassword: adminProcedure
+    .input(z.object({
+      id: z.string(),
+      pwd: z.string().trim(),
+    }))
+    .use(requirePermission(['manageUser']))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.id === input.id){
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '请在个人资料中修改你的密码' });
+      }
+      if (!(await verifyPassword(ctx.user.password, input.pwd))){
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '密码错误' });
+      }
+      const hashpwd = await hashPassword(resetPassword);
+      await db.update(users).set({
+        password: hashpwd,
+      }).where(eq(users.id, input.id));
+    }),
 
   tokenValidity: protectedProcedure
     .query(() => { }), // protectedProcedure will check if user is logged in

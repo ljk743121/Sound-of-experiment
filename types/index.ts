@@ -14,6 +14,7 @@ export type TPermission =
   'manageUser' | // manage users (listing, banning, ...)
   'deleteUser' |
   'editPermissions' |
+  'resetPassword' |
   'announcement'| //manage announcement
   'robot'; 
 

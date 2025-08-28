@@ -254,12 +254,16 @@ import { getImgUrl } from '~~/constants';
 // import { songFetching } from '~/composables/ClientSearch';
 
 const { $trpc } = useNuxtApp();
+const userStore = useUserStore();
 
 definePageMeta({
   title: '歌曲投稿',
 });
 const submitDisabled = ref(true);
 
+if (!userStore.loggedIn){
+  navigateTo('/auth/login');
+}
 try {
   await $trpc.user.tokenValidity.query();
 } catch {
@@ -273,8 +277,6 @@ try {
 } catch {
   navigateTo('/');
 }
-
-const userStore = useUserStore();
 
 // Reuse `form` section
 const [UseTemplate, GridForm] = createReusableTemplate();

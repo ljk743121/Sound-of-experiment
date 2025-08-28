@@ -36,6 +36,9 @@ import { breadCrumb } from '~~/constants';
 
 const userStore = useUserStore();
 
+if (!userStore.loggedIn) {
+  navigateTo('/auth/login');
+}
 if (!userStore.permissions.includes('admin')){
   navigateTo('/');
 }

@@ -72,6 +72,12 @@ const data = {
           permissions: ['editPermissions'] as TPermission[],
         },
         {
+          title: "重置密码",
+          url: "/admin/user/resetPassword",
+          icon: "lucide:lock",
+          permissions: ['resetPassword'] as TPermission[],
+        },
+        {
           title: "删除用户",
           url: "/admin/user/deleteUser",
           icon: "lucide:trash",

@@ -59,12 +59,14 @@
 import { permissionNames } from '~~/constants';
 
 const { $trpc } = useNuxtApp();
+const userStore = useUserStore();
 
+if (!userStore.loggedIn){
+  navigateTo('/auth/login');
+}
 try {
   await $trpc.user.tokenValidity.query();
 } catch {
   navigateTo('/auth/login');
 }
-
-const userStore = useUserStore();
 </script>

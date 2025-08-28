@@ -114,6 +114,18 @@
 import { getImgUrl } from '~~/constants';
 
 const { $trpc } = useNuxtApp();
+const userStore = useUserStore();
+
+if (!userStore.loggedIn){
+  navigateTo('/auth/login');
+}
+try {
+  await $trpc.user.tokenValidity.query();
+} catch {
+  navigateTo('/auth/login');
+}
+
+
 const { data: weekData } = useQuery({
   queryFn: () => $trpc.stats.song.query(),
   queryKey: ['stats.song'],
