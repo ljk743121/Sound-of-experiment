@@ -70,19 +70,19 @@
         <div class="flex justify-end">
           <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
             @click.prevent="$emit('songExport', song)">
-            <Icon name="lucide:play" class="mr-2" />
+            <Icon name="lucide:play" class="mr-1" />
             播放
           </Button>
           <span v-if="song.likes && !isArrangement">
             <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
               :disabled="isDisVoting">
-              <Icon name="lucide:heart" class="mr-2 fill-red-500 text-red-500" />
+              <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
               取消点赞
               <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
             </Button>
             <Button v-else variant="outline" @click.prevent="vote(song.id!)"
               :disabled="isVoting || !userStore.loggedIn">
-              <Icon name="lucide:heart" class="mr-2" />
+              <Icon name="lucide:heart" class="mr-1" />
               点赞
               <Badge v-if="song.likes" variant="destructive">{{ song.likes.length || 0 }}</Badge>
             </Button>
@@ -95,13 +95,13 @@
           </span>
           <span v-if="isArrangement">
             <Button variant="outline" disabled>
-              <Icon name="lucide:heart" class="mr-2" />
-              <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录以查看点赞数" }}</Badge>
+              <Icon name="lucide:heart" class="mr-1" />
+              <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录查看点赞数" }}</Badge>
             </Button>
           </span>
           <DialogTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
-              <Icon name="lucide:info" class="mr-2" />
+              <Icon name="lucide:info" class="mr-1" />
               详情
             </Button>
           </DialogTrigger>
@@ -131,32 +131,32 @@
         <div class="flex justify-end">
           <Button :disabled="!(song.songId && song.source && song.songId.length > 0)"
             @click.prevent="$emit('songExport', song)">
-            <Icon name="lucide:play" class="mr-2" />
+            <Icon name="lucide:play" class="mr-1" />
             播放
           </Button>
-          <span v-if="song.likes">
+          <span v-if="song.likes && !isArrangement">
             <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
               :disabled="isDisVoting">
-              <Icon name="lucide:heart" class="mr-2 fill-red-500 text-red-500" />
+              <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
               取消点赞
               <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
             </Button>
             <Button v-else variant="outline" @click.prevent="vote(song.id!)"
               :disabled="isVoting || !userStore.loggedIn">
-              <Icon name="lucide:heart" class="mr-2" />
+              <Icon name="lucide:heart" class="mr-1" />
               点赞
               <Badge v-if="song.likes" variant="destructive">{{ Array.from(song.likes).length || 0 }}</Badge>
             </Button>
           </span>
           <span v-if="isArrangement">
             <Button variant="outline" disabled>
-              <Icon name="lucide:heart" class="mr-2" />
+              <Icon name="lucide:heart" class="mr-1" />
               <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录以查看点赞数" }}</Badge>
             </Button>
           </span>
           <DrawerTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
-              <Icon name="lucide:info" class="mr-2" />
+              <Icon name="lucide:info" class="mr-1" />
               详情
             </Button>
           </DrawerTrigger>

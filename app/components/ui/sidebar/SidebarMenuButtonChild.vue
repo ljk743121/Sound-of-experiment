@@ -1,3 +1,25 @@
+<script setup lang="ts">
+import type { PrimitiveProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { SidebarMenuButtonVariants } from "."
+import { Primitive } from "reka-ui"
+import { cn } from "@/lib/utils"
+import { sidebarMenuButtonVariants } from "."
+
+export interface SidebarMenuButtonProps extends PrimitiveProps {
+  variant?: SidebarMenuButtonVariants["variant"]
+  size?: SidebarMenuButtonVariants["size"]
+  isActive?: boolean
+  class?: HTMLAttributes["class"]
+}
+
+const props = withDefaults(defineProps<SidebarMenuButtonProps>(), {
+  as: "button",
+  variant: "default",
+  size: "default",
+})
+</script>
+
 <template>
   <Primitive
     data-sidebar="menu-button"
@@ -11,23 +33,3 @@
     <slot />
   </Primitive>
 </template>
-
-<script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-import { cn } from '@/lib/utils';
-import { Primitive, type PrimitiveProps } from 'radix-vue';
-import { type SidebarMenuButtonVariants, sidebarMenuButtonVariants } from '.';
-
-export interface SidebarMenuButtonProps extends PrimitiveProps {
-  variant?: SidebarMenuButtonVariants['variant'];
-  size?: SidebarMenuButtonVariants['size'];
-  isActive?: boolean;
-  class?: HTMLAttributes['class'];
-}
-
-const props = withDefaults(defineProps<SidebarMenuButtonProps>(), {
-  as: 'button',
-  variant: 'default',
-  size: 'default',
-});
-</script>
