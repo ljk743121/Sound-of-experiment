@@ -10,11 +10,13 @@ const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: "icon",
 })
 
+const userStore = useUserStore();
+
 const data = {
   user: {
-    id: "2241154",
-    name: "李hadcn",
-    displayName: "Luke",
+    id: userStore.id,
+    name: userStore.name,
+    displayName: userStore.displayName,
   },
   navMain: [
     {

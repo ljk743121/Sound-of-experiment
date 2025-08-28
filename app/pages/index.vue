@@ -57,12 +57,12 @@
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button v-if="userStore.loggedIn" variant="ghost" class="w-full">
-              <Avatar class="rounded-lg">
-                <Icon name="lucide:circle-user" size="20" />
+              <Avatar class="rounded-lg h-8 w-8">
+                {{ userStore.name.slice(0, 1) }}
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ userStore.name }}</span>
-                <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
+                <span class="truncate text-xs" v-if="userStore.displayName"><span class="text-muted-foreground text-sm">昵称：</span>{{ userStore.displayName }}</span>
                 <span class="truncate text-xs">{{ userStore.id }}</span>
               </div>
               <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />

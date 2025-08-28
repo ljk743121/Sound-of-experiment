@@ -34,7 +34,7 @@ function logout() {
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-semibold">{{ user.name }}</span>
-              <span class="truncate text-xs" v-if="user.displayName"><span class="text-muted-foreground"></span>{{ user.displayName }}</span>
+              <span class="truncate text-xs" v-if="user.displayName"><span class="text-muted-foreground text-sm">昵称：</span>{{ user.displayName }}</span>
               <span class="truncate text-xs">{{ user.id }}</span>
             </div>
             <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />

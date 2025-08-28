@@ -27,6 +27,7 @@ export const breadCrumb: Record<string, string> = {
   general: '通用界面',
   watchSongs: '查看点歌情况',
   editPermissions: '编辑权限',
+  deleteUser: '删除用户',
 };
 
 export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;
