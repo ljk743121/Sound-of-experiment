@@ -25,7 +25,8 @@
               <Icon name="lucide:music-4" size="26" class="mr-2" />
               投稿
             </span>
-            <span v-if="userStore.loggedIn" class="text-sm font-normal">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span>
+            <span v-if="userStore.loggedIn" class="text-sm font-normal">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0
+              }})</span>
             <span v-else class="text-sm font-normal">登录以点歌</span>
           </div>
         </Button>
@@ -62,7 +63,7 @@
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ userStore.name }}</span>
-                <span class="truncate text-xs" v-if="userStore.displayName"><span class="text-muted-foreground text-sm">昵称：</span>{{ userStore.displayName }}</span>
+                <span class="truncate text-xs" v-if="userStore.displayName">{{ userStore.displayName }}</span>
                 <span class="truncate text-xs">{{ userStore.id }}</span>
               </div>
               <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
@@ -72,12 +73,12 @@
             :side-offset="4">
             <DropdownMenuLabel class="p-0 font-normal">
               <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar class="rounded-lg">
-                  <Icon name="lucide:circle-user" size="20" />
+                <Avatar class="rounded-lg h-8 w-8">
+                  {{ userStore.name.slice(0, 1) }}
                 </Avatar>
                 <div class="grid flex-1 text-left text-sm leading-tight">
                   <span class="truncate font-semibold">{{ userStore.name }}</span>
-                  <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
+                  <span class="truncate text-xs" v-if="userStore.displayName">{{ userStore.displayName }}</span>
                   <span class="truncate text-xs">{{ userStore.id }}</span>
                 </div>
               </div>
@@ -153,7 +154,8 @@
               <SongCard v-for="song in filteredList" :key="song.id" :song @songExport="playMusic" />
             </TabsContent>
             <TabsContent value="myList">
-              <SongCard v-if="userStore.loggedIn" v-for="song in filteredList" :key="song.id" :song @songExport="playMusic" isMine />
+              <SongCard v-if="userStore.loggedIn" v-for="song in filteredList" :key="song.id" :song
+                @songExport="playMusic" isMine />
             </TabsContent>
           </Tabs>
         </TabsContent>
@@ -170,7 +172,7 @@
           <div v-if="isAnnouncementListPending">
             <Icon name="lucide:loader-2" size="20" class="animate-spin" />
           </div>
-          <HomeAnnouncement v-else :announcement-list="announcementList!"/>
+          <HomeAnnouncement v-else :announcement-list="announcementList!" />
         </TabsContent>
       </Tabs>
     </section>
