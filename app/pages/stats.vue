@@ -47,7 +47,7 @@
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea class="h-max-[500px]" type="always">
+        <ScrollArea class="h-[500px]" type="always">
           <div class="flex flex-col gap-2">
             <div v-for="(singer, i) of singerData" :key="singer.name" class="items-center gap-3 md:flex">
               <div class="truncate text-xs text-muted-foreground md:w-40 md:text-right">
@@ -77,7 +77,7 @@
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea class="h-max-[500px]" type="always">
+        <ScrollArea class="h-[500px]" type="always">
           <div class="flex flex-col gap-2">
             <div v-for="(song, i) of likeData" :key="song.name" class="items-center gap-3 md:flex">
               <div class="flex items-center truncate text-xs text-muted-foreground md:w-40 md:text-right">
