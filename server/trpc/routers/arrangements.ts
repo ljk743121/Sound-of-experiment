@@ -161,7 +161,7 @@ export const arrangementsRouter = router({
         let songCount = input.songCount === 0 ? Math.ceil(totalLength/dayTimes) : input.songCount;
         for (let date = start; date.compare(end) <= 0; date = date.add({ days: 1 })) {
           const dateString = date.toString();
-          await tx.insert(arrangements).values({ date: dateString });
+          if (songIndex+droppedSongIndex<totalLength) await tx.insert(arrangements).values({ date: dateString });
 
           for (let i = 0; i < songCount; i++) {
             if (songIndex < approvedSongs.length) {
@@ -185,13 +185,6 @@ export const arrangementsRouter = router({
 
               droppedSongIndex++;
             }
-          }
-
-          if (songIndex+droppedSongIndex==totalLength){
-            await tx
-              .delete(arrangements)
-              .where(eq(arrangements.date, dateString));
-            break;
           }
 
           if (input.songCount===0){
