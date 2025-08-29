@@ -187,7 +187,7 @@ export const arrangementsRouter = router({
             }
           }
 
-          if (songIndex+droppedSongIndex==0){
+          if (songIndex+droppedSongIndex==totalLength){
             await tx
               .delete(arrangements)
               .where(eq(arrangements.date, dateString));
