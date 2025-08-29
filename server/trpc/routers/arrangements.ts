@@ -244,6 +244,18 @@ export const arrangementsRouter = router({
       date: z.string(),
     }))
     .mutation(async ({ input }) => { 
+      const usedSongs = await db.query.songs.findMany({
+        where: eq(songs.arrangementDate, input.date),
+        columns: {
+          id: true,
+        },
+      });
+      for (const i of usedSongs){
+        await db.update(songs).set({
+          arrangementDate: null,
+          state: 'approved',
+        }).where(eq(songs.id, i.id));
+      }
       await db.delete(arrangements).where(eq(arrangements.date, input.date));
     }),
 });
