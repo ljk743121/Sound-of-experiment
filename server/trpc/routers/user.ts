@@ -7,6 +7,7 @@ import { users } from '~~/server/db/schema';
 import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
 import type { TPermission } from '~~/types';
 import { hasBlockWord } from '~~/server/utils/universal';
+import { hashPassword, verifyPassword } from '~~/server/utils/auth';
 
 export const userRouter = router({
   login: publicProcedure

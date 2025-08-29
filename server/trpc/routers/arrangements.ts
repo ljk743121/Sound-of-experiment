@@ -187,6 +187,13 @@ export const arrangementsRouter = router({
             }
           }
 
+          if (songIndex+droppedSongIndex==0){
+            await tx
+              .delete(arrangements)
+              .where(eq(arrangements.date, dateString));
+            break;
+          }
+
           if (input.songCount===0){
             songCount = (totalLength-songCount) >= 0 ? Math.ceil((totalLength-songCount)/(dayTimes-1)) : 0;
           }
@@ -230,5 +237,13 @@ export const arrangementsRouter = router({
       });
       
       return arrangement;
+    }),
+  delete: adminProcedure
+    .use(requirePermission(['arrange','deleteArrangement']))
+    .input(z.object({
+      date: z.string(),
+    }))
+    .mutation(async ({ input }) => { 
+      await db.delete(arrangements).where(eq(arrangements.date, input.date));
     }),
 });

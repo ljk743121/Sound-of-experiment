@@ -10,7 +10,7 @@ import { TMediaSource, TSubmitType } from '~~/types';
 
 function getISOWeekNumber(date: Date): number {
   const target = new Date(date.valueOf());
-  const dayNr = (date.getDay() + 6) % 7;
+  const dayNr = (target.getDay() + 6) % 7;
   target.setDate(target.getDate() - dayNr + 3);
   const firstThursday = target.getTime();
   target.setMonth(0, 1);

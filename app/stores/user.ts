@@ -9,7 +9,7 @@ export const useUserStore = defineStore('user', () => {
   const displayName = ref('');
   const permissions = ref<TPermission[]>([]);
   const remainSubmitSongs = ref(0);
-  const lastLoginAt = ref(new Date(0));
+  const lastLoginAt = ref((''));
 
   const login = (data: RouterOutput['user']['login']) => {
     loggedIn.value = true;
@@ -18,8 +18,8 @@ export const useUserStore = defineStore('user', () => {
     name.value = data.name ?? '';
     displayName.value = data.displayName ?? '';
     permissions.value = data.permissions ?? [];
-    remainSubmitSongs.value = data.remainSubmitSongs ?? 1;
-    lastLoginAt.value = new Date(data.lastLoginAt);
+    remainSubmitSongs.value = data.remainSubmitSongs ?? 0;
+    lastLoginAt.value = (new Date(data.lastLoginAt)).toISOString();
   };
 
   const logout = () => {
@@ -30,11 +30,7 @@ export const useUserStore = defineStore('user', () => {
     displayName.value = '';
     remainSubmitSongs.value = 0;
     permissions.value = [];
-    lastLoginAt.value = new Date(0);
-  };
-
-  const changeRemainSongs = (num: number) => {
-    remainSubmitSongs.value = num;
+    lastLoginAt.value = (new Date(0)).toISOString();
   };
 
   return {

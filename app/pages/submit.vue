@@ -218,8 +218,8 @@
       <CardDescription>
         投稿前请确认：
         <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+          <li class="text-destructive">已阅读投稿规则和<NuxtLink to="/faq" class="text-blue-600">常见问题</NuxtLink></li>
           <li>检查是否已有相同歌曲</li>
-          <li>确保歌曲信息准确</li>
           <li>选择合适的投稿方式</li>
         </ul>
       </CardDescription>
@@ -270,9 +270,10 @@ try {
 }
 try {
   const canSubmit = await $trpc.song.canSubmit.query();
-  if (!canSubmit)
+  if (!canSubmit){
     toast.error('您没有可投稿歌曲次数了');
     navigateTo('/');
+  }
   submitDisabled.value = false;
 } catch {
   navigateTo('/');

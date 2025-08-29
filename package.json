@@ -22,6 +22,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@adonisjs/hash": "^9.1.1",
     "@formkit/auto-animate": "^0.8.2",
     "@iconify-json/lucide": "^1.2.26",
     "@internationalized/date": "^3.7.0",
@@ -45,7 +46,7 @@
     "@nuxt/image": "^1.11.0",
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/tailwindcss": "^6.12.2",
-    "@pinia/nuxt": "^0.10.0",
+    "@pinia/nuxt": "^0.9.0",
     "@popperjs/core": "^2.11.8",
     "@radix-icons/vue": "^1.0.0",
     "@tailwindcss/typography": "^0.5.15",
@@ -82,7 +83,7 @@
     "nuxt-auth-utils": "0.5.14",
     "nuxt-musicfyplayer": "^2.1.7",
     "pg": "^8.13.1",
-    "pinia": "^3.0.0",
+    "pinia": "^2.3.1",
     "pinia-plugin-persistedstate": "^4.2.0",
     "radix-vue": "^1.9.13",
     "reka-ui": "^2.4.1",
@@ -92,6 +93,7 @@
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "trpc-nuxt": "^0.10.22",
+    "uninstall": "^0.0.0",
     "vaul-vue": "^0.2.1",
     "vee-validate": "^4.15.0",
     "vue": "latest",

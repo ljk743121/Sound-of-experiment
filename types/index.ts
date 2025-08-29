@@ -9,6 +9,7 @@ export type TPermission =
   'admin' | // visit the admin page
   'review' | // review songs
   'arrange' | // arrange songs
+  'deleteArrangement' |
   'time' | // set opening time
   'blockWords' | // manage block words
   'manageUser' | // manage users (listing, banning, ...)

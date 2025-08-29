@@ -324,10 +324,10 @@ if (!userStore.loggedIn) {
       if (lastLoginTime < announcementTime) {
         hasNewAnnouncement.value = true;
         toast.warning("有新的公告等待查看");
-        userStore.lastLoginAt = new Date();
         $trpc.user.updateLoginTime.mutate();
+        userStore.lastLoginAt = (new Date()).toISOString();
       } else {
-        userStore.lastLoginAt = new Date();
+        userStore.lastLoginAt = (new Date()).toISOString();
       };
     }
   }else {

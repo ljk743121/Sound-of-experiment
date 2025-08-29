@@ -89,10 +89,11 @@
       </Carousel>
       <div class=" w-[20%]">
         <ScrollArea class="h-svh"> 
-          <Card class="mb-4" v-for="(day, index) in arrangementList"> 
+          <Card class="mb-4 flex gap-1" v-for="(day, index) in arrangementList"> 
             <Button variant="outline" class="w-full" @click="onThumbClick(index)">
                 {{ day.date }}
             </Button>
+            <AdminSongDeleteArrangemet v-if="userStore.permissions.includes('deleteArrangement')" :date=day.date />
           </Card>
         </ScrollArea>
       </div>
@@ -139,6 +140,8 @@ watchOnce(api, (api) => {
 })
 
 const { $trpc } = useNuxtApp();
+const userStore = useUserStore();
+
 const { data: arrangementList } = useQuery({
   queryFn: () => $trpc.arrangements.list.query(),
   queryKey: ['arrangements.list'],

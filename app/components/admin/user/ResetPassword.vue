@@ -2,7 +2,7 @@
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
       <Button variant="destructive" size="xs">
-        <Icon name="lucide:trash" />
+        <Icon name="lucide:refresh-cw" />
       </Button>
     </DialogTrigger>
 

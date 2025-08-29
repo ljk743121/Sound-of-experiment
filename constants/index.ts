@@ -14,6 +14,7 @@ export const permissionNames: ({ value: TPermission; label: string; icon: string
   { value: 'editPermissions', label: '编辑权限', icon: 'lucide:edit' },
   { value: 'resetPassword', label: '重置密码', icon: 'lucide:key' },
   { value: 'deleteSong', label: '删除歌曲', icon: 'lucide:trash' },
+  { value: 'deleteArrangement', label: '删除排歌', icon: 'lucide:trash' }
 ];
 
 export const breadCrumb: Record<string, string> = {

@@ -4,6 +4,9 @@ import { nanoid } from 'nanoid';
 import { db } from '../db';
 import { users } from '../db/schema';
 import { env } from '../env';
+import { Hash } from "@adonisjs/hash";
+import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
+import { useRuntimeConfig } from '#imports';
 
 const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
 const decode = TextDecoder.prototype.decode.bind(new TextDecoder());
@@ -60,4 +63,20 @@ export async function getUserFromHeader(authorization: string | undefined) {
   if (result.err === 'ERR_JWT_EXPIRED')
     return result.err;
   return result.user;
+}
+
+let _hash: Hash;
+function getHash() {
+  if (!_hash) {
+    const options = useRuntimeConfig().hash?.scrypt;
+    const scrypt = new Scrypt(options);
+    _hash = new Hash(scrypt);
+  }
+  return _hash;
+}
+export async function hashPassword(password: string) {
+  return await getHash().make(password);
+}
+export async function verifyPassword(hashedPassword: string, plainPassword: string) {
+  return await getHash().verify(hashedPassword, plainPassword);
 }
