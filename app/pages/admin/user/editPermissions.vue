@@ -85,7 +85,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 import TablePermission from '~/components/admin/user/TablePermission.vue';
-import { valueUpdater } from '~/lib/utils';
+import { valueUpdater } from '~/lib/table';
 
 definePageMeta({
   layout: 'admin',

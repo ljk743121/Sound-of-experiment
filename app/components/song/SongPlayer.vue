@@ -4,7 +4,7 @@
     <Icon name="lucide:loader-circle" class="animate-spin" size="35" />
   </div>
   <!-- information of success or error -->
-  <div v-else class="flex flex-col gap-4 rounded-lg border p-5 shadow-sm ">
+  <div v-else class="flex flex-col gap-4 rounded-lg border p-5 shadow-xs ">
     <div class="flex items-center gap-3 border-b pb-3">
       <Icon name="lucide:music-4" class="text-primary" size="20" />
       <h3 class="text-xl font-semibold">

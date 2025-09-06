@@ -86,7 +86,7 @@ import {
 } from '@tanstack/vue-table';
 
 import Button from '~/components/ui/button/Button.vue';
-import { valueUpdater } from '~/lib/utils';
+import { valueUpdater } from '~/lib/table';
 
 definePageMeta({
   layout: 'admin',

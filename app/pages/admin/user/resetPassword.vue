@@ -84,7 +84,7 @@ import {
   getSortedRowModel,
   useVueTable,
 } from '@tanstack/vue-table';
-import { valueUpdater } from '~/lib/utils';
+import { valueUpdater } from '~/lib/table';
 import ResetPassword from '~/components/admin/user/ResetPassword.vue';
 
 definePageMeta({

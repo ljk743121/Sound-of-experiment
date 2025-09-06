@@ -86,7 +86,7 @@ import {
 } from '@tanstack/vue-table';
 import ChangeMaxSubmitSongs from '~/components/admin/user/ChangeMaxSubmitSongs.vue';
 import HistorySheet from '~/components/song/HistorySheet.vue';
-import { valueUpdater } from '~/lib/utils';
+import { valueUpdater } from '~/lib/table';
 import ResetRemainSubmitSongs from '~/components/admin/user/ResetRemainSubmitSongs.vue';
 
 definePageMeta({

@@ -67,7 +67,7 @@
           </Button>
         </div>
       </div>
-      <Carousel class="flex justify-end max-w-screen-md border-r h-svh" @init-api="setApi">
+      <Carousel class="flex justify-end max-w-screen border-r h-svh" @init-api="setApi">
         <CarouselContent>
           <CarouselItem v-for="(day, index) in arrangementList" :key="index" class="pl-1 basis-full">
             <div class="flex h-16 items-center justify-between border-b bg-background px-4">
@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DateRange } from 'radix-vue';
+import type { DateRange } from 'reka-ui';
 import type { RouterOutput } from '~~/types';
 import { RangeCalendar } from '@/components/ui/range-calendar';
 import { type DateValue, getLocalTimeZone, startOfWeek, today } from '@internationalized/date';

@@ -38,7 +38,7 @@
               borderless
               :model-value="value" mode="dateTime" color="gray" locale="zh" trim-weeks
               title-position="left"
-              is-required is24hr class="rounded-lg border !bg-background shadow-sm"
+              is-required is24hr class="rounded-lg border bg-background! shadow-xs"
               expanded
               :is-dark="isDark"
               @update:model-value="handleChange"
@@ -55,7 +55,7 @@
               borderless
               :model-value="value" mode="dateTime" color="gray" locale="zh" trim-weeks
               title-position="left"
-              is-required is24hr class="rounded-lg border !bg-background shadow-sm"
+              is-required is24hr class="rounded-lg border bg-background! shadow-xs"
               expanded
               :is-dark="isDark"
               @update:model-value="handleChange"
@@ -74,7 +74,7 @@
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
                 :model-value="value" mode="time" color="gray" locale="zh" hide-time-header
-                is-required is24hr style="border: none !important" class="!bg-background" @update:model-value="handleChange"
+                is-required is24hr style="border: none !important" class="bg-background!" @update:model-value="handleChange"
               />
             </FormControl>
             <FormMessage />
@@ -90,7 +90,7 @@
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
                 :model-value="value" mode="time" color="gray" locale="zh" hide-time-header
-                is-required is24hr style="border: none !important" class="!bg-background"
+                is-required is24hr style="border: none !important" class="bg-background!"
                 @update:model-value="handleChange"
               />
             </FormControl>

@@ -1,5 +1,5 @@
 <template>
-  <div class="container max-w-screen-lg select-none divide-y px-0 md:border-x">
+  <div class="container max-w-full select-none divide-y px-0 md:border-x">
     <div class="flex items-center gap-2 pl-5 font-bold">
       <Button size="icon" variant="outline" @click="navigateTo('/')">
         <Icon name="lucide:chevron-left" />

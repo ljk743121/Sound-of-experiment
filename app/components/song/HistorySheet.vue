@@ -1,7 +1,7 @@
 <template>
   <Sheet>
     <SheetTrigger as-child>
-      <Button variant="outline" size="xs" class="font-mono">
+      <Button variant="outline" size="sm" class="font-mono">
         {{ songs.length }}
       </Button>
     </SheetTrigger>

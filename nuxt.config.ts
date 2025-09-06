@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from '@tailwindcss/vite'
+
 export default defineNuxtConfig({
   app:{
     head:{
@@ -26,17 +28,24 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  css: [
+    '~/assets/css/tailwind.css',
+  ],
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
+  },
+
   modules: [
     '@pinia/nuxt',
     'pinia-plugin-persistedstate/nuxt',
     '@vueuse/nuxt',
     '@nuxt/image',
     '@nuxt/icon',
-    '@nuxtjs/tailwindcss',
     'shadcn-nuxt',
     '@vee-validate/nuxt',
     '@nuxtjs/color-mode',
-    'radix-vue/nuxt',
     'nuxt-musicfyplayer',
   ],
 

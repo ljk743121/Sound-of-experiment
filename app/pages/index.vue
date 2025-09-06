@@ -1,6 +1,6 @@
 <template>
   <main
-    class="mx-auto flex max-w-screen-sm flex-col gap-4 p-5 lg:mx-auto lg:grid lg:h-screen lg:max-w-screen-xl lg:grid-cols-2 lg:gap-8 lg:p-10">
+    class="mx-auto flex max-w-screen flex-col gap-4 p-5 lg:mx-auto lg:grid lg:h-screen lg:max-w-(--breakpoint-xl) lg:grid-cols-2 lg:gap-8 lg:p-10">
     <section class="flex flex-col gap-3 lg:self-center">
       <LogosSoe class="w-full" />
 
@@ -161,7 +161,7 @@
         </TabsContent>
         <TabsContent value="arrangement">
           <DatePicker v-model="selectedDate" mode="date" borderless expanded title-position="left" is-required
-            :attributes="calendarAttr" :is-dark="isDark" class="mb-4 !bg-background" />
+            :attributes="calendarAttr" :is-dark="isDark" class="mb-4 bg-background!" />
           <ul class="flex flex-col gap-3">
             <li v-for="song in arrangementListSongs" :key="song.id">
               <SongCard :song @songExport="playMusic" is-arrangement />

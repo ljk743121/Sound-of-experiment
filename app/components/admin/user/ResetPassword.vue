@@ -1,7 +1,7 @@
 <template>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="destructive" size="xs">
+      <Button variant="destructive" size="sm">
         <Icon name="lucide:refresh-cw" />
       </Button>
     </DialogTrigger>

@@ -1,6 +1,6 @@
 <template>
   <UseTemplate>
-    <form class="mx-auto grid max-w-screen-md grid-cols-1 gap-6 p-4 md:p-6" @submit="onSubmit">
+    <form class="mx-auto grid max-w-(--breakpoint-md) grid-cols-1 gap-6 p-4 md:p-6" @submit="onSubmit">
       <FormField v-slot="{ componentField }" name="name">
         <FormItem>
           <FormLabel>歌曲名: {{ form.values.name }}</FormLabel>
@@ -75,15 +75,15 @@
               <CardContent>
                 <div v-for="songInfo in songsList" :key="songInfo.id" class="w-full">
                   <div
-                    class="mx-auto flex flex-col gap-4 rounded-lg border p-4 shadow-sm transition-colors sm:max-w-md sm:flex-row">
-                    <div class="flex-shrink-0">
+                    class="mx-auto flex flex-col gap-4 rounded-lg border p-4 shadow-xs transition-colors sm:max-w-md sm:flex-row">
+                    <div class="shrink-0">
                       <Avatar class="size-12 rounded">
                         <NuxtImg :src="getImgUrl(songInfo.imgId,songInfo.source)" class="object-cover"
                           :alt="songInfo.name" loading="lazy" />
                         <Icon name="lucide:music" size="24" />
                       </Avatar>
                     </div>
-                    <div class="min-w-0 flex-grow">
+                    <div class="min-w-0 grow">
                       <div class="mb-3 text-start">
                         <CardTitle class="line-clamp-1 text-base font-medium">
                           {{ songInfo.name }}
@@ -205,7 +205,7 @@
   </UseTemplate>
 
   <Card
-    class="mx-auto max-w-screen-md border backdrop-blur-sm">
+    class="mx-auto max-w-screen border backdrop-blur-xs">
     <CardHeader>
       <div class="flex justify-end">
         <Button variant="outline" size="icon" @click.prevent="navigateTo('/')">

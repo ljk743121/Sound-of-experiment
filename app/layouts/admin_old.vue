@@ -104,7 +104,7 @@
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom"
+                  class="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg" side="bottom"
                   :side-offset="4"
                 >
                   <DropdownMenuLabel class="p-0 font-normal">
@@ -136,7 +136,7 @@
     </Sidebar>
     <SidebarInset>
       <header
-        class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+        class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
       >
         <div class="flex w-full items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />

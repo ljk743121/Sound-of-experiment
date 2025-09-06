@@ -28,7 +28,7 @@
             </p>
           </CardDescription>
         </div>
-        <div class="flex-grow" />
+        <div class="grow" />
         <span v-if="song.createdAt" class="text-xs text-muted-foreground">
           {{ useTimeAgo(song.createdAt) }}
         </span>
@@ -187,7 +187,7 @@
     </ClientOnly>
   </Card>
   <div v-else-if="type === 'review'"
-    class="h-auto w-full cursor-pointer rounded-lg border p-4 shadow-sm transition-colors hover:bg-muted"
+    class="h-auto w-full cursor-pointer rounded-lg border p-4 shadow-xs transition-colors hover:bg-muted"
     :class="{ 'bg-muted': selected }">
     <CardTitle>
       {{ song.name }}
@@ -222,7 +222,7 @@
             </p>
           </CardDescription>
         </div>
-        <div class="flex-grow" />
+        <div class="grow" />
         <span v-if="song.createdAt" class="text-xs text-muted-foreground">
           {{ useTimeAgo(song.createdAt) }}
         </span>
@@ -236,13 +236,13 @@
       
       <div class="flex gap-1">
         <template v-if="song.state !== 'used' && song.state !== 'dropped'">
-        <Button v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="xs"
+        <Button v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="sm"
           @click="approve({ id: song.id })">
           <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
           <Icon name="lucide:check" />
         </Button>
         <template v-if="song.state !== 'rejected' && song.id">
-          <Button variant="outline" :disable="rejectPending" size="xs"
+          <Button variant="outline" :disable="rejectPending" size="sm"
             @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })">
             <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
             <Icon name="lucide:x" />

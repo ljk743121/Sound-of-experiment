@@ -3,8 +3,7 @@
     v-if="isCard"
     variant="outline"
     class="block size-full items-center gap-2"
-    :class="`${stateColor.from[state]} from-[-10%] ${stateColor.via[state]} via-30% to-white to-80%`"
-    style="background: linear-gradient(310deg, var(--tw-gradient-stops))"
+    :class="`bg-gradient-to-r ${stateColor.from[state]} from-[-10%] ${stateColor.via[state]} via-30% to-white to-80%`"
   >
     <div class="text-xs text-zinc-950">
       目前投稿状态

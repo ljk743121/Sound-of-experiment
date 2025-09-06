@@ -4,7 +4,7 @@
   </span>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="outline" size="xs">
+      <Button variant="outline" size="sm">
         <Icon name="lucide:refresh-cw" />
       </Button>
     </DialogTrigger>

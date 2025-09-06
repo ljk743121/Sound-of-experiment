@@ -1,7 +1,7 @@
 <template>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="destructive" :disabled="isPending" size="xs">
+      <Button variant="destructive" :disabled="isPending" size="sm">
         <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
         <Icon name="lucide:trash" />
       </Button>
