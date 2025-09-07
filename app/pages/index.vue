@@ -1,7 +1,7 @@
 <template>
   <main
-    class="mx-auto flex max-w-screen flex-col gap-4 p-5 lg:mx-auto lg:grid lg:h-screen lg:max-w-(--breakpoint-xl) lg:grid-cols-2 lg:gap-8 lg:p-10">
-    <section class="flex flex-col gap-3 lg:self-center">
+    class="container mx-auto grid h-screen max-w-screen-xl grid-cols-1 gap-4 p-5 md:grid-cols-2 md:gap-8 md:p-10">
+    <section class="flex flex-col gap-3 md:self-center">
       <LogosSoe class="w-full" />
 
       <div class="grid grid-cols-2 gap-3">
@@ -57,9 +57,11 @@
       <div class="mt-4 flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <Button v-if="userStore.loggedIn" variant="ghost" class="w-full">
-              <Avatar class="rounded-lg h-8 w-8">
-                {{ userStore.name.slice(0, 1) }}
+            <Button v-if="userStore.loggedIn" variant="ghost" class=" w-max">
+              <Avatar>
+                <AvatarFallback>
+                  {{ userStore.name.slice(0, 1) }}
+                </AvatarFallback>
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ userStore.name }}</span>
@@ -73,8 +75,10 @@
             :side-offset="4">
             <DropdownMenuLabel class="p-0 font-normal">
               <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar class="rounded-lg h-8 w-8">
-                  {{ userStore.name.slice(0, 1) }}
+                <Avatar>
+                  <AvatarFallback>
+                    {{ userStore.name.slice(0, 1) }}
+                  </AvatarFallback>
                 </Avatar>
                 <div class="grid flex-1 text-left text-sm leading-tight">
                   <span class="truncate font-semibold">{{ userStore.name }}</span>
@@ -98,8 +102,7 @@
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <ModifyPasswordDialog />
-        <Button v-if="!userStore.loggedIn" variant="outline" class="w-full" @click.prevent="navigateTo('/auth/login')">
+        <Button v-if="!userStore.loggedIn" variant="outline" class="w-max" @click.prevent="navigateTo('/auth/login')">
           <Icon name="lucide:circle-user" size="20" />
           登录
         </Button>
@@ -113,9 +116,9 @@
       </div>
     </section>
 
-    <section class="lg:overflow-auto lg:px-4">
+    <section class="md:overflow-auto md:px-4">
       <Tabs v-model="selectedTab" default-value="arrangement">
-        <div class="sticky top-0 z-50 -mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
+        <div class="-mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
           <TabsList class="grid grid-cols-3">
             <TabsTrigger value="arrangement">
               排歌歌单
@@ -183,7 +186,6 @@
 import type { RouterOutput } from '~~/types';
 import { useFuse, type UseFuseOptions } from '@vueuse/integrations/useFuse';
 import { DatePicker } from '@ztl-uwu/v-calendar';
-import ModifyPasswordDialog from '~/components/profile/ModifyPasswordDialog.vue';
 import SongPlayer from '~/components/song/SongPlayer.vue'
 
 const userStore = useUserStore();

@@ -31,7 +31,7 @@
               </TableCell>
               <TableCell class="text-right">
                 <Switch
-                  :checked="editPermission.includes(permission.value)"
+                  :model-value="editPermission.includes(permission.value)"
                   @click="togglePermission(permission.value)"
                 />
               </TableCell>

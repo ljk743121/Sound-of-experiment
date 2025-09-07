@@ -27,3 +27,13 @@ export type TIdentity = 'student' | 'teacher' | 'admin' | 'host' | 'superadmin' 
 export type TSubmitType = 'realName' | 'anonymous' | 'alias';
 
 export type TMediaSource = 'wy' | 'tx';
+
+export type TMusicFlow = {
+    id: number;
+    audio: string;
+    title: string;
+    artist: string;
+    artwork: string;
+    album: string;
+    original?: Record<string, unknown>;
+};

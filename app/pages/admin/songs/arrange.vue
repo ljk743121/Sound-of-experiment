@@ -67,7 +67,7 @@
           </Button>
         </div>
       </div>
-      <Carousel class="flex justify-end max-w-screen border-r h-svh" @init-api="setApi">
+      <Carousel class="flex justify-end max-w-sm border-r h-svh" @init-api="setApi">
         <CarouselContent>
           <CarouselItem v-for="(day, index) in arrangementList" :key="index" class="pl-1 basis-full">
             <div class="flex h-16 items-center justify-between border-b bg-background px-4">
@@ -87,14 +87,14 @@
         <CarouselPrevious />
         <CarouselNext class="z-10" />
       </Carousel>
-      <div class=" w-[20%]">
+      <div>
         <ScrollArea class="h-svh"> 
-          <Card class="mb-4 flex gap-1" v-for="(day, index) in arrangementList"> 
-            <Button variant="outline" class="w-full" @click="onThumbClick(index)">
+          <div class="mb-4 flex gap-1" v-for="(day, index) in arrangementList"> 
+            <Button variant="outline" class="max-w-min" @click="onThumbClick(index)">
                 {{ day.date }}
             </Button>
-            <AdminSongDeleteArrangemet v-if="userStore.permissions.includes('deleteArrangement')" :date=day.date />
-          </Card>
+            <AdminSongDeleteArrangement v-if="userStore.permissions.includes('deleteArrangement')" :date=day.date />
+          </div>
         </ScrollArea>
       </div>
     </div>

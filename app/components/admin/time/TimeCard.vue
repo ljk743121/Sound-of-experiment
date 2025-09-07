@@ -7,7 +7,7 @@
       <Badge variant="secondary">
         {{ time.name }}
       </Badge>
-      <Switch :checked="time.isActive" @click="mutate({ id: time.id, isActive: !time.isActive })" />
+      <Switch :model-value="time.isActive" @update:model-value="mutate({ id: time.id, isActive: !time.isActive })" />
     </div>
     <div class="mb-6 mt-4 flex flex-row">
       <span class="px-5 pt-2 lg:px-10">

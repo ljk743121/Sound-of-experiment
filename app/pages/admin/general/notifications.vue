@@ -13,8 +13,8 @@
             <Icon name="lucide:loader-2" size="20" class="animate-spin" />
           </div>
         </div>
-        <div v-else-if="announcementList && announcementList.length" v-for="item in announcementList">
-          <<HomeAnnouncement :announcement-list="announcementList!"/>
+        <div v-else-if="announcementList && announcementList.length">
+          <HomeAnnouncement :announcement-list="announcementList!"/>
         </div>
         <div v-else> 
           无公告

@@ -131,6 +131,20 @@
   --sidebar-ring: oklch(0.442 0.017 285.786);
 }
 
+:root, :host {
+  --mw-color-mw-primary-dark: "#030712";
+  --mw-color-mw-primary: "#101828";
+  --mw-color-mw-secondary: "#1e2939";
+  --mw-color-mw-primary-border: "#1e2939";
+  --mw-color-mw-primary-hover: "#8e51ff";
+  --mw-color-mw-primary-active: "#a684ff";
+  --mw-color-mw-primary-typography: "#fafafa";
+  --mw-color-mw-secondary-typography: "#a1a1a1";
+  --scroll-bar-background-light: "#f8fafc";
+  --scroll-bar-background: "#1d293d";
+  --scroll-bar-slider: "#52dcff";
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
