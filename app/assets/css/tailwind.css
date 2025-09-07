@@ -136,13 +136,13 @@
   --mw-color-mw-primary: "#101828";
   --mw-color-mw-secondary: "#1e2939";
   --mw-color-mw-primary-border: "#1e2939";
-  --mw-color-mw-primary-hover: "#8e51ff";
-  --mw-color-mw-primary-active: "#a684ff";
+  --mw-color-mw-primary-hover: "#52aaff";
+  --mw-color-mw-primary-active: "#85aaff";
   --mw-color-mw-primary-typography: "#fafafa";
   --mw-color-mw-secondary-typography: "#a1a1a1";
   --scroll-bar-background-light: "#f8fafc";
   --scroll-bar-background: "#1d293d";
-  --scroll-bar-slider: "#52dcff";
+  --scroll-bar-slider: "#20d9fe";
 }
 
 @layer base {

@@ -57,7 +57,7 @@
       <div class="mt-4 flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <Button v-if="userStore.loggedIn" variant="ghost" class=" w-max">
+            <Button v-if="userStore.loggedIn" variant="ghost" class="min-w-max">
               <Avatar>
                 <AvatarFallback>
                   {{ userStore.name.slice(0, 1) }}
@@ -108,11 +108,6 @@
         </Button>
         <div class="ml-auto flex gap-2" />
         <DarkModeToggle />
-      </div>
-
-      <div class="grid gap-3">
-        <SongPlayer v-if="songPlayingConfig.id.length > 0" :id="songPlayingConfig.id" :name="songPlayingConfig.name"
-          :artists="songPlayingConfig.artists" :source="songPlayingConfig.source" :img-id="songPlayingConfig.imgId" />
       </div>
     </section>
 
@@ -180,13 +175,19 @@
       </Tabs>
     </section>
   </main>
+  <ClientOnly>
+    <MusicFlow
+      :options="{
+        autoplay: false,
+      }"
+    />
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
 import type { RouterOutput } from '~~/types';
 import { useFuse, type UseFuseOptions } from '@vueuse/integrations/useFuse';
 import { DatePicker } from '@ztl-uwu/v-calendar';
-import SongPlayer from '~/components/song/SongPlayer.vue'
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
@@ -387,22 +388,46 @@ const filteredList = computed(() => fuse.value.results.value.map(e => e.item));
 
 const selectedTab = ref<'list' | 'arrangement' | 'notification'>('arrangement');
 
-const songPlayingConfig = ref({
-  id: '',
-  name: '',
+
+import { getImgUrl } from '~~/constants';
+import { MusicFlow, useMusicFlow, type TMusicFlow } from "vue-music-flow";
+const { onPlaySingleTrack, isTrackPlaying } = useMusicFlow();
+
+const playingTrack = ref({
+  id: 0,
+  title: '',
+  artist: '',
+  songId: '',
   source: '',
-  artists: '',
-  imgId: '',
+})
+
+const { data: songUrl, isFetching: UrlFetching, refetch: songFetching } = useQuery({
+  queryFn: () => $trpc.search.mixGetUrl.query({
+    id: playingTrack.value.songId,
+    source: playingTrack.value.source!,
+  }),
+  queryKey: ['search.mixGetUrl'],
+  refetchOnWindowFocus: false,
+  enabled: computed(() => playingTrack.value.songId !== "" ),
 });
-function playMusic(song: Partial<RouterOutput['song']['listSafe'][0]>) {
+
+async function playMusic(song: Partial<RouterOutput['song']['listSafe'][0]>) {
   if (song.songId === null || song.source === null) {
     toast.error('无歌曲数据');
     return;
   }
-  songPlayingConfig.value.id = song.songId!;
-  songPlayingConfig.value.name = song.name!;
-  songPlayingConfig.value.artists = song.creator!;
-  songPlayingConfig.value.source = song.source!;
-  songPlayingConfig.value.imgId = song.imgId || '';
+  playingTrack.value.id = song.id!;
+  playingTrack.value.songId = song.songId!;
+  playingTrack.value.source = song.source!;
+  await songFetching();
+  const songP = {
+    id: song.id!,
+    title: song.name!,
+    artist: song.creator!,
+    artwork: song.imgId ? getImgUrl(song.imgId, song.source!) : '',
+    album: '',
+    audio: songUrl.value?.url || '',
+  };
+  onPlaySingleTrack(songP);
 }
 </script>
