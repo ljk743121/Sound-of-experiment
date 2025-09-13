@@ -55,7 +55,6 @@
 </template>
 
 <script setup lang="ts">
-import { LogosSoe } from '#components';
 import { vAutoAnimate } from '@formkit/auto-animate/vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';

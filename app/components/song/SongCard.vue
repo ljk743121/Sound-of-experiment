@@ -61,7 +61,7 @@
         <span v-if="isArrangement">
           <Button variant="outline" disabled>
             <Icon name="lucide:heart" class="mr-1" />
-            <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录查看点赞数" }}</Badge>
+            <Badge variant="destructive">{{ song.likeCount }}</Badge>
           </Button>
         </span>
         <template v-if="isMine && song.state && song.state !== 'used'">

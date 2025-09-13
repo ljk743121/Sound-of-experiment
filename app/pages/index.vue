@@ -175,7 +175,7 @@
       </Tabs>
       <div class=" h-16"></div>
       <ClientOnly>
-        <MusicFlow :options="{
+        <MusicFlow v-if="userStore.loggedIn" :options="{
           autoplay: true,
         }"
           :fetch-url="fetchUrl"
