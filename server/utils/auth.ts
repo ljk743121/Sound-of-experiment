@@ -7,6 +7,7 @@ import { env } from '../env';
 import { Hash } from "@adonisjs/hash";
 import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
 import { useRuntimeConfig } from '#imports';
+import validateUser from './localUtils/getUserDetail';
 
 const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
 const decode = TextDecoder.prototype.decode.bind(new TextDecoder());
@@ -79,4 +80,8 @@ export async function hashPassword(password: string) {
 }
 export async function verifyPassword(hashedPassword: string, plainPassword: string) {
   return await getHash().verify(hashedPassword, plainPassword);
+}
+
+export async function isRegisterUserValid(id: string, name: string){
+  return validateUser(id,name);
 }

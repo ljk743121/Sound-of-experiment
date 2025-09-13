@@ -7,7 +7,7 @@ import { users } from '~~/server/db/schema';
 import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
 import type { TPermission } from '~~/types';
 import { hasBlockWord } from '~~/server/utils/universal';
-import { hashPassword, verifyPassword } from '~~/server/utils/auth';
+import { hashPassword, isRegisterUserValid, verifyPassword } from '~~/server/utils/auth';
 
 export const userRouter = router({
   login: publicProcedure
@@ -49,6 +49,10 @@ export const userRouter = router({
       });
       // auto register
       if (!user) {
+        const isExist = await isRegisterUserValid(input.id, input.username);
+        if (!isExist){
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: '认证失败，请如实填写信息' });
+        }
         const hashpwd = await hashPassword(input.password);
         user = (
           await db
