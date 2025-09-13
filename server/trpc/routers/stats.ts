@@ -117,14 +117,14 @@ export const statsRouter = router({
           name: true,
           imgId: true,
           source: true,
-          likes: true,
+          likeCount: true,
         },
       });
 
       const map = new Map<string, { count: number, source: string | null, imgId: string | null }>();
       for (const song of songs) {
-        if (!song.likes||!song.likes.length) continue;
-        const likes = song.likes.length ?? 0;
+        if (song.likeCount <= 0) continue;
+        const likes = song.likeCount;
         const existing = map.get(song.name);
         const newCount = (existing?.count ?? 0) + likes;
         map.set(song.name, { 

@@ -152,6 +152,7 @@ export const songRouter = router({
           isRealName: true,
           state: true,
           likes: true,
+          likeCount: true,
           rejectMessage: true,
           arrangementDate: true,
           createdAt: true,
@@ -172,6 +173,7 @@ export const songRouter = router({
           source: true,
           imgId: true,
           state: true,
+          likeCount: true,
           arrangementDate: true,
           createdAt: true,
         },
@@ -236,6 +238,7 @@ export const songRouter = router({
       await db.update(songs)
         .set({
           likes: [...song.likes, ctx.user.id],
+          likeCount: song.likeCount + 1,
         })
         .where(eq(songs.id, id));
     }),
@@ -253,6 +256,7 @@ export const songRouter = router({
       await db.update(songs)
         .set({
           likes: song.likes.filter(like => like !== ctx.user.id),
+          likeCount: song.likeCount - 1,
         })
         .where(eq(songs.id, id));
     }),

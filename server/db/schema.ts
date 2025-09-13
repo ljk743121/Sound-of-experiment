@@ -35,6 +35,7 @@ export const songs = pgTable('songs', {
   arrangementDate: text().references(() => arrangements.date, { onUpdate: 'cascade', onDelete: 'set null' }),
   state: text().$type<TSongState>().notNull().default('pending'),
   likes: json().notNull().$type<string[]>().default([]),
+  likeCount: integer().notNull().default(0),
   rejectMessage: text(),
   message: text(),
   msgPublic: text(),

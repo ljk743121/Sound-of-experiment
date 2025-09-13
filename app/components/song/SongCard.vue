@@ -45,11 +45,11 @@
           <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
             :disabled="isDisVoting">
             <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
-            <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
+            <Badge variant="destructive">{{ song.likeCount }}</Badge>
           </Button>
           <Button v-else variant="outline" @click.prevent="vote(song.id!)" :disabled="isVoting || !userStore.loggedIn">
             <Icon name="lucide:heart" class="mr-1" />
-            <Badge v-if="song.likes" variant="destructive">{{ song.likes.length || 0 }}</Badge>
+            <Badge v-if="song.likes" variant="destructive">{{ song.likeCount }}</Badge>
           </Button>
           <!-- <HomeLikes v-if="song.likes" :idList="song.likes">
             <Button v-if="isMine" variant="ghost" class="text-sm text-muted-foreground" >

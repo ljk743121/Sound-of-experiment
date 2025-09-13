@@ -65,6 +65,7 @@ export const arrangementsRouter = router({
               imgId: true,
               duration: true,
               likes: true,
+              likeCount: true,
               rejectMessage: true,
               msgPublic: true,
               state: true,
@@ -92,6 +93,7 @@ export const arrangementsRouter = router({
               imgId: true,
               source: true,
               state: true,
+              likeCount: true,
               createdAt: true,
             }
           }
