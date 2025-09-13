@@ -3,16 +3,10 @@
     <!-- class="hover:cursor-pointer" @click="isOpen = true" -->
     <CardHeader>
       <div class="flex flex-row">
-        <Avatar class="size-12 rounded mr-4 relative overflow-hidden" :class="{ 'cursor-pointer': song.songId && song.source && song.songId.length > 0, 'cursor-not-allowed opacity-50': !(song.songId && song.source && song.songId.length > 0) }" @click.stop="handleAvatarClick">
+        <Avatar class="size-12 rounded mr-4 relative overflow-hidden">
           <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)" class="object-cover"
             :alt="song.name" loading="lazy" />
           <Icon name="lucide:music" size="24" />
-          <div 
-            v-if="song.songId && song.source && song.songId.length > 0"
-            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-          >
-            <Icon name="lucide:play" size="24" class="text-white" />
-          </div>
         </Avatar>
         <div>
           <CardTitle>
@@ -38,6 +32,43 @@
       </p>
       <SongState v-if="!isArrangement" :song />
     </CardHeader>
+    <ClientOnly>
+      <DialogTemplate>
+        <Button
+            @click.stop="handleAvatarClick"
+            :disabled="!(song.songId && song.source && song.songId.length > 0)"
+            variant="outline" size="icon">
+            <Icon v-if="!isPlaying" name="lucide:play" />
+            <Icon v-else name="lucide:pause" />
+          </Button>
+        <span v-if="song.likes && !isArrangement">
+          <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
+            :disabled="isDisVoting">
+            <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
+            <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
+          </Button>
+          <Button v-else variant="outline" @click.prevent="vote(song.id!)" :disabled="isVoting || !userStore.loggedIn">
+            <Icon name="lucide:heart" class="mr-1" />
+            <Badge v-if="song.likes" variant="destructive">{{ song.likes.length || 0 }}</Badge>
+          </Button>
+          <!-- <HomeLikes v-if="song.likes" :idList="song.likes">
+            <Button v-if="isMine" variant="ghost" class="text-sm text-muted-foreground" >
+              <Icon name="lucide:info" class="mr-2" />
+              点赞详情
+            </Button>
+          </HomeLikes> -->
+        </span>
+        <span v-if="isArrangement">
+          <Button variant="outline" disabled>
+            <Icon name="lucide:heart" class="mr-1" />
+            <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录查看点赞数" }}</Badge>
+          </Button>
+        </span>
+        <template v-if="isMine && song.state && song.state !== 'used'">
+          <SongDeleteMySong :song="song" />
+        </template>
+      </DialogTemplate>
+    </ClientOnly>
 
     <ClientOnly>
       <UseTemplate>
@@ -74,35 +105,7 @@
       </UseTemplate>
       <Dialog v-if="isDesktop" v-model:open="isOpen">
         <div class="flex justify-end">
-          <span v-if="song.likes && !isArrangement">
-            <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
-              :disabled="isDisVoting">
-              <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
-              取消点赞
-              <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
-            </Button>
-            <Button v-else variant="outline" @click.prevent="vote(song.id!)"
-              :disabled="isVoting || !userStore.loggedIn">
-              <Icon name="lucide:heart" class="mr-1" />
-              点赞
-              <Badge v-if="song.likes" variant="destructive">{{ song.likes.length || 0 }}</Badge>
-            </Button>
-            <!-- <HomeLikes v-if="song.likes" :idList="song.likes">
-            <Button v-if="isMine" variant="ghost" class="text-sm text-muted-foreground" >
-              <Icon name="lucide:info" class="mr-2" />
-              点赞详情
-            </Button>
-          </HomeLikes> -->
-          </span>
-          <span v-if="isArrangement">
-            <Button variant="outline" disabled>
-              <Icon name="lucide:heart" class="mr-1" />
-              <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录查看点赞数" }}</Badge>
-            </Button>
-          </span>
-          <template v-if="isMine&&song.state&&song.state!=='used'">
-            <SongDeleteMySong :song="song" />
-          </template>
+          <SongDialog />
           <DialogTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
               <Icon name="lucide:info" class="mr-1" />
@@ -133,29 +136,7 @@
 
       <Drawer v-else v-model:open="isOpen">
         <div class="flex justify-end">
-          <span v-if="song.likes && !isArrangement">
-            <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
-              :disabled="isDisVoting">
-              <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
-              取消点赞
-              <Badge variant="destructive">{{ song.likes.length || 0 }}</Badge>
-            </Button>
-            <Button v-else variant="outline" @click.prevent="vote(song.id!)"
-              :disabled="isVoting || !userStore.loggedIn">
-              <Icon name="lucide:heart" class="mr-1" />
-              点赞
-              <Badge v-if="song.likes" variant="destructive">{{ Array.from(song.likes).length || 0 }}</Badge>
-            </Button>
-          </span>
-          <span v-if="isArrangement">
-            <Button variant="outline" disabled>
-              <Icon name="lucide:heart" class="mr-1" />
-              <Badge variant="destructive">{{ userStore.loggedIn ? (song.likes?.length || 0) : "登录以查看点赞数" }}</Badge>
-            </Button>
-          </span>
-          <template v-if="isMine&&song.state&&song.state!=='used'">
-            <SongDeleteMySong :song="song" />
-          </template>
+          <SongDialog />
           <DrawerTrigger as-child>
             <Button variant="outline" @click.stop="isOpen = true">
               <Icon name="lucide:info" class="mr-1" />
@@ -233,22 +214,22 @@
       <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
         公开留言: {{ song.msgPublic }}
       </p>
-      
+
       <div class="flex gap-1">
         <template v-if="song.state !== 'used' && song.state !== 'dropped'">
-        <Button v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="sm"
-          @click="approve({ id: song.id })">
-          <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
-          <Icon name="lucide:check" />
-        </Button>
-        <template v-if="song.state !== 'rejected' && song.id">
-          <Button variant="outline" :disable="rejectPending" size="sm"
-            @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })">
-            <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
-            <Icon name="lucide:x" />
+          <Button v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="sm"
+            @click="approve({ id: song.id })">
+            <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
+            <Icon name="lucide:check" />
           </Button>
-          <Input v-model="rejectMessage" placeholder="拒绝理由" class="h-7 rounded-sm text-xs" />
-        </template>
+          <template v-if="song.state !== 'rejected' && song.id">
+            <Button variant="outline" :disable="rejectPending" size="sm"
+              @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })">
+              <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
+              <Icon name="lucide:x" />
+            </Button>
+            <Input v-model="rejectMessage" placeholder="拒绝理由" class="h-7 rounded-sm text-xs" />
+          </template>
         </template>
         <AdminSongDeleteSong v-if="userStore.permissions.includes('deleteSong')" :song="song" />
       </div>
@@ -272,6 +253,7 @@ const {
   song: Partial<RouterOutput['song']['listMine'][0]>;
   isArrangement?: boolean;
   isMine?: boolean;
+  isPlaying?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -282,6 +264,7 @@ const isOpen = ref(false);
 
 const isDesktop = useMediaQuery('(min-width: 768px)');
 const [UseTemplate, SongDrawer] = createReusableTemplate();
+const [DialogTemplate, SongDialog] = createReusableTemplate();
 
 const { $trpc } = useNuxtApp();
 const userStore = useUserStore();

@@ -29,7 +29,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   css: [
-    '../node_modules/vue-music-flow/dist/vue-music-flow.css',
+    '@ljk743121/vue-music-flow/dist/vue-music-flow.css',
     '~/assets/css/tailwind.css',
   ],
   vite: {

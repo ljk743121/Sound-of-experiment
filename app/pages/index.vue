@@ -1,6 +1,5 @@
 <template>
-  <main
-    class="container mx-auto grid h-screen max-w-screen-xl grid-cols-1 gap-4 p-5 md:grid-cols-2 md:gap-8 md:p-10">
+  <main class="container mx-auto grid h-screen max-w-screen-xl grid-cols-1 gap-4 p-5 md:grid-cols-2 md:gap-8 md:p-10">
     <section class="flex flex-col gap-3 md:self-center">
       <LogosSoe class="w-full" />
 
@@ -121,7 +120,7 @@
             <TabsTrigger value="list">
               歌曲列表
             </TabsTrigger>
-            <TabsTrigger value="notification" :disabled="!userStore.loggedIn" @click="hasNewAnnouncement=false">
+            <TabsTrigger value="notification" :disabled="!userStore.loggedIn" @click="hasNewAnnouncement = false">
               通知
               <span v-if="hasNewAnnouncement" class="absolute right-2 top-2 flex h-2 w-2">
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
@@ -149,11 +148,12 @@
               </div>
             </div>
             <TabsContent value="songList">
-              <SongCard v-for="song in filteredList" :key="song.id" :song @songExport="playMusic" />
+              <SongCard v-for="song in filteredList" :key="song.id" :song @songExport="playMusic"
+                :isPlaying="isTrackPlaying(song.id)" />
             </TabsContent>
             <TabsContent value="myList">
               <SongCard v-if="userStore.loggedIn" v-for="song in filteredList" :key="song.id" :song
-                @songExport="playMusic" isMine />
+                @songExport="playMusic" isMine :isPlaying="isTrackPlaying(song.id)" />
             </TabsContent>
           </Tabs>
         </TabsContent>
@@ -162,7 +162,7 @@
             :attributes="calendarAttr" :is-dark="isDark" class="mb-4 bg-background!" />
           <ul class="flex flex-col gap-3">
             <li v-for="song in arrangementListSongs" :key="song.id">
-              <SongCard :song @songExport="playMusic" is-arrangement />
+              <SongCard :song @songExport="playMusic" is-arrangement :isPlaying="isTrackPlaying(song.id)" />
             </li>
           </ul>
         </TabsContent>
@@ -173,15 +173,19 @@
           <HomeAnnouncement v-else :announcement-list="announcementList!" />
         </TabsContent>
       </Tabs>
+      <div class=" h-16"></div>
+      <ClientOnly>
+        <MusicFlow :options="{
+          autoplay: true,
+        }"
+          :fetch-url="fetchUrl"
+        >
+        </MusicFlow>
+      </ClientOnly>
     </section>
+    <div class="h-40"></div>
   </main>
-  <ClientOnly>
-    <MusicFlow
-      :options="{
-        autoplay: false,
-      }"
-    />
-  </ClientOnly>
+
 </template>
 
 <script setup lang="ts">
@@ -191,6 +195,7 @@ import { DatePicker } from '@ztl-uwu/v-calendar';
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
+const queryClient = useQueryClient();
 
 const selectedDate = ref(new Date());
 const isDark = computed(() => useColorMode().preference === 'dark');
@@ -272,12 +277,12 @@ function getDateString(date: Date) {
 
 const arrangementListSongs = computed(
   () => {
-    if (userStore.loggedIn){
-      if (arrangementList.value){
+    if (userStore.loggedIn) {
+      if (arrangementList.value) {
         return arrangementList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs || [];
       }
       return [];
-    }else {
+    } else {
       return arrangementGuestList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs || [];
     }
   }
@@ -333,7 +338,7 @@ if (!userStore.loggedIn) {
         userStore.lastLoginAt = (new Date()).toISOString();
       };
     }
-  }else {
+  } else {
     await arrangementGuestListRefetch();
     await songGuestListRefetch();
   }
@@ -366,20 +371,20 @@ const fuseGuestOptions: UseFuseOptions<TGuestLists[0]> = {
 
 const searchPrompt = ref('');
 const fuse = computed(() => {
-  if (!userStore.loggedIn){
+  if (!userStore.loggedIn) {
     return songGuestList.value === undefined
-  ? useFuse<TGuestLists[0]>(searchPrompt, [], fuseGuestOptions)
-  : useFuse<TGuestLists[0]>(searchPrompt, songGuestList, fuseGuestOptions);
+      ? useFuse<TGuestLists[0]>(searchPrompt, [], fuseGuestOptions)
+      : useFuse<TGuestLists[0]>(searchPrompt, songGuestList, fuseGuestOptions);
   }
-  if (listMode.value==='songList'){
+  if (listMode.value === 'songList') {
     return songList.value === undefined
-  ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
-  : useFuse<TLists[0]>(searchPrompt, songList, fuseOptions);
+      ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
+      : useFuse<TLists[0]>(searchPrompt, songList, fuseOptions);
   }
-  if (listMode.value==='myList'){
+  if (listMode.value === 'myList') {
     return mySongList.value === undefined
-  ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
-  : useFuse<TLists[0]>(searchPrompt, mySongList, fuseOptions);
+      ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
+      : useFuse<TLists[0]>(searchPrompt, mySongList, fuseOptions);
   }
   return useFuse<TLists[0]>(searchPrompt, [], fuseOptions);
 })
@@ -390,44 +395,85 @@ const selectedTab = ref<'list' | 'arrangement' | 'notification'>('arrangement');
 
 
 import { getImgUrl } from '~~/constants';
-import { MusicFlow, useMusicFlow, type TMusicFlow } from "vue-music-flow";
-const { onPlaySingleTrack, isTrackPlaying } = useMusicFlow();
+import { MusicFlow, useMusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
+const { onPlayAsPlaylist, isTrackPlaying,  } = useMusicFlow();
 
-const playingTrack = ref({
-  id: 0,
-  title: '',
-  artist: '',
-  songId: '',
-  source: '',
-})
+const tracks = ref<TMusicFlow[]>([]);
+const track = ref<TMusicFlow>();
+const previousList = ref<string>();
+const previousDate = ref(new Date());
 
-const { data: songUrl, isFetching: UrlFetching, refetch: songFetching } = useQuery({
-  queryFn: () => $trpc.search.mixGetUrl.query({
-    id: playingTrack.value.songId,
-    source: playingTrack.value.source!,
-  }),
+const { data: songUrl } = useQuery({
+  queryFn: () => $trpc.search.mixGetUrl.query,
   queryKey: ['search.mixGetUrl'],
   refetchOnWindowFocus: false,
-  enabled: computed(() => playingTrack.value.songId !== "" ),
+  refetchIntervalInBackground: false,
+  enabled: track.value ? true : false,
 });
+
+async function fetchUrl(data: Record<string, unknown>){
+  if (!data) return '';
+  if (!data.songId || !data.source) return '';
+  const song = await queryClient.fetchQuery({
+      queryKey: ['search.mixGetUrl'],
+      queryFn: () => $trpc.search.mixGetUrl.query({
+        id: data.songId! as string,
+        source: data.source! as string,
+      }),
+    });
+  if (song){
+    return song.url;
+  }
+  return '';
+}
 
 async function playMusic(song: Partial<RouterOutput['song']['listSafe'][0]>) {
   if (song.songId === null || song.source === null) {
     toast.error('无歌曲数据');
     return;
   }
-  playingTrack.value.id = song.id!;
-  playingTrack.value.songId = song.songId!;
-  playingTrack.value.source = song.source!;
-  await songFetching();
-  const songP = {
+  const isOutdate = ((selectedTab.value==='list' ? listMode.value : selectedTab.value) !== previousList.value) || (selectedDate.value !== previousDate.value)
+  if (!tracks.value.length || isOutdate) {
+    let TrackList: TLists | undefined = undefined;
+    if (selectedTab.value === 'list') {
+      if (listMode.value === 'songList') {
+        TrackList = songList.value;
+      } else if (listMode.value === 'myList') {
+        TrackList = mySongList.value;
+      }
+    }else if (selectedTab.value === 'arrangement') {
+      if (selectedDate.value !== previousDate.value)
+      TrackList = arrangementListSongs.value as TLists;
+    }
+    previousList.value = selectedTab.value==='list' ? listMode.value : selectedTab.value;
+    if (TrackList) {
+      tracks.value = Array.from(TrackList, (e) => {
+        if (!e.songId || !e.source) return undefined;
+        return {
+          id: e.id!,
+          title: e.name!,
+          artist: e.creator!,
+          artwork: e.imgId ? getImgUrl(e.imgId, e.source!) : '',
+          album: '',
+          data: {
+            songId: e.songId,
+            source: e.source!,
+          }
+        }
+      }).filter((e) => e !== undefined);
+    }
+  }
+  track.value = {
     id: song.id!,
     title: song.name!,
     artist: song.creator!,
     artwork: song.imgId ? getImgUrl(song.imgId, song.source!) : '',
     album: '',
-    audio: songUrl.value?.url || '',
+    data: {
+      songId: song.songId,
+      source: song.source!,
+    }
   };
-  onPlaySingleTrack(songP);
+  onPlayAsPlaylist(tracks.value,track.value)
 }
 </script>

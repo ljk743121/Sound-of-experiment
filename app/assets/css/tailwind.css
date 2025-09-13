@@ -132,17 +132,17 @@
 }
 
 :root, :host {
-  --mw-color-mw-primary-dark: "#030712";
-  --mw-color-mw-primary: "#101828";
-  --mw-color-mw-secondary: "#1e2939";
-  --mw-color-mw-primary-border: "#1e2939";
-  --mw-color-mw-primary-hover: "#52aaff";
-  --mw-color-mw-primary-active: "#85aaff";
-  --mw-color-mw-primary-typography: "#fafafa";
-  --mw-color-mw-secondary-typography: "#a1a1a1";
-  --scroll-bar-background-light: "#f8fafc";
-  --scroll-bar-background: "#1d293d";
-  --scroll-bar-slider: "#20d9fe";
+  --color-mw-primary-dark: oklch(0.1296 0.0274 261.69);
+  --color-mw-primary: oklch(0.2099 0.0341 263.44);
+  --color-mw-secondary: oklch(0.2784 0.0335 257.67);
+  --color-mw-primary-border: oklch(0.2784 0.0335 257.67);
+  --color-mw-primary-hover: oklch(0.7217 0.1504 250);
+  --color-mw-primary-active: oklch(0.7459 0.13 265.48);
+  --color-mw-primary-typography: oklch(0.9851 0 0);
+  --color-mw-secondary-typography: oklch(0.709 0 0);
+  --scroll-bar-background-light: oklch(0.9842 0.0034 247.86);
+  --scroll-bar-background: oklch(0.2784 0.0335 257.67);
+  --scroll-bar-slider: oklch(0.8175 0.1414 216.56);
 }
 
 @layer base {
