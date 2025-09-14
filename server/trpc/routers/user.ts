@@ -12,7 +12,7 @@ import { hashPassword, isRegisterUserValid, verifyPassword } from '~~/server/uti
 export const userRouter = router({
   login: publicProcedure
     .input(z.object({
-      id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
+      id: z.string().min(7,'最少7位数字').regex(/\d+/, '输入必须为数字').trim(),
       password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').trim(),
     }))
     .mutation(async ({ input }) => {
@@ -38,9 +38,9 @@ export const userRouter = router({
     }),
   register: publicProcedure
     .input(z.object({
-      id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
-      username: z.string().min(2, '最少为2个字符').max(7, '最多为7个字符').regex(/[一-龥]+/, '输入必须为汉字').trim(),
-      // displayName: z.string(),
+      id: z.string().min(7,'最少7位数字').regex(/\d+/, '输入必须为数字').trim(),
+      username: z.string().trim().min(2, '最少为2个字符').max(7, '最多为7个字符').regex(/[一-龥]+/, '输入必须为汉字'),
+      displayName: z.string().trim().min(1, '最少为1个字符').max(32, '最多为32个字符').optional(),
       password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(pwRegex, '密码需包括至少1个字母,1个数字').trim(),
     }))
     .mutation(async ({ input }) => {

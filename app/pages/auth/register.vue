@@ -32,6 +32,16 @@
                 <FormMessage />
               </FormItem>
             </FormField>
+            <FormField v-slot="{ componentField }" name="displayName">
+              <FormItem v-auto-animate> 
+                <FormLabel>昵称(可选)</FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="Alias" v-bind="componentField" />
+                </FormControl>
+                <FormDescription class="text-xs"> 投稿歌曲时对外可选的昵称 </FormDescription>
+                <FormMessage />
+              </FormItem>
+            </FormField>
             <FormField v-slot="{ componentField }" name="password">
               <FormItem v-auto-animate>
                 <FormLabel>密码</FormLabel>
@@ -74,7 +84,7 @@ import { pwRegex } from '~~/constants';
 const { $trpc } = useNuxtApp();
 
 useHead({
-  title: 'Voice of SZSY 账号注册',
+  title: '账号注册',
   meta: [
     { name: 'description', content: 'Voice of SZSY 注册页面' },
     { name: 'keywords', content: '点歌,注册,用户注册,广播站系统' },
@@ -94,7 +104,8 @@ try {
 const formSchema = toTypedSchema(
   z.object({
     id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
-    username: z.string().min(2, '最少为2个字符').max(7, '最多为7个字符').regex(/[一-龥]+/, '输入必须为汉字').trim(),
+    username: z.string().trim().min(2, '最少为2个字符').max(7, '最多为7个字符').regex(/[一-龥]+/, '输入必须为汉字'),
+    displayName: z.string().trim().min(1, '最少为1个字符').max(32, '最多为32个字符').optional(),
     password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(pwRegex, '密码需包括至少1个字母,1个数字').trim(),
   }),
 );
