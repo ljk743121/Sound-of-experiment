@@ -180,11 +180,11 @@ export async function getSongUrlWy(id: string) {
   const res = await fetch(`${baseUrl}${id}.mp3`);
   if (!res.ok) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲链接失败" });
-  } else if (res.url === "https://music.163.com/404") {
+  } else if (res.url.replace(/^http:/, "https:") === "https://music.163.com/404") {
     throw new TRPCError({ code: "BAD_REQUEST", message: "歌曲为VIP歌曲" });
   } else {
     return {
-      url: res.url,
+      url: res.url.replace(/^http:/, "https:"),
       pay: false,
     };
   }
@@ -228,7 +228,7 @@ export async function getSongUrlQQ(mid: string) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "歌曲为VIP歌曲" });
 
   return {
-    url: `${serverBaseURL}${resPURL.req_0.data.midurlinfo[0].purl}`,
+    url: `${serverBaseURL}${resPURL.req_0.data.midurlinfo[0].purl}`.replace(/^http:/, "https:"),
     pay: false,
   };
 }
@@ -280,7 +280,7 @@ export async function getSongUrlWyVip(id: string, user: User) {
     id,
   );
   return {
-    url: resSongsUrl.data.url,
+    url: resSongsUrl.data.url.replace(/^http:/, "https:"),
     pay: true,
   };
 }
@@ -333,7 +333,7 @@ export async function getSongUrlQQVip(mid: string, user: User) {
     mid,
   );
   return {
-    url: resSongsUrl.data.url,
+    url: resSongsUrl.data.url.replace(/^http:/, "https:"),
     pay: true,
   };
 }

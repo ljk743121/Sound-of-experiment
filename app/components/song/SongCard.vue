@@ -117,7 +117,7 @@
           </li>
         </ul>
       </UseTemplate>
-      <Dialog v-if="isDesktop" v-model:open="isOpen">
+      <Dialog v-model:open="isOpen">
         <div class="flex justify-end">
           <SongDialog />
           <DialogTrigger as-child>
@@ -153,7 +153,7 @@
         </DialogContent>
       </Dialog>
 
-      <Drawer v-else v-model:open="isOpen">
+      <!-- <Drawer v-else v-model:open="isOpen">
         <div class="flex justify-end">
           <SongDialog />
           <DrawerTrigger as-child>
@@ -188,7 +188,7 @@
           <SongDrawer class="px-4" />
           <DrawerFooter class="pt-2" />
         </DrawerContent>
-      </Drawer>
+      </Drawer> -->
     </ClientOnly>
   </Card>
   <div
@@ -293,7 +293,7 @@ const emit = defineEmits<{
 
 const isOpen = ref(false);
 
-const isDesktop = useMediaQuery("(min-width: 768px)");
+// const isDesktop = useMediaQuery("(min-width: 768px)");
 const [UseTemplate, SongDrawer] = createReusableTemplate();
 const [DialogTemplate, SongDialog] = createReusableTemplate();
 
