@@ -22,7 +22,6 @@
 - Vue 3
 - TRPC
 
-
 主要功能：
 
 - 用户管理
@@ -41,7 +40,6 @@
 
 从 v2.0.1 起，网站可以无需跳转第三方网站即可播放歌曲，本项目的歌曲播放器使用[nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)项目
 
-
 ## 用户界面
 
 <p><img width="100%" src="./public/images/0.png" alt="main ui"></p>
@@ -49,6 +47,7 @@
 <p><img width="100%" src="./public/images/2.png" alt="submit ui"></p>
 
 ## 使用方法
+
 将本项目源代码克隆至本地，或下载release文件后解压，在文件目录内运行
 
 ```bash
@@ -64,20 +63,23 @@ pnpm run dev
 4. `auth:genKey`: 生成公钥和私钥
 
 ## 自定义音乐源：
-Step 1：定义音乐数据解析逻辑  
-在路径 `server/utils/song.ts` 文件中新增你的专属音乐源解析函数：  
 
-#### 📌 数据格式要求  
-返回值必须严格遵守以下类型定义：  
+Step 1：定义音乐数据解析逻辑  
+在路径 `server/utils/song.ts` 文件中新增你的专属音乐源解析函数：
+
+#### 📌 数据格式要求
+
+返回值必须严格遵守以下类型定义：
+
 ```typescript
 interface MusicData {
-  id: string;         //  音乐标识符
-  name: string;       //  曲目名称
-  artists: string;    //  艺术家信息  
-  album?: string;     //  专辑名称（非必填）
-  source: string;     //  源名称
-  imgId: string;      //  封面图标识符（用于获取缩略图）
-  duration: number;   //  时长（单位：s）
+  id: string; //  音乐标识符
+  name: string; //  曲目名称
+  artists: string; //  艺术家信息
+  album?: string; //  专辑名称（非必填）
+  source: string; //  源名称
+  imgId: string; //  封面图标识符（用于获取缩略图）
+  duration: number; //  时长（单位：s）
 }
 ```
 
@@ -90,7 +92,7 @@ Step 2：在搜索接口注入新数据源
 
 ---
 
-*词语约定：本协议中的“本项目”指 Sound of Experiment（Voice of SZSY）项目；“使用者”指签署本协议的使用者；“官方音乐平台”指对本项目内置的包括网易云，QQ等音乐源的官方平台统称；“版权数据”指包括但不限于图像、音频、名字等在内的他人拥有所属版权的数据。*
+_词语约定：本协议中的“本项目”指 Sound of Experiment（Voice of SZSY）项目；“使用者”指签署本协议的使用者；“官方音乐平台”指对本项目内置的包括网易云，QQ等音乐源的官方平台统称；“版权数据”指包括但不限于图像、音频、名字等在内的他人拥有所属版权的数据。_
 
 ### 一、数据来源
 
@@ -129,14 +131,17 @@ Step 2：在搜索接口注入新数据源
 ---
 
 ## 致谢
+
 1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm)
 2. [copws/qq-music-api](https://github.com/copws/qq-music-api)
 3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
 
 ## 贡献者
+
 <a href="https://github.com/ljk743121/Sound-of-experiment/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment" />
 </a>
 
 ## 项目版权
+
 [GPL v3](./LICENSE) &copy; 2025 Sound of Experiment contributors

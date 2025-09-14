@@ -1,0 +1,6 @@
+# Ignore artifacts:
+build
+public
+app/components/ui
+.github
+pnpm-lock.yaml
