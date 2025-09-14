@@ -2,13 +2,7 @@ import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { times } from "~~/server/db/schema";
-import {
-  adminProcedure,
-  protectedProcedure,
-  publicProcedure,
-  requirePermission,
-  router,
-} from "../trpc";
+import { adminProcedure, publicProcedure, requirePermission, router } from "../trpc";
 
 export async function fitsInTime(t: Date) {
   const list = await db.query.times.findMany({
@@ -21,19 +15,21 @@ export async function fitsInTime(t: Date) {
   });
 
   for (const time of list) {
-    if (!time.isActive) continue;
+    if (!time.isActive)
+      continue;
     if (!time.repeats) {
-      if (t < time.startAt || time.endAt < t) continue;
+      if (t < time.startAt || time.endAt < t)
+        continue;
     } else {
       const getDayOfWeek = (date: Date) => {
         return date.getDay() === 0 ? 7 : date.getDay();
       };
       const getTimeNumber = (date: Date) => {
         return (
-          getDayOfWeek(date) * 1000000 +
-          date.getHours() * 10000 +
-          date.getMinutes() * 100 +
-          date.getSeconds()
+          getDayOfWeek(date) * 1000000
+          + date.getHours() * 10000
+          + date.getMinutes() * 100
+          + date.getSeconds()
         );
       };
 
@@ -48,7 +44,8 @@ export async function fitsInTime(t: Date) {
         inRange = currentTime >= startTime || currentTime <= endTime;
       }
 
-      if (!inRange) continue;
+      if (!inRange)
+        continue;
     }
     return true;
   }
@@ -63,7 +60,7 @@ export const timeRouter = router({
         startAt: z.date(),
         endAt: z.date(),
         repeats: z.boolean(),
-      })
+      }),
     )
     .use(requirePermission(["time"]))
     .mutation(async ({ input }) => {
@@ -109,7 +106,7 @@ export const timeRouter = router({
         endAt: z.date(),
         repeats: z.boolean(),
         isActive: z.boolean(),
-      })
+      }),
     )
     .use(requirePermission(["time"]))
     .mutation(async ({ input }) => {
@@ -122,7 +119,7 @@ export const timeRouter = router({
       z.object({
         id: z.number().int(),
         isActive: z.boolean(),
-      })
+      }),
     )
     .use(requirePermission(["time"]))
     .mutation(async ({ input }) => {

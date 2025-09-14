@@ -238,7 +238,7 @@
         投稿前请确认：
         <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
           <li class="text-destructive">
-            已阅读投稿规则和<NuxtLink to="/faq" class="text-blue-600">常见问题</NuxtLink>
+            已阅读投稿规则和<NuxtLink to="/faq" class="text-blue-600"> 常见问题 </NuxtLink>
           </li>
           <li>检查是否已有相同歌曲</li>
           <li>选择合适的投稿方式</li>
@@ -263,10 +263,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { TMediaSource, RouterOutput, TSubmitType } from "~~/types";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import type { RouterOutput, TMediaSource, TSubmitType } from "~~/types";
 import * as z from "zod";
 import { getImgUrl } from "~~/constants";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+import SongPlayer from "~/components/song/SongPlayer.vue";
 // import { songFetching } from '~/composables/ClientSearch';
 
 const { $trpc } = useNuxtApp();
@@ -295,8 +297,6 @@ try {
 } catch {
   navigateTo("/");
 }
-
-import SongPlayer from "~/components/song/SongPlayer.vue";
 
 // Reuse `form` section
 const [UseTemplate, GridForm] = createReusableTemplate();

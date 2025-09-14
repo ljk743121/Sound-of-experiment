@@ -1,10 +1,29 @@
+<template>
+  <Sidebar v-bind="props">
+    <SidebarHeader class="border-b">
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <LogosSoelogo class="h-auto w-full cursor-pointer px-8" @click="navigateTo('/')" />
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarHeader>
+    <SidebarContent>
+      <NavMain :items="data.navMain" />
+      <TimeSetting />
+    </SidebarContent>
+    <SidebarFooter>
+      <NavUser :user="data.user" />
+    </SidebarFooter>
+    <SidebarRail />
+  </Sidebar>
+</template>
+
 <script setup lang="ts">
-import type { SidebarProps } from "@/components/ui/sidebar";
 import type { TPermission } from "~~/types";
-import NavUser from "./NavUser.vue";
+import type { SidebarProps } from "@/components/ui/sidebar";
 import NavMain from "./NavMain.vue";
+import NavUser from "./NavUser.vue";
 import TimeSetting from "./TimeSetting.vue";
-import { item } from "@unovis/ts/components/bullet-legend/style";
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: "icon",
@@ -115,23 +134,3 @@ const data = {
   ],
 };
 </script>
-
-<template>
-  <Sidebar v-bind="props">
-    <SidebarHeader class="border-b">
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <LogosSoelogo class="h-auto w-full cursor-pointer px-8" @click="navigateTo('/')" />
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarHeader>
-    <SidebarContent>
-      <NavMain :items="data.navMain" />
-      <TimeSetting />
-    </SidebarContent>
-    <SidebarFooter>
-      <NavUser :user="data.user" />
-    </SidebarFooter>
-    <SidebarRail />
-  </Sidebar>
-</template>

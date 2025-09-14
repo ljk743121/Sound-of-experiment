@@ -1,9 +1,9 @@
+import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { announcement } from "~~/server/db/schema";
 import { adminProcedure, protectedProcedure, requirePermission, router } from "../trpc";
-import { TRPCError } from "@trpc/server";
 
 export const announcementRouter = router({
   create: adminProcedure
@@ -12,7 +12,7 @@ export const announcementRouter = router({
       z.object({
         markdown: z.string().min(1),
         visible: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       await db.insert(announcement).values({
@@ -62,14 +62,16 @@ export const announcementRouter = router({
       z.object({
         id: z.number(),
         markdown: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const updateList = await db.query.announcement.findFirst({
         where: eq(announcement.id, input.id),
       });
-      if (!updateList) throw new TRPCError({ code: "NOT_FOUND" });
-      if (ctx.user.id !== updateList.creatorId) throw new TRPCError({ code: "FORBIDDEN" });
+      if (!updateList)
+        throw new TRPCError({ code: "NOT_FOUND" });
+      if (ctx.user.id !== updateList.creatorId)
+        throw new TRPCError({ code: "FORBIDDEN" });
       await db
         .update(announcement)
         .set({

@@ -12,7 +12,7 @@
               <MdEditor
                 v-model="newAnnouncement"
                 language="zh-CN"
-                noUploadImg
+                no-upload-img
                 :toolbars="toolbars"
                 :read-only="isPending || isPostPending"
               />
@@ -36,7 +36,7 @@
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <Button @click="postAnnouncement" :disabled="isPostPending">
+              <Button :disabled="isPostPending" @click="postAnnouncement">
                 <Icon v-if="isPostPending" name="lucide:loader-2" size="20" class="animate-spin" />
                 发布
               </Button>
@@ -49,13 +49,13 @@
               <MdEditor
                 v-model="isEditing.markdown"
                 language="zh-CN"
-                noUploadImg
+                no-upload-img
                 :toolbars="toolbars"
-                previewTheme="github"
-                noImgZoomIn
+                preview-theme="github"
+                no-img-zoom-in
               />
-              <Button @click="updateAnnouncement" :disabled="isUpdatePending">确认修改</Button>
-              <Button @click="cancelEdit">取消修改</Button>
+              <Button :disabled="isUpdatePending" @click="updateAnnouncement"> 确认修改 </Button>
+              <Button @click="cancelEdit"> 取消修改 </Button>
             </div>
           </div>
           <div class="overflow-x-auto">
@@ -101,7 +101,7 @@
                         <div
                           class="prose-xl prose-blue prose-pre:bg-zinc-300 prose-pre:text-gray-800 m-1 p-3 text-sm"
                           v-html="$mdRenderer.render(item.markdown)"
-                        ></div>
+                        />
                       </DialogScrollContent>
                     </Dialog>
                   </TableCell>
@@ -135,8 +135,8 @@
                           <AlertDialogFooter>
                             <AlertDialogCancel>取消</AlertDialogCancel>
                             <AlertDialogAction
-                              @click="removePost(item.id)"
                               :disabled="isRemovePending"
+                              @click="removePost(item.id)"
                             >
                               <Icon
                                 v-if="isRemovePending"
@@ -167,7 +167,6 @@ import "md-editor-v3/lib/style.css";
 
 const { $trpc } = useNuxtApp();
 const { $mdRenderer } = useNuxtApp();
-const userStore = useUserStore();
 const queryClient = useQueryClient();
 
 definePageMeta({
@@ -212,7 +211,7 @@ const toolbars: ToolbarNames[] = [
 const newAnnouncement = ref("# 这是标题\n这是内容");
 const newAnnouncementVisibility = ref("");
 
-const formatDate = (date: Date): string => {
+function formatDate(date: Date): string {
   return new Date(date).toLocaleDateString("zh-CN", {
     year: "numeric",
     month: "2-digit",
@@ -221,7 +220,7 @@ const formatDate = (date: Date): string => {
     minute: "2-digit",
     second: "2-digit",
   });
-};
+}
 
 const { data: announcementList, isPending } = useQuery({
   queryFn: () => $trpc.announcement.list.query(),
@@ -240,7 +239,7 @@ const { mutate: post, isPending: isPostPending } = useMutation({
   onError: (err) => useErrorHandler(err),
 });
 
-const postAnnouncement = async () => {
+async function postAnnouncement() {
   if (!newAnnouncement.value) {
     toast.error("请填写内容");
     return;
@@ -253,7 +252,7 @@ const postAnnouncement = async () => {
     markdown: newAnnouncement.value,
     visible: newAnnouncementVisibility.value,
   });
-};
+}
 
 const { mutate: remove, isPending: isRemovePending } = useMutation({
   mutationFn: $trpc.announcement.remove.mutate,
@@ -264,9 +263,9 @@ const { mutate: remove, isPending: isRemovePending } = useMutation({
   onError: (err) => useErrorHandler(err),
 });
 
-const removePost = (id: number) => {
+function removePost(id: number) {
   remove(id);
-};
+}
 
 const isEditing = ref({
   status: false,
@@ -277,12 +276,12 @@ const isEditing = ref({
   updateAt: "",
 });
 
-const cancelEdit = () => {
+function cancelEdit() {
   isEditing.value.id = -1;
   isEditing.value.markdown = "";
   isEditing.value.status = false;
   newAnnouncementVisibility.value = "";
-};
+}
 
 const { mutate: update, isPending: isUpdatePending } = useMutation({
   mutationFn: $trpc.announcement.update.mutate,
@@ -294,17 +293,17 @@ const { mutate: update, isPending: isUpdatePending } = useMutation({
   onError: (err) => useErrorHandler(err),
 });
 
-const editAnnouncement = () => {
-  if (isEditing.value.id !== -1 && isEditing.value.markdown !== "") {
-    if (isEditing.value.creatorId !== userStore.id) {
-      toast.error("你没有权限编辑此公告");
-      return;
-    }
-    isEditing.value.status = true;
-  }
-};
+// function editAnnouncement() {
+//   if (isEditing.value.id !== -1 && isEditing.value.markdown !== "") {
+//     if (isEditing.value.creatorId !== userStore.id) {
+//       toast.error("你没有权限编辑此公告");
+//       return;
+//     }
+//     isEditing.value.status = true;
+//   }
+// }
 
-const updateAnnouncement = async () => {
+async function updateAnnouncement() {
   if (!isEditing.value.markdown) {
     toast.error("请填写内容");
     return;
@@ -313,5 +312,5 @@ const updateAnnouncement = async () => {
     id: isEditing.value.id,
     markdown: isEditing.value.markdown,
   });
-};
+}
 </script>

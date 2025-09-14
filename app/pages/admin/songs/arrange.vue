@@ -117,7 +117,7 @@
       </Carousel>
       <div>
         <ScrollArea class="h-svh">
-          <div class="mb-4 flex gap-1" v-for="(day, index) in arrangementList">
+          <div v-for="(day, index) in arrangementList" :key="index" class="mb-4 flex gap-1">
             <Button variant="outline" class="max-w-min" @click="onThumbClick(index)">
               {{ day.date }}
             </Button>
@@ -135,10 +135,10 @@
 <script setup lang="ts">
 import type { DateRange } from "reka-ui";
 import type { RouterOutput } from "~~/types";
-import { RangeCalendar } from "@/components/ui/range-calendar";
-import { type DateValue, getLocalTimeZone, startOfWeek, today } from "@internationalized/date";
 import type { CarouselApi } from "@/components/ui/carousel";
+import { type DateValue, getLocalTimeZone, startOfWeek, today } from "@internationalized/date";
 import { watchOnce } from "@vueuse/core";
+import { RangeCalendar } from "@/components/ui/range-calendar";
 
 definePageMeta({
   layout: "admin",

@@ -21,11 +21,11 @@
     </Card>
   </div>
 </template>
+
 <script setup lang="ts">
 definePageMeta({
   layout: "admin",
 });
-const userStore = useUserStore();
 
 const { $trpc } = useNuxtApp();
 

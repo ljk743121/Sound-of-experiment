@@ -83,8 +83,8 @@ import {
   getSortedRowModel,
   useVueTable,
 } from "@tanstack/vue-table";
-import { valueUpdater } from "~/lib/table";
 import DeleteUser from "~/components/admin/user/DeleteUser.vue";
+import { valueUpdater } from "~/lib/table";
 
 definePageMeta({
   layout: "admin",

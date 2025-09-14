@@ -24,7 +24,8 @@ const t = initTRPC.context<Context>().create({
 });
 
 export const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED", message: "用户未登录" });
+  if (!ctx.user)
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "用户未登录" });
   else if (ctx.user === "ERR_JWT_EXPIRED")
     throw new TRPCError({ code: "UNAUTHORIZED", message: "登录已过期" });
 
@@ -66,7 +67,8 @@ export const loggedProcedure = t.procedure.use(async (opts) => {
   try {
     const user = opts.ctx.user === "ERR_JWT_EXPIRED" ? undefined : opts.ctx.user;
     let input = JSON.stringify(opts.rawInput);
-    if (input?.includes("password") || input?.includes("Password")) input = "***";
+    if (input?.includes("password") || input?.includes("Password"))
+      input = "***";
 
     consola.log(
       start.toLocaleString("zh-CN"),
@@ -79,7 +81,7 @@ export const loggedProcedure = t.procedure.use(async (opts) => {
       input,
       "|",
       user?.permissions,
-      user?.id
+      user?.id,
     );
 
     if (!result.ok && result.error.code === "INTERNAL_SERVER_ERROR") {

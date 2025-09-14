@@ -24,7 +24,7 @@ export default defineNuxtConfig({
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-title", content: "Voice of SZSY" },
         { name: "author", content: "Ljk743121 and contributors" },
-        { "http-equiv": "X-UA-Compatible", content: "IE=edge" },
+        { "http-equiv": "X-UA-Compatible", "content": "IE=edge" },
       ],
       link: [
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
@@ -116,9 +116,9 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    //private
+    // private
     public: {
-      //public
+      // public
     },
   },
 

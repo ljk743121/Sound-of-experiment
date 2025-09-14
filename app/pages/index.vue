@@ -187,15 +187,16 @@
               />
             </TabsContent>
             <TabsContent value="myList">
-              <SongCard
-                v-for="song in filteredList"
-                v-if="userStore.loggedIn"
-                :key="song.id"
-                :song
-                is-mine
-                :is-playing="isTrackPlaying(song.id)"
-                @song-export="playMusic"
-              />
+              <template v-if="userStore.loggedIn">
+                <SongCard
+                  v-for="song in filteredList"
+                  :key="song.id"
+                  :song
+                  is-mine
+                  :is-playing="isTrackPlaying(song.id)"
+                  @song-export="playMusic"
+                />
+              </template>
             </TabsContent>
           </Tabs>
         </TabsContent>
@@ -356,7 +357,7 @@ const arrangementListSongs = computed(() => {
 
 const calendarAttr = computed(() => {
   const res = [];
-  let list = userStore.loggedIn ? arrangementList.value : arrangementGuestList.value;
+  const list = userStore.loggedIn ? arrangementList.value : arrangementGuestList.value;
   for (const arrangement of list ?? []) {
     res.push({
       dot: true,
@@ -468,7 +469,7 @@ const track = ref<TMusicFlow>();
 const previousList = ref<string>();
 const previousDate = ref(new Date());
 
-const { data: songUrl } = useQuery({
+useQuery({
   queryFn: () => $trpc.search.mixGetUrl.query,
   queryKey: ["search.mixGetUrl"],
   refetchOnWindowFocus: false,

@@ -79,7 +79,7 @@ export async function searchSongsWy(key: string, type: string) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "搜索结果为空" });
     }
 
-    songsIdList = resSongs.result.songs.map((song) => song.id);
+    songsIdList = resSongs.result.songs.map(song => song.id);
   } else {
     // id
     songsIdList = [key];
@@ -106,11 +106,11 @@ export async function searchSongsWy(key: string, type: string) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲信息为空" });
   }
 
-  const transformSongs = resAlbums.songs.map((song) => ({
+  const transformSongs = resAlbums.songs.map(song => ({
     id: song.id.toString(),
     name: song.name,
     artists: song.artists
-      .map((artist) => artist.name)
+      .map(artist => artist.name)
       .join(", ")
       .trim(),
     album: song.album.name,
@@ -123,7 +123,8 @@ export async function searchSongsWy(key: string, type: string) {
 
 export async function searchSongsQQ(key: string, type: string) {
   const searchBase = searchBaseURL.qqSearch;
-  if (type === "id") throw new TRPCError({ code: "BAD_REQUEST", message: "id搜索暂未实现" });
+  if (type === "id")
+    throw new TRPCError({ code: "BAD_REQUEST", message: "id搜索暂未实现" });
 
   interface TSearchDataItem {
     albummid: string;
@@ -159,11 +160,11 @@ export async function searchSongsQQ(key: string, type: string) {
     },
   });
 
-  const songList = res.data.song.list.map((item) => ({
+  const songList = res.data.song.list.map(item => ({
     id: item.songmid,
     name: item.songname,
     artists: item.singer
-      .map((artist) => artist.name)
+      .map(artist => artist.name)
       .join(", ")
       .trim(),
     album: item.albumname,
@@ -234,7 +235,8 @@ export async function getSongUrlQQ(mid: string) {
 
 export async function getSongUrlWyVip(id: string, user: User) {
   const songBaseURL = env.WY_URL;
-  if (!songBaseURL) throw new TRPCError({ code: "BAD_REQUEST", message: "未设置请求源" });
+  if (!songBaseURL)
+    throw new TRPCError({ code: "BAD_REQUEST", message: "未设置请求源" });
   interface TSongURL {
     code: number;
     data: {
@@ -275,7 +277,7 @@ export async function getSongUrlWyVip(id: string, user: User) {
     "->",
     "wy",
     "|",
-    id
+    id,
   );
   return {
     url: resSongsUrl.data.url,
@@ -285,7 +287,8 @@ export async function getSongUrlWyVip(id: string, user: User) {
 
 export async function getSongUrlQQVip(mid: string, user: User) {
   const songBaseURL = env.TX_URL;
-  if (!songBaseURL) throw new TRPCError({ code: "BAD_REQUEST", message: "未设置请求源" });
+  if (!songBaseURL)
+    throw new TRPCError({ code: "BAD_REQUEST", message: "未设置请求源" });
   interface TSongURL {
     code: number;
     data: {
@@ -327,7 +330,7 @@ export async function getSongUrlQQVip(mid: string, user: User) {
     "->",
     "tx",
     "|",
-    mid
+    mid,
   );
   return {
     url: resSongsUrl.data.url,

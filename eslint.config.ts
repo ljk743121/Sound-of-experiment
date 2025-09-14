@@ -10,7 +10,7 @@ export default antfu(
       quotes: "double",
       semi: true,
     },
-    ignores: ["public/**", "app/components/ui/**"],
+    ignores: ["public/**", "app/components/ui/**", ".github/**"],
     regexp: false,
   },
   {
@@ -25,5 +25,5 @@ export default antfu(
       "style/brace-style": ["warn", "1tbs", { allowSingleLine: true }],
       "node/prefer-global/process": "off",
     },
-  }
+  },
 );

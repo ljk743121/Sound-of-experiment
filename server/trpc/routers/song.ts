@@ -1,8 +1,10 @@
+import type { TMediaSource, TSubmitType } from "~~/types";
 import { TRPCError } from "@trpc/server";
-import { desc, eq, gt, and } from "drizzle-orm";
+import { desc, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { songs, users } from "~~/server/db/schema";
+import { hasBlockWord } from "~~/server/utils/universal";
 import {
   adminProcedure,
   protectedProcedure,
@@ -11,8 +13,6 @@ import {
   router,
 } from "../trpc";
 import { fitsInTime } from "./time";
-import { hasBlockWord } from "~~/server/utils/universal";
-import { TMediaSource, TSubmitType } from "~~/types";
 
 function getISOWeekNumber(date: Date): number {
   const target = new Date(date.valueOf());
@@ -27,7 +27,8 @@ function getISOWeekNumber(date: Date): number {
 }
 
 async function checkCanSubmit(remainSongs: number) {
-  if (!(await fitsInTime(new Date()))) return false;
+  if (!(await fitsInTime(new Date())))
+    return false;
   return remainSongs > 0;
 }
 
@@ -44,14 +45,15 @@ export const songRouter = router({
         submitType: z.custom<TSubmitType>(),
         message: z.string().trim().optional(),
         msgPublic: z.string().trim().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (!(await checkCanSubmit(ctx.user.remainSubmitSongs)))
+      if (!(await checkCanSubmit(ctx.user.remainSubmitSongs))) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "您的剩余提交次数为0,请等5天后重置",
         });
+      }
 
       const content = `${input.name} ${input.creator} ${input.message || ""} ${input.msgPublic || ""}`;
       if (await hasBlockWord(content)) {
@@ -87,13 +89,14 @@ export const songRouter = router({
     .input(
       z.object({
         id: z.number(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const song = await db.query.songs.findFirst({
         where: eq(songs.id, input.id),
       });
-      if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
+      if (!song)
+        throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
       if (song.ownerId !== ctx.user.id)
         throw new TRPCError({ code: "BAD_REQUEST", message: "你不能删除他人的歌曲" });
       if (song.state === "used")
@@ -104,14 +107,15 @@ export const songRouter = router({
     .input(
       z.object({
         id: z.number(),
-      })
+      }),
     )
     .use(requirePermission(["review", "deleteSong"]))
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input }) => {
       const song = await db.query.songs.findFirst({
         where: eq(songs.id, input.id),
       });
-      if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
+      if (!song)
+        throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
       await db.delete(songs).where(eq(songs.id, input.id));
     }),
 
@@ -232,7 +236,8 @@ export const songRouter = router({
     const song = await db.query.songs.findFirst({
       where: eq(songs.id, id),
     });
-    if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
+    if (!song)
+      throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
     if (song.likes.includes(ctx.user.id))
       throw new TRPCError({ code: "BAD_REQUEST", message: "您已点过赞" });
     await db
@@ -248,21 +253,21 @@ export const songRouter = router({
     const song = await db.query.songs.findFirst({
       where: eq(songs.id, id),
     });
-    if (!song) throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
+    if (!song)
+      throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
     if (!song.likes.includes(ctx.user.id))
       throw new TRPCError({ code: "BAD_REQUEST", message: "您没有点赞此歌曲" });
     await db
       .update(songs)
       .set({
-        likes: song.likes.filter((like) => like !== ctx.user.id),
+        likes: song.likes.filter(like => like !== ctx.user.id),
         likeCount: song.likeCount - 1,
       })
       .where(eq(songs.id, id));
   }),
 
   idToName: protectedProcedure.input(z.array(z.string())).query(async ({ input }) => {
-    let list = [];
-    console.log(input);
+    const list = [];
     for (const id of input) {
       list.push((await getUserDetailById(id)).name);
     }
@@ -274,7 +279,7 @@ export const songRouter = router({
       .input(
         z.object({
           id: z.number(),
-        })
+        }),
       )
       .use(requirePermission(["review"]))
       .mutation(async ({ input }) => {
@@ -286,7 +291,7 @@ export const songRouter = router({
         z.object({
           id: z.number(),
           rejectMessage: z.string().min(4, "拒绝理由不得小于4个字符"),
-        })
+        }),
       )
       .use(requirePermission(["review"]))
       .mutation(async ({ input }) => {

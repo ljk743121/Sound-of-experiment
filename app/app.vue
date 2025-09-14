@@ -3,11 +3,11 @@
   <Toaster
     position="top-right"
     class="pointer-events-auto"
-    closeButton
-    richColors
+    close-button
+    rich-colors
     :duration="7000"
     expand
-    :visibleToasts="5"
+    :visible-toasts="5"
   />
   <NuxtLayout>
     <NuxtPage />

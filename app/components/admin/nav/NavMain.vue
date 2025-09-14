@@ -1,26 +1,3 @@
-<script setup lang="ts">
-import { ChevronRight } from "lucide-vue-next";
-import type { TPermission } from "~~/types";
-
-defineProps<{
-  items: {
-    title: string;
-    url?: string;
-    icon?: string;
-    isActive?: boolean;
-    permissions?: TPermission[];
-    items?: {
-      title: string;
-      icon?: string;
-      url: string;
-      permissions?: TPermission[];
-    }[];
-  }[];
-}>();
-
-const userPermissions = useUserStore().permissions;
-</script>
-
 <template>
   <SidebarGroup>
     <SidebarGroupLabel>管理</SidebarGroupLabel>
@@ -35,11 +12,11 @@ const userPermissions = useUserStore().permissions;
         <SidebarMenuItem v-if="item.items">
           <CollapsibleTrigger as-child>
             <SidebarMenuButton
-              :tooltip="item.title"
               v-if="
                 !item.permissions ||
                 userPermissions.some((permission) => item.permissions?.includes(permission))
               "
+              :tooltip="item.title"
             >
               <Icon v-if="item.icon" :name="item.icon" />
               <span>{{ item.title }}</span>
@@ -86,3 +63,26 @@ const userPermissions = useUserStore().permissions;
     </SidebarMenu>
   </SidebarGroup>
 </template>
+
+<script setup lang="ts">
+import type { TPermission } from "~~/types";
+import { ChevronRight } from "lucide-vue-next";
+
+defineProps<{
+  items: {
+    title: string;
+    url?: string;
+    icon?: string;
+    isActive?: boolean;
+    permissions?: TPermission[];
+    items?: {
+      title: string;
+      icon?: string;
+      url: string;
+      permissions?: TPermission[];
+    }[];
+  }[];
+}>();
+
+const userPermissions = useUserStore().permissions;
+</script>

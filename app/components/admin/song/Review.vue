@@ -16,7 +16,9 @@
   </div>
   <div v-if="song.message">
     <div class="m-5 text-left text-2xl text-foreground">私密留言</div>
-    <div class="m-8 text-left text-base">{{ song.message }}</div>
+    <div class="m-8 text-left text-base">
+      {{ song.message }}
+    </div>
   </div>
   <SongPlayer
     :id="song.songId"

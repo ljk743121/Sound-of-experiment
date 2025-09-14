@@ -118,7 +118,7 @@ export const arrangementsRouter = router({
         start: z.string(),
         end: z.string(),
         songCount: z.number().int(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       if (!(await reviewAll()))
@@ -130,7 +130,7 @@ export const arrangementsRouter = router({
       const start = parseDate(input.start);
       const end = parseDate(input.end);
 
-      let dayTimes = end.compare(start) + 1;
+      const dayTimes = end.compare(start) + 1;
 
       // get unused songs
       const approvedSongs = await db.query.songs.findMany({
@@ -145,8 +145,8 @@ export const arrangementsRouter = router({
       let droppedSongs: typeof approvedSongs = [];
       // (only when insufficient unused songs is present)
       if (
-        (end.compare(start) + 1) * input.songCount > approvedSongs.length ||
-        input.songCount === 0
+        (end.compare(start) + 1) * input.songCount > approvedSongs.length
+        || input.songCount === 0
       ) {
         droppedSongs = await db.query.songs.findMany({
           where: eq(songs.state, "dropped"),
@@ -201,8 +201,8 @@ export const arrangementsRouter = router({
           }
 
           if (input.songCount === 0) {
-            songCount =
-              totalLength - songCount >= 0
+            songCount
+              = totalLength - songCount >= 0
                 ? Math.ceil((totalLength - songCount) / (dayTimes - 1))
                 : 0;
           }
@@ -250,7 +250,7 @@ export const arrangementsRouter = router({
     .input(
       z.object({
         date: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const usedSongs = await db.query.songs.findMany({

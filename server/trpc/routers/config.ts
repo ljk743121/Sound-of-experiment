@@ -1,24 +1,19 @@
-import { z } from "zod";
-import { env } from "~~/server/env";
 import { TRPCError } from "@trpc/server";
 import { get } from "@vercel/edge-config";
-import {
-  adminProcedure,
-  protectedProcedure,
-  publicProcedure,
-  requirePermission,
-  router,
-} from "../trpc";
+import { consola } from "consola";
+import { z } from "zod";
+import { env } from "~~/server/env";
+import { adminProcedure, publicProcedure, requirePermission, router } from "../trpc";
 
 export const configRouter = router({
-  get: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+  get: publicProcedure.input(z.string()).mutation(async ({ input }) => {
     const value = await get(input);
     return value;
   }),
   update: adminProcedure
     .use(requirePermission(["manageUser"]))
     .input(z.object({ key: z.string(), value: z.any() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       if (!(env.EDGE_CONFIG_TOKEN && env.EDGE_CONFIG_ID)) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -31,7 +26,7 @@ export const configRouter = router({
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${env.EDGE_CONFIG_TOKEN}`,
+              "Authorization": `Bearer ${env.EDGE_CONFIG_TOKEN}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -43,10 +38,17 @@ export const configRouter = router({
                 },
               ],
             }),
-          }
+          },
         );
         await updateEdgeConfig.json();
-      } catch (error) {
+      } catch (e) {
+        consola.log(
+          "Config update error",
+          "->",
+          input.key,
+          "|",
+          e instanceof Error ? e.message : String(e),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "更新边缘配置失败",

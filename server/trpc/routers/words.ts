@@ -10,7 +10,7 @@ export const blockWordsRouter = router({
     .input(
       z.object({
         word: z.string().min(1),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       await db.insert(blockWords).values({
@@ -29,7 +29,7 @@ export const blockWordsRouter = router({
     .input(
       z.object({
         word: z.string().min(1),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       await db.delete(blockWords).where(eq(blockWords.word, input.word));

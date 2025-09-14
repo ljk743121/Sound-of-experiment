@@ -9,14 +9,17 @@
           <DialogTitle>点赞人</DialogTitle>
         </DialogHeader>
         <div class="grid grid-cols-2 gap-4">
-          <div v-for="item in data">
-            <div class="text-sm font-medium text-gray-900">{{ item }}</div>
+          <div v-for="(item, index) in data" :key="index">
+            <div class="text-sm font-medium text-gray-900">
+              {{ item }}
+            </div>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   </ClientOnly>
 </template>
+
 <script setup lang="ts">
 const { idList } = defineProps<{
   idList: string[];

@@ -31,9 +31,10 @@
             你的权限：
             <div>
               <Badge
-                v-for="permission in permissionNames.filter((pm) =>
+                v-for="(permission, index) in permissionNames.filter((pm) =>
                   userStore.permissions.includes(pm.value)
                 )"
+                :key="index"
                 class="mr-2"
                 variant="outline"
               >

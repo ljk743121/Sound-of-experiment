@@ -5,7 +5,7 @@ import { permissionNames } from "~~/constants";
 import { db } from "~~/server/db";
 import { users } from "~~/server/db/schema";
 
-const permissions: TPermission[] = Array.from(permissionNames, (name) => name.value);
+const permissions: TPermission[] = Array.from(permissionNames, name => name.value);
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -13,7 +13,7 @@ const rl = readline.createInterface({
 });
 
 function question(query: string): Promise<string> {
-  return new Promise((resolve) => rl.question(query, resolve));
+  return new Promise(resolve => rl.question(query, resolve));
 }
 
 const id = await question("请输入管理员ID: ");

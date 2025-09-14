@@ -8,8 +8,8 @@
           <Button
             variant="secondary"
             class="ml-auto"
-            @click.prevent="acceptAll"
             :disabled="acceptAllPending || !songList || songList.length === 0"
+            @click.prevent="acceptAll"
           >
             <Icon name="lucide:check-circle" size="17" class="mr-2" />
             通过全部歌曲

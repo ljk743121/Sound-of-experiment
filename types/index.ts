@@ -16,7 +16,7 @@ export type TPermission =
   | "deleteUser"
   | "editPermissions"
   | "resetPassword"
-  | "announcement" //manage announcement
+  | "announcement" // manage announcement
   | "deleteSong"
   | "robot";
 
@@ -35,7 +35,7 @@ export type TSubmitType = "realName" | "anonymous" | "alias";
 
 export type TMediaSource = "wy" | "tx";
 
-export type TMusicFlow = {
+export interface TMusicFlow {
   id: number;
   audio: string;
   title: string;
@@ -43,4 +43,4 @@ export type TMusicFlow = {
   artwork: string;
   album: string;
   original?: Record<string, unknown>;
-};
+}

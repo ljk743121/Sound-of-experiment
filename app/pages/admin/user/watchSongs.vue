@@ -84,9 +84,9 @@ import {
   useVueTable,
 } from "@tanstack/vue-table";
 import ChangeMaxSubmitSongs from "~/components/admin/user/ChangeMaxSubmitSongs.vue";
+import ResetRemainSubmitSongs from "~/components/admin/user/ResetRemainSubmitSongs.vue";
 import HistorySheet from "~/components/song/HistorySheet.vue";
 import { valueUpdater } from "~/lib/table";
-import ResetRemainSubmitSongs from "~/components/admin/user/ResetRemainSubmitSongs.vue";
 
 definePageMeta({
   layout: "admin",

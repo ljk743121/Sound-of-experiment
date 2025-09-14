@@ -1,23 +1,3 @@
-<script setup lang="ts">
-import { useSidebar } from "@/components/ui/sidebar";
-
-const props = defineProps<{
-  user: {
-    id: string;
-    name: string;
-    displayName?: string;
-  };
-}>();
-
-const { isMobile } = useSidebar();
-
-function logout() {
-  useUserStore().logout();
-  toast.success("登出成功");
-  navigateTo("/auth/login");
-}
-</script>
-
 <template>
   <SidebarMenu>
     <SidebarMenuItem>
@@ -34,7 +14,7 @@ function logout() {
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-semibold">{{ user.name }}</span>
-              <span class="truncate text-xs" v-if="user.displayName"
+              <span v-if="user.displayName" class="truncate text-xs"
                 ><span class="text-sm text-muted-foreground">昵称：</span
                 >{{ user.displayName }}</span
               >
@@ -58,7 +38,7 @@ function logout() {
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ user.name }}</span>
-                <span class="truncate text-xs" v-if="user.displayName"
+                <span v-if="user.displayName" class="truncate text-xs"
                   >昵称：{{ user.displayName }}</span
                 >
                 <span class="truncate text-xs">{{ user.id }}</span>
@@ -82,3 +62,23 @@ function logout() {
     </SidebarMenuItem>
   </SidebarMenu>
 </template>
+
+<script setup lang="ts">
+import { useSidebar } from "@/components/ui/sidebar";
+
+defineProps<{
+  user: {
+    id: string;
+    name: string;
+    displayName?: string;
+  };
+}>();
+
+const { isMobile } = useSidebar();
+
+function logout() {
+  useUserStore().logout();
+  toast.success("登出成功");
+  navigateTo("/auth/login");
+}
+</script>

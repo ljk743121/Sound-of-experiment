@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as searchApi from "~~/server/utils/song";
-import { protectedProcedure, requirePermission, router } from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 
 export const searchRouter = router({
   mixSearch: protectedProcedure
@@ -10,7 +10,7 @@ export const searchRouter = router({
         key: z.string(),
         source: z.string(),
         type: z.enum(["search", "id"]),
-      })
+      }),
     )
     .query(async ({ input }) => {
       if (input.source === "wy") {
@@ -26,10 +26,11 @@ export const searchRouter = router({
       z.object({
         id: z.string(),
         source: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
-      if (!input.id) throw new TRPCError({ code: "BAD_REQUEST", message: "缺少ID参数" });
+      if (!input.id)
+        throw new TRPCError({ code: "BAD_REQUEST", message: "缺少ID参数" });
       let songInfo = { url: "", pay: false };
       if (input.source === "wy") {
         try {
@@ -54,7 +55,8 @@ export const searchRouter = router({
       } else {
         throw new TRPCError({ code: "BAD_REQUEST", message: "未知的源" });
       }
-      if (!songInfo.url) throw new TRPCError({ code: "BAD_REQUEST", message: "歌曲链接为空" });
+      if (!songInfo.url)
+        throw new TRPCError({ code: "BAD_REQUEST", message: "歌曲链接为空" });
       return songInfo;
     }),
 });

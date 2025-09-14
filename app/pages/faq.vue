@@ -64,8 +64,8 @@
       </AccordionItem>
     </Accordion>
     <div class="mt-8 text-center">
-      <Button asChild>
-        <NuxtLink to="/">返回首页</NuxtLink>
+      <Button as-child>
+        <NuxtLink to="/"> 返回首页 </NuxtLink>
       </Button>
     </div>
   </div>

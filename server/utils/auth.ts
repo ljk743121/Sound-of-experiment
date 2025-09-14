@@ -1,12 +1,12 @@
+import { useRuntimeConfig } from "#imports";
+import { Hash } from "@adonisjs/hash";
+import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
 import { eq } from "drizzle-orm";
 import * as jose from "jose";
 import { nanoid } from "nanoid";
 import { db } from "../db";
 import { users } from "../db/schema";
 import { env } from "../env";
-import { Hash } from "@adonisjs/hash";
-import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
-import { useRuntimeConfig } from "#imports";
 import validateUser from "./localUtils/getUserDetail";
 
 const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
@@ -51,15 +51,18 @@ export async function getUserFromToken(token: string) {
   } catch (err) {
     if (err instanceof jose.errors.JWEDecryptionFailed)
       return { err: "ERR_JWE_DECRYPTION_FAILED" as const };
-    else if (err instanceof jose.errors.JWTExpired) return { err: "ERR_JWT_EXPIRED" as const };
+    else if (err instanceof jose.errors.JWTExpired)
+      return { err: "ERR_JWT_EXPIRED" as const };
     else return { err: "ERR_INVALID_TOKEN" as const };
   }
 }
 
 export async function getUserFromHeader(authorization: string | undefined) {
-  if (!authorization) return undefined;
+  if (!authorization)
+    return undefined;
   const result = await getUserFromToken(authorization);
-  if (result.err === "ERR_JWT_EXPIRED") return result.err;
+  if (result.err === "ERR_JWT_EXPIRED")
+    return result.err;
   return result.user;
 }
 

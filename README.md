@@ -64,7 +64,7 @@ pnpm run dev
 
 ## 自定义音乐源：
 
-Step 1：定义音乐数据解析逻辑  
+Step 1：定义音乐数据解析逻辑
 在路径 `server/utils/song.ts` 文件中新增你的专属音乐源解析函数：
 
 #### 📌 数据格式要求
@@ -83,7 +83,7 @@ interface MusicData {
 }
 ```
 
-Step 2：在搜索接口注入新数据源  
+Step 2：在搜索接口注入新数据源
 请打开 TRPC 路由配置文件 `server/trpc/routers/search.ts`，在`mixSearch`和`mixGetUrl`API中添加自定义源逻辑
 
 ## 项目协议

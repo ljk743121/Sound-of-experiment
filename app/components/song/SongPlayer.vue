@@ -69,8 +69,8 @@
     <!-- use SearchCount to force re-rendering -->
     <MusicfyPlayer
       v-if="config.audioSrc !== 'https://example.com/audio.mp3'"
-      :config="config"
       :key="SearchCount"
+      :config="config"
       width="100%"
     />
   </div>
@@ -78,11 +78,6 @@
 
 <script setup lang="ts">
 import { getImgUrl } from "~~/constants";
-
-const { $trpc } = useNuxtApp();
-const queryClient = useQueryClient();
-
-const SearchCount = ref(0);
 
 const props = defineProps<{
   id: string | null;
@@ -92,6 +87,10 @@ const props = defineProps<{
   imgId: string | null;
   source: string | null;
 }>();
+const { $trpc } = useNuxtApp();
+const queryClient = useQueryClient();
+
+const SearchCount = ref(0);
 
 const { status: songUrlStatus, isFetching: UrlFetching } = useQuery({
   queryFn: () =>

@@ -1,4 +1,4 @@
-import type { TPermission, TIdentity, TSongState } from "~~/types";
+import type { TIdentity, TPermission, TSongState } from "~~/types";
 import { relations } from "drizzle-orm";
 import { boolean, integer, json, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 

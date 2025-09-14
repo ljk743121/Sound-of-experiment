@@ -38,10 +38,10 @@
     <ClientOnly>
       <DialogTemplate>
         <Button
-          @click.stop="handleAvatarClick"
           :disabled="!(song.songId && song.source && song.songId.length > 0)"
           variant="outline"
           size="icon"
+          @click.stop="handleAvatarClick"
         >
           <Icon v-if="!isPlaying" name="lucide:play" />
           <Icon v-else name="lucide:pause" />
@@ -50,8 +50,8 @@
           <Button
             v-if="song.likes.includes(userStore.id)"
             variant="outline"
-            @click.prevent="disvote(song.id!)"
             :disabled="isDisVoting"
+            @click.prevent="disvote(song.id!)"
           >
             <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
             <Badge variant="destructive">{{ song.likeCount }}</Badge>
@@ -59,8 +59,8 @@
           <Button
             v-else
             variant="outline"
-            @click.prevent="vote(song.id!)"
             :disabled="isVoting || !userStore.loggedIn"
+            @click.prevent="vote(song.id!)"
           >
             <Icon name="lucide:heart" class="mr-1" />
             <Badge v-if="song.likes" variant="destructive">{{ song.likeCount }}</Badge>
@@ -319,14 +319,14 @@ const { mutate: reject, isPending: rejectPending } = useMutation({
 
 const rejectMessage = ref("");
 
-const formatDuration = (seconds: number): string => {
+function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return "00:00:00";
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
   const pad = (num: number) => num.toString().padStart(2, "0");
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
-};
+}
 
 const { mutate: vote, isPending: isVoting } = useMutation({
   mutationFn: $trpc.song.vote.mutate,
@@ -350,10 +350,10 @@ const { mutate: disvote, isPending: isDisVoting } = useMutation({
   onError: (err) => useErrorHandler(err),
 });
 
-const handleAvatarClick = (e: Event) => {
+function handleAvatarClick(e: Event) {
   e.stopPropagation();
   if (song.songId && song.source && song.songId.length > 0) {
     emit("songExport", song);
   }
-};
+}
 </script>

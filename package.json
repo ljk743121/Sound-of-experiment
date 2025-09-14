@@ -21,8 +21,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:lint-staged": "npx lint-staged",
-    "format": "npx prettier . --write",
-    "prepare": "npx husky-init"
+    "lint:format": "npx prettier . --write",
+    "husky:prepare": "npx husky-init && husky install"
   },
   "dependencies": {
     "@adonisjs/hash": "^9.1.1",
@@ -121,6 +121,7 @@
     "vue-tsc": "2.2.10"
   },
   "lint-staged": {
+    "**/*.{js,ts,md,json}": "eslint --fix",
     "**/*.{js,jsx,ts,tsx,md,vue,json,css}": "prettier --write"
   }
 }

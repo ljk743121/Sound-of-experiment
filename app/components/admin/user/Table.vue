@@ -87,16 +87,16 @@ import {
 import Button from "~/components/ui/button/Button.vue";
 import { valueUpdater } from "~/lib/table";
 
+const { columns, data = [] } = defineProps<{
+  columns: ColumnDef<a>[];
+  data: a[];
+}>();
+
 definePageMeta({
   layout: "admin",
 });
 
 type a = Partial<RouterOutput["user"]["list"][0]>;
-
-const { columns, data = [] } = defineProps<{
-  columns: ColumnDef<a>[];
-  data: a[];
-}>();
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);

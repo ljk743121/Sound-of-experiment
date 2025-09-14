@@ -1,8 +1,8 @@
-import { db } from "~~/server/db";
-import { nanoid } from "nanoid";
-import { users } from "~~/server/db/schema";
 import type { TPermission } from "~~/types";
 import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { db } from "~~/server/db";
+import { users } from "~~/server/db/schema";
 import { produceAccessToken } from "~~/server/utils/auth";
 import { hashPassword } from "../server/utils/auth";
 

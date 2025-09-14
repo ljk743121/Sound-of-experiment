@@ -100,7 +100,7 @@
                   </Avatar>
                   <div class="grid flex-1 text-left text-sm leading-tight">
                     <span class="truncate font-semibold">{{ userStore.name }}</span>
-                    <span class="truncate text-xs" v-if="userStore.displayName"
+                    <span v-if="userStore.displayName" class="truncate text-xs"
                       >昵称：{{ userStore.displayName }}</span
                     >
                     <span class="truncate text-xs">{{ userStore.id }}</span>
@@ -120,7 +120,7 @@
                     </Avatar>
                     <div class="grid flex-1 text-left text-sm leading-tight">
                       <span class="truncate font-semibold">{{ userStore.name }}</span>
-                      <span class="truncate text-xs" v-if="userStore.displayName"
+                      <span v-if="userStore.displayName" class="truncate text-xs"
                         >昵称：{{ userStore.displayName }}</span
                       >
                       <span class="truncate text-xs">{{ userStore.id }}</span>

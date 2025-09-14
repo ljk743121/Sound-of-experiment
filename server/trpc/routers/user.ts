@@ -21,14 +21,15 @@ export const userRouter = router({
       z.object({
         id: z.string().min(7, "最少7位数字").regex(/\d+/, "输入必须为数字").trim(),
         password: z.string().min(6, "最少为6个字符").max(16, "最多为16个字符").trim(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const user = await db.query.users.findFirst({
         where: eq(users.id, input.id),
       });
       // make sure registration is successful
-      if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "登录失败" });
+      if (!user)
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "登录失败" });
 
       if (!(await verifyPassword(user.password!, input.password)))
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "登录失败" });
@@ -60,7 +61,7 @@ export const userRouter = router({
           .max(16, "最多为16个字符")
           .regex(pwRegex, "密码需包括至少1个字母,1个数字")
           .trim(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       let user = await db.query.users.findFirst({
@@ -115,7 +116,7 @@ export const userRouter = router({
       z.object({
         id: z.string(),
         pwd: z.string().trim(),
-      })
+      }),
     )
     .use(requirePermission(["manageUser", "deleteUser"]))
     .mutation(async ({ input, ctx }) => {
@@ -132,7 +133,7 @@ export const userRouter = router({
       z.object({
         id: z.string(),
         pwd: z.string().trim(),
-      })
+      }),
     )
     .use(requirePermission(["manageUser", "resetPassword"]))
     .mutation(async ({ input, ctx }) => {
@@ -225,7 +226,7 @@ export const userRouter = router({
       z.object({
         id: z.string(),
         permissions: z.custom<TPermission>().array(),
-      })
+      }),
     )
     .use(requirePermission(["manageUser", "editPermissions"]))
     .mutation(async ({ input }) => {
@@ -236,7 +237,7 @@ export const userRouter = router({
       z.object({
         id: z.string(),
         maxSongs: z.number().min(0, "输入须大于等于0").max(10, "输入须小于等于10"),
-      })
+      }),
     )
     .use(requirePermission(["manageUser"]))
     .mutation(async ({ input }) => {
@@ -247,7 +248,7 @@ export const userRouter = router({
       z.object({
         id: z.string(),
         maxSongs: z.number().min(0, "输入须大于等于0").max(10, "输入须小于等于10"),
-      })
+      }),
     )
     .use(requirePermission(["manageUser"]))
     .mutation(async ({ input }) => {
@@ -264,7 +265,7 @@ export const userRouter = router({
           .string()
           .min(8, { message: "用户密码长度应至少为8" })
           .regex(pwRegex, "密码必须包含大小写字母、数字与特殊符号"),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       if (!(await verifyPassword(ctx.user.password!, input.oldPassword)))
@@ -287,7 +288,7 @@ export const userRouter = router({
     .input(
       z.object({
         alias: z.string().trim().min(1, "最少为1个字符").max(32, "最多为32个字符"),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       if (await hasBlockWord(input.alias)) {
