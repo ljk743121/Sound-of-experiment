@@ -315,4 +315,8 @@ export const userRouter = router({
       })
       .where(eq(users.id, ctx.user.id));
   }),
+  getRobotToken: adminProcedure.use(requirePermission(["robot"])).query(async ({ ctx }) => {
+    const token = await produceAccessToken(ctx.user.id, "4weeks");
+    return token;
+  }),
 });

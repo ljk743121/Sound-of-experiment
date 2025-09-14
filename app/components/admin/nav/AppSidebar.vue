@@ -123,6 +123,12 @@ const data = {
       icon: "lucide:bell",
       permissions: ["announcement"] as TPermission[],
     },
+    {
+      title: "获取机器人令牌",
+      url: "/admin/robot",
+      icon: "lucide:robot",
+      permissions: ["robot"] as TPermission[],
+    },
   ],
   settings: [
     {
