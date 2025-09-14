@@ -20,13 +20,11 @@
       </DialogHeader>
       <div class="grid w-full max-w-sm items-center gap-1.5">
         <Label for="pwd">输入你的密码</Label>
-        <Input id="pwd" v-model="pwd" type="password" placeholder="密码"/>
+        <Input id="pwd" v-model="pwd" type="password" placeholder="密码" />
       </div>
       <DialogFooter>
         <DialogClose as-child>
-          <Button type="button" variant="secondary">
-            取消
-          </Button>
+          <Button type="button" variant="secondary"> 取消 </Button>
         </DialogClose>
         <Button variant="destructive" :disable="isPending" @click="mutate({ id, pwd })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -38,9 +36,9 @@
 </template>
 
 <script setup lang="ts">
-import { resetPassword } from '~~/constants';
+import { resetPassword } from "~~/constants";
 
-const { id,name } = defineProps<{
+const { id, name } = defineProps<{
   id: string;
   name: string;
 }>();
@@ -48,16 +46,16 @@ const { id,name } = defineProps<{
 const { $trpc } = useNuxtApp();
 
 const isOpen = ref(false);
-const pwd = ref('');
+const pwd = ref("");
 
 const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.user.resetPassword.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user.listUser'] });
-    toast.success('重置成功');
+    await queryClient.invalidateQueries({ queryKey: ["user.listUser"] });
+    toast.success("重置成功");
     isOpen.value = false;
   },
-  onError: err => useErrorHandler(err),
+  onError: (err) => useErrorHandler(err),
 });
 </script>

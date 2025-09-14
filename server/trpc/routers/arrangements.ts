@@ -1,134 +1,140 @@
-import { parseDate } from '@internationalized/date';
-import { TRPCError } from '@trpc/server';
-import { desc, eq, sql } from 'drizzle-orm';
-import { z } from 'zod';
-import { db } from '~~/server/db';
-import { arrangements, songs } from '~~/server/db/schema';
-import { adminProcedure, protectedProcedure, publicProcedure, requirePermission, router } from '../trpc';
-import { fitsInTime } from './time';
+import { parseDate } from "@internationalized/date";
+import { TRPCError } from "@trpc/server";
+import { desc, eq, sql } from "drizzle-orm";
+import { z } from "zod";
+import { db } from "~~/server/db";
+import { arrangements, songs } from "~~/server/db/schema";
+import {
+  adminProcedure,
+  protectedProcedure,
+  publicProcedure,
+  requirePermission,
+  router,
+} from "../trpc";
+import { fitsInTime } from "./time";
 
 async function reviewAll() {
-  return (await db.query.songs.findMany({
-    where: eq(songs.state, 'pending'),
-    columns: { id: true },
-  })).length === 0;
+  return (
+    (
+      await db.query.songs.findMany({
+        where: eq(songs.state, "pending"),
+        columns: { id: true },
+      })
+    ).length === 0
+  );
 }
 
 export const arrangementsRouter = router({
-  list: adminProcedure
-    .use(requirePermission(['arrange']))
-    .query(async () => {
-      return await db.query.arrangements.findMany({
-        orderBy: desc(arrangements.date),
-        columns: {
-          date: true,
-        },
-        with: {
-          songs: {
-            orderBy: desc(songs.createdAt),
-            columns: {
-              id: true,
-              creator: true,
-              ownerDisplayName: true,
-              name: true,
-              songId: true,
-              source: true,
-              imgId: true,
-              duration: true,
-              rejectMessage: true,
-              message: true,
-              state: true,
-              createdAt: true,
-            }
-          }
-        }
-      });
-    }),
-
-  listSafe: protectedProcedure
-    .query(async () => {
-      return await db.query.arrangements.findMany({
-        orderBy: desc(arrangements.date),
-        columns: {
-          date: true,
-        },
-        with: {
-          songs: {
-            orderBy: desc(songs.createdAt),
-            columns: {
-              id: true,
-              creator: true,
-              ownerDisplayName: true,
-              name: true,
-              songId: true,
-              source: true,
-              imgId: true,
-              duration: true,
-              likes: true,
-              likeCount: true,
-              rejectMessage: true,
-              msgPublic: true,
-              state: true,
-              createdAt: true,
-            },
+  list: adminProcedure.use(requirePermission(["arrange"])).query(async () => {
+    return await db.query.arrangements.findMany({
+      orderBy: desc(arrangements.date),
+      columns: {
+        date: true,
+      },
+      with: {
+        songs: {
+          orderBy: desc(songs.createdAt),
+          columns: {
+            id: true,
+            creator: true,
+            ownerDisplayName: true,
+            name: true,
+            songId: true,
+            source: true,
+            imgId: true,
+            duration: true,
+            rejectMessage: true,
+            message: true,
+            state: true,
+            createdAt: true,
           },
         },
-      });
-    }),
+      },
+    });
+  }),
 
-  listGuest: publicProcedure
-    .query(async () => {
-      return await db.query.arrangements.findMany({
-        orderBy: desc(arrangements.date),
-        columns: {
-          date: true,
+  listSafe: protectedProcedure.query(async () => {
+    return await db.query.arrangements.findMany({
+      orderBy: desc(arrangements.date),
+      columns: {
+        date: true,
+      },
+      with: {
+        songs: {
+          orderBy: desc(songs.createdAt),
+          columns: {
+            id: true,
+            creator: true,
+            ownerDisplayName: true,
+            name: true,
+            songId: true,
+            source: true,
+            imgId: true,
+            duration: true,
+            likes: true,
+            likeCount: true,
+            rejectMessage: true,
+            msgPublic: true,
+            state: true,
+            createdAt: true,
+          },
         },
-        with: {
-          songs: {
-            orderBy: desc(songs.createdAt),
-            columns: {
-              id: true,
-              creator: true,
-              name: true,
-              imgId: true,
-              source: true,
-              state: true,
-              likeCount: true,
-              createdAt: true,
-            }
-          }
-        }
-      })
-    }),
+      },
+    });
+  }),
 
-  reviewAll: adminProcedure
-    .use(requirePermission(['arrange']))
-    .query(async () => {
-      return await reviewAll();
-    }),
+  listGuest: publicProcedure.query(async () => {
+    return await db.query.arrangements.findMany({
+      orderBy: desc(arrangements.date),
+      columns: {
+        date: true,
+      },
+      with: {
+        songs: {
+          orderBy: desc(songs.createdAt),
+          columns: {
+            id: true,
+            creator: true,
+            name: true,
+            imgId: true,
+            source: true,
+            state: true,
+            likeCount: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  }),
+
+  reviewAll: adminProcedure.use(requirePermission(["arrange"])).query(async () => {
+    return await reviewAll();
+  }),
 
   arrange: adminProcedure
-    .use(requirePermission(['arrange']))
-    .input(z.object({
-      start: z.string(),
-      end: z.string(),
-      songCount: z.number().int(),
-    }))
+    .use(requirePermission(["arrange"]))
+    .input(
+      z.object({
+        start: z.string(),
+        end: z.string(),
+        songCount: z.number().int(),
+      })
+    )
     .mutation(async ({ input }) => {
       if (!(await reviewAll()))
-        throw new TRPCError({ code: 'FORBIDDEN', message: '请审核全部歌曲' });
+        throw new TRPCError({ code: "FORBIDDEN", message: "请审核全部歌曲" });
 
       if (await fitsInTime(new Date()))
-        throw new TRPCError({ code: 'FORBIDDEN', message: '请在投稿截止后排歌' });
+        throw new TRPCError({ code: "FORBIDDEN", message: "请在投稿截止后排歌" });
 
       const start = parseDate(input.start);
       const end = parseDate(input.end);
 
-      let dayTimes = end.compare(start)+1;
+      let dayTimes = end.compare(start) + 1;
 
       // get unused songs
       const approvedSongs = await db.query.songs.findMany({
-        where: eq(songs.state, 'approved'),
+        where: eq(songs.state, "approved"),
         orderBy: sql`RANDOM()`,
         columns: {
           id: true,
@@ -138,9 +144,12 @@ export const arrangementsRouter = router({
       // get dropped songs
       let droppedSongs: typeof approvedSongs = [];
       // (only when insufficient unused songs is present)
-      if ((end.compare(start) + 1) * input.songCount > approvedSongs.length || input.songCount === 0) {
+      if (
+        (end.compare(start) + 1) * input.songCount > approvedSongs.length ||
+        input.songCount === 0
+      ) {
         droppedSongs = await db.query.songs.findMany({
-          where: eq(songs.state, 'dropped'),
+          where: eq(songs.state, "dropped"),
           orderBy: sql`RANDOM()`,
           columns: {
             id: true,
@@ -150,20 +159,21 @@ export const arrangementsRouter = router({
 
       const totalLength = approvedSongs.length + droppedSongs.length;
       // throw new TRPCError({ code:'BAD_REQUEST', message: `已选择${totalLength}首歌曲`})
-      if (totalLength === 0){
+      if (totalLength === 0) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: '没有歌曲可播放',
+          code: "NOT_FOUND",
+          message: "没有歌曲可播放",
         });
       }
 
       await db.transaction(async (tx) => {
         let songIndex = 0;
         let droppedSongIndex = 0;
-        let songCount = input.songCount === 0 ? Math.ceil(totalLength/dayTimes) : input.songCount;
+        let songCount = input.songCount === 0 ? Math.ceil(totalLength / dayTimes) : input.songCount;
         for (let date = start; date.compare(end) <= 0; date = date.add({ days: 1 })) {
           const dateString = date.toString();
-          if (songIndex+droppedSongIndex<totalLength) await tx.insert(arrangements).values({ date: dateString });
+          if (songIndex + droppedSongIndex < totalLength)
+            await tx.insert(arrangements).values({ date: dateString });
 
           for (let i = 0; i < songCount; i++) {
             if (songIndex < approvedSongs.length) {
@@ -171,17 +181,18 @@ export const arrangementsRouter = router({
                 .update(songs)
                 .set({
                   arrangementDate: dateString,
-                  state: 'used',
+                  state: "used",
                 })
                 .where(eq(songs.id, approvedSongs[songIndex]!.id));
 
               songIndex++;
-            } else if (droppedSongIndex < droppedSongs.length) { // recover dropped songs
+            } else if (droppedSongIndex < droppedSongs.length) {
+              // recover dropped songs
               await tx
                 .update(songs)
                 .set({
                   arrangementDate: dateString,
-                  state: 'used',
+                  state: "used",
                 })
                 .where(eq(songs.id, droppedSongs[droppedSongIndex]!.id));
 
@@ -189,8 +200,11 @@ export const arrangementsRouter = router({
             }
           }
 
-          if (input.songCount===0){
-            songCount = (totalLength-songCount) >= 0 ? Math.ceil((totalLength-songCount)/(dayTimes-1)) : 0;
+          if (input.songCount === 0) {
+            songCount =
+              totalLength - songCount >= 0
+                ? Math.ceil((totalLength - songCount) / (dayTimes - 1))
+                : 0;
           }
         }
 
@@ -198,7 +212,7 @@ export const arrangementsRouter = router({
         while (songIndex < approvedSongs.length) {
           await tx
             .update(songs)
-            .set({ state: 'dropped' })
+            .set({ state: "dropped" })
             .where(eq(songs.id, approvedSongs[songIndex]!.id));
 
           songIndex++;
@@ -206,50 +220,53 @@ export const arrangementsRouter = router({
       });
     }),
 
-    today: protectedProcedure
-    .use(requirePermission(['robot']))
-    .query(async () => {
-      const today = new Date().toISOString().split('T')[0];
-      
-      const arrangement = await db.query.arrangements.findFirst({
-        where: eq(arrangements.date, today),
-        columns: {
-          date: true,
-        },
-        with: {
-          songs: {
-            orderBy: desc(songs.createdAt),
-            columns: {
-              creator: true,
-              name: true,
-              songId: true,
-              source: true,
-              imgId: true,
-              message: true,
-            },
+  today: protectedProcedure.use(requirePermission(["robot"])).query(async () => {
+    const today = new Date().toISOString().split("T")[0];
+
+    const arrangement = await db.query.arrangements.findFirst({
+      where: eq(arrangements.date, today),
+      columns: {
+        date: true,
+      },
+      with: {
+        songs: {
+          orderBy: desc(songs.createdAt),
+          columns: {
+            creator: true,
+            name: true,
+            songId: true,
+            source: true,
+            imgId: true,
+            message: true,
           },
         },
-      });
-      
-      return arrangement;
-    }),
+      },
+    });
+
+    return arrangement;
+  }),
   delete: adminProcedure
-    .use(requirePermission(['arrange','deleteArrangement']))
-    .input(z.object({
-      date: z.string(),
-    }))
-    .mutation(async ({ input }) => { 
+    .use(requirePermission(["arrange", "deleteArrangement"]))
+    .input(
+      z.object({
+        date: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
       const usedSongs = await db.query.songs.findMany({
         where: eq(songs.arrangementDate, input.date),
         columns: {
           id: true,
         },
       });
-      for (const i of usedSongs){
-        await db.update(songs).set({
-          arrangementDate: null,
-          state: 'approved',
-        }).where(eq(songs.id, i.id));
+      for (const i of usedSongs) {
+        await db
+          .update(songs)
+          .set({
+            arrangementDate: null,
+            state: "approved",
+          })
+          .where(eq(songs.id, i.id));
       }
       await db.delete(arrangements).where(eq(arrangements.date, input.date));
     }),

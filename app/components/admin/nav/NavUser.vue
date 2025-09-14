@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { useSidebar } from '@/components/ui/sidebar'
+import { useSidebar } from "@/components/ui/sidebar";
 
 const props = defineProps<{
   user: {
-    id: string
-    name: string
-    displayName?: string
-  }
-}>()
+    id: string;
+    name: string;
+    displayName?: string;
+  };
+}>();
 
-const { isMobile } = useSidebar()
+const { isMobile } = useSidebar();
 
 function logout() {
   useUserStore().logout();
-  toast.success('登出成功');
-  navigateTo('/auth/login');
+  toast.success("登出成功");
+  navigateTo("/auth/login");
 }
 </script>
 
@@ -23,8 +23,10 @@ function logout() {
     <SidebarMenuItem>
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <SidebarMenuButton size="lg"
-            class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+          <SidebarMenuButton
+            size="lg"
+            class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          >
             <Avatar>
               <AvatarFallback>
                 {{ user.name.slice(0, 1) }}
@@ -32,15 +34,21 @@ function logout() {
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-semibold">{{ user.name }}</span>
-              <span class="truncate text-xs" v-if="user.displayName"><span
-                  class="text-muted-foreground text-sm">昵称：</span>{{ user.displayName }}</span>
+              <span class="truncate text-xs" v-if="user.displayName"
+                ><span class="text-sm text-muted-foreground">昵称：</span
+                >{{ user.displayName }}</span
+              >
               <span class="truncate text-xs">{{ user.id }}</span>
             </div>
             <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-          :side="isMobile ? 'bottom' : 'right'" align="end" :side-offset="4">
+        <DropdownMenuContent
+          class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+          :side="isMobile ? 'bottom' : 'right'"
+          align="end"
+          :side-offset="4"
+        >
           <DropdownMenuLabel class="p-0 font-normal">
             <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar>
@@ -50,7 +58,9 @@ function logout() {
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ user.name }}</span>
-                <span class="truncate text-xs" v-if="user.displayName">昵称：{{ user.displayName }}</span>
+                <span class="truncate text-xs" v-if="user.displayName"
+                  >昵称：{{ user.displayName }}</span
+                >
                 <span class="truncate text-xs">{{ user.id }}</span>
               </div>
             </div>

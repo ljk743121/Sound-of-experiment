@@ -1,39 +1,46 @@
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
-import type { AppRouter } from '~~/server/trpc/routers';
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "~~/server/trpc/routers";
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type RouterInput = inferRouterInputs<AppRouter>;
 
 export type TPermission =
-  'login' | // login to home page
-  'admin' | // visit the admin page
-  'review' | // review songs
-  'arrange' | // arrange songs
-  'deleteArrangement' |
-  'time' | // set opening time
-  'blockWords' | // manage block words
-  'manageUser' | // manage users (listing, banning, ...)
-  'deleteUser' |
-  'editPermissions' |
-  'resetPassword' |
-  'announcement'| //manage announcement
-  'deleteSong' |
-  'robot'; 
+  | "login" // login to home page
+  | "admin" // visit the admin page
+  | "review" // review songs
+  | "arrange" // arrange songs
+  | "deleteArrangement"
+  | "time" // set opening time
+  | "blockWords" // manage block words
+  | "manageUser" // manage users (listing, banning, ...)
+  | "deleteUser"
+  | "editPermissions"
+  | "resetPassword"
+  | "announcement" //manage announcement
+  | "deleteSong"
+  | "robot";
 
-export type TSongState = 'pending' | 'approved' | 'rejected' | 'used' | 'dropped';
+export type TSongState = "pending" | "approved" | "rejected" | "used" | "dropped";
 
-export type TIdentity = 'student' | 'teacher' | 'admin' | 'host' | 'superadmin' | 'retiree' | 'grad';
+export type TIdentity =
+  | "student"
+  | "teacher"
+  | "admin"
+  | "host"
+  | "superadmin"
+  | "retiree"
+  | "grad";
 
-export type TSubmitType = 'realName' | 'anonymous' | 'alias';
+export type TSubmitType = "realName" | "anonymous" | "alias";
 
-export type TMediaSource = 'wy' | 'tx';
+export type TMediaSource = "wy" | "tx";
 
 export type TMusicFlow = {
-    id: number;
-    audio: string;
-    title: string;
-    artist: string;
-    artwork: string;
-    album: string;
-    original?: Record<string, unknown>;
+  id: number;
+  audio: string;
+  title: string;
+  artist: string;
+  artwork: string;
+  album: string;
+  original?: Record<string, unknown>;
 };

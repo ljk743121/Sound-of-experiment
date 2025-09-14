@@ -9,18 +9,14 @@
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>修改权限</DialogTitle>
-        <DialogDescription>
-          更改用户的权限。
-        </DialogDescription>
+        <DialogDescription> 更改用户的权限。 </DialogDescription>
       </DialogHeader>
 
       <div class="flex gap-2">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>
-                权限
-              </TableHead>
+              <TableHead> 权限 </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -42,9 +38,7 @@
 
       <DialogFooter>
         <DialogClose as-child>
-          <Button type="button" variant="secondary">
-            取消
-          </Button>
+          <Button type="button" variant="secondary"> 取消 </Button>
         </DialogClose>
         <Button :disable="isPending" @click="mutate({ id, permissions: editPermission })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -55,14 +49,17 @@
   </Dialog>
 
   <Badge v-for="permission in permissions" :key="permission" variant="outline">
-    <Icon :name="permissionNames.find(x => x.value === permission)?.icon || 'lucide:help-circle'" class="mr-1" />
-    {{ permissionNames.find(x => x.value === permission)?.label || permission }}
+    <Icon
+      :name="permissionNames.find((x) => x.value === permission)?.icon || 'lucide:help-circle'"
+      class="mr-1"
+    />
+    {{ permissionNames.find((x) => x.value === permission)?.label || permission }}
   </Badge>
 </template>
 
 <script setup lang="ts">
-import type { TPermission } from '~~/types';
-import { permissionNames } from '~~/constants';
+import type { TPermission } from "~~/types";
+import { permissionNames } from "~~/constants";
 
 const { permissions } = defineProps<{
   id: string;
@@ -76,26 +73,23 @@ const isOpen = ref(false);
 const editPermission = ref(Array.from(permissions));
 
 watch(isOpen, (v) => {
-  if (!v)
-    editPermission.value = Array.from(permissions);
+  if (!v) editPermission.value = Array.from(permissions);
 });
 
 const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.user.editPermission.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user.listPermission'] });
+    await queryClient.invalidateQueries({ queryKey: ["user.listPermission"] });
     editPermission.value = Array.from(permissions);
-    toast.success('修改成功');
+    toast.success("修改成功");
     isOpen.value = false;
   },
-  onError: err => useErrorHandler(err),
+  onError: (err) => useErrorHandler(err),
 });
 
 function togglePermission(permission: TPermission) {
-  if (!editPermission.value.includes(permission))
-    editPermission.value.push(permission);
-  else
-    editPermission.value.splice(editPermission.value.indexOf(permission), 1);
+  if (!editPermission.value.includes(permission)) editPermission.value.push(permission);
+  else editPermission.value.splice(editPermission.value.indexOf(permission), 1);
 }
 </script>

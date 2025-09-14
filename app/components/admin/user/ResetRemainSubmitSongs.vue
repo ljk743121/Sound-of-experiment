@@ -1,5 +1,5 @@
 <template>
-  <span class="text-muted-foreground mr-2 my-auto">
+  <span class="my-auto mr-2 text-muted-foreground">
     {{ remainSongs }}
   </span>
   <Dialog v-model:open="isOpen">
@@ -19,9 +19,7 @@
       </DialogHeader>
       <DialogFooter>
         <DialogClose as-child>
-          <Button type="button" variant="secondary">
-            取消
-          </Button>
+          <Button type="button" variant="secondary"> 取消 </Button>
         </DialogClose>
         <Button :disable="isPending" @click="mutate({ id, maxSongs })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -47,10 +45,10 @@ const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.user.resetRemainSongs.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user.listSongs'] });
-    toast.success('重置成功');
+    await queryClient.invalidateQueries({ queryKey: ["user.listSongs"] });
+    toast.success("重置成功");
     isOpen.value = false;
   },
-  onError: err => useErrorHandler(err),
+  onError: (err) => useErrorHandler(err),
 });
 </script>

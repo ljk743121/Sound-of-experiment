@@ -3,9 +3,14 @@
     <!-- class="hover:cursor-pointer" @click="isOpen = true" -->
     <CardHeader>
       <div class="flex flex-row">
-        <Avatar class="size-12 rounded mr-4 relative overflow-hidden">
-          <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)" class="object-cover"
-            :alt="song.name" loading="lazy" />
+        <Avatar class="relative mr-4 size-12 overflow-hidden rounded">
+          <NuxtImg
+            v-if="song.imgId && song.source"
+            :src="getImgUrl(song.imgId, song.source)"
+            class="object-cover"
+            :alt="song.name"
+            loading="lazy"
+          />
           <Icon name="lucide:music" size="24" />
         </Avatar>
         <div>
@@ -16,7 +21,7 @@
             歌手:{{ song.creator }}
             <p class="mt-1">
               <Badge variant="outline">
-                {{ song.isRealName ? '实名' : '匿名' }}
+                {{ song.isRealName ? "实名" : "匿名" }}
               </Badge>
               <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
             </p>
@@ -27,27 +32,36 @@
           {{ useTimeAgo(song.createdAt) }}
         </span>
       </div>
-      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
-        留言: {{ song.msgPublic }}
-      </p>
+      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">留言: {{ song.msgPublic }}</p>
       <SongState v-if="!isArrangement" :song />
     </CardHeader>
     <ClientOnly>
       <DialogTemplate>
         <Button
-            @click.stop="handleAvatarClick"
-            :disabled="!(song.songId && song.source && song.songId.length > 0)"
-            variant="outline" size="icon">
-            <Icon v-if="!isPlaying" name="lucide:play" />
-            <Icon v-else name="lucide:pause" />
-          </Button>
+          @click.stop="handleAvatarClick"
+          :disabled="!(song.songId && song.source && song.songId.length > 0)"
+          variant="outline"
+          size="icon"
+        >
+          <Icon v-if="!isPlaying" name="lucide:play" />
+          <Icon v-else name="lucide:pause" />
+        </Button>
         <span v-if="song.likes && !isArrangement">
-          <Button v-if="song.likes.includes(userStore.id)" variant="outline" @click.prevent="disvote(song.id!)"
-            :disabled="isDisVoting">
+          <Button
+            v-if="song.likes.includes(userStore.id)"
+            variant="outline"
+            @click.prevent="disvote(song.id!)"
+            :disabled="isDisVoting"
+          >
             <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
             <Badge variant="destructive">{{ song.likeCount }}</Badge>
           </Button>
-          <Button v-else variant="outline" @click.prevent="vote(song.id!)" :disabled="isVoting || !userStore.loggedIn">
+          <Button
+            v-else
+            variant="outline"
+            @click.prevent="vote(song.id!)"
+            :disabled="isVoting || !userStore.loggedIn"
+          >
             <Icon name="lucide:heart" class="mr-1" />
             <Badge v-if="song.likes" variant="destructive">{{ song.likeCount }}</Badge>
           </Button>
@@ -99,7 +113,7 @@
           </li>
           <li v-if="song.createdAt" class="flex justify-between">
             <span class="min-w-20 text-sm text-muted-foreground">投稿时间</span>
-            <span class="font-mono">{{ song.createdAt?.toLocaleString('zh-CN') }}</span>
+            <span class="font-mono">{{ song.createdAt?.toLocaleString("zh-CN") }}</span>
           </li>
         </ul>
       </UseTemplate>
@@ -116,15 +130,20 @@
         <DialogContent class="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)"
-                class="object-cover mb-2" :alt="song.name" loading="lazy" />
+              <NuxtImg
+                v-if="song.imgId && song.source"
+                :src="getImgUrl(song.imgId, song.source)"
+                class="mb-2 object-cover"
+                :alt="song.name"
+                loading="lazy"
+              />
               {{ song.name }}
             </DialogTitle>
             <DialogDescription>
               歌手:{{ song.creator }}
               <p class="mt-2">
                 <Badge variant="outline">
-                  {{ song.isRealName ? '实名' : '匿名' }}
+                  {{ song.isRealName ? "实名" : "匿名" }}
                 </Badge>
                 <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
               </p>
@@ -147,15 +166,20 @@
         <DrawerContent>
           <DrawerHeader class="text-left">
             <DrawerTitle>
-              <NuxtImg v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)"
-                class="object-cover mb-2" :alt="song.name" loading="lazy" />
+              <NuxtImg
+                v-if="song.imgId && song.source"
+                :src="getImgUrl(song.imgId, song.source)"
+                class="mb-2 object-cover"
+                :alt="song.name"
+                loading="lazy"
+              />
               {{ song.name }}
             </DrawerTitle>
             <DrawerDescription>
               歌手:{{ song.creator }}
               <p>
                 <Badge variant="outline">
-                  {{ song.isRealName ? '实名' : '匿名' }}
+                  {{ song.isRealName ? "实名" : "匿名" }}
                 </Badge>
                 <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
               </p>
@@ -167,9 +191,11 @@
       </Drawer>
     </ClientOnly>
   </Card>
-  <div v-else-if="type === 'review'"
+  <div
+    v-else-if="type === 'review'"
     class="h-auto w-full cursor-pointer rounded-lg border p-4 shadow-xs transition-colors hover:bg-muted"
-    :class="{ 'bg-muted': selected }">
+    :class="{ 'bg-muted': selected }"
+  >
     <CardTitle>
       {{ song.name }}
     </CardTitle>
@@ -177,13 +203,11 @@
       歌手:{{ song.creator }}
       <p>
         <Badge variant="outline">
-          {{ song.isRealName ? '实名' : '匿名' }}
+          {{ song.isRealName ? "实名" : "匿名" }}
         </Badge>
         <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
       </p>
-      <p v-if="song.message" class="text-xs text-muted-foreground">
-        私密留言: {{ song.message }}
-      </p>
+      <p v-if="song.message" class="text-xs text-muted-foreground">私密留言: {{ song.message }}</p>
     </CardDescription>
   </div>
   <Card v-else-if="type === 'songs'">
@@ -197,7 +221,7 @@
             歌手:{{ song.creator }}
             <p>
               <Badge variant="outline">
-                {{ song.isRealName ? '实名' : '匿名' }}
+                {{ song.isRealName ? "实名" : "匿名" }}
               </Badge>
               <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
             </p>
@@ -208,23 +232,30 @@
           {{ useTimeAgo(song.createdAt) }}
         </span>
       </div>
-      <p v-if="song.message" class="text-xs text-muted-foreground">
-        私密留言: {{ song.message }}
-      </p>
+      <p v-if="song.message" class="text-xs text-muted-foreground">私密留言: {{ song.message }}</p>
       <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
         公开留言: {{ song.msgPublic }}
       </p>
 
       <div class="flex gap-1">
         <template v-if="song.state !== 'used' && song.state !== 'dropped'">
-          <Button v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="sm"
-            @click="approve({ id: song.id })">
+          <Button
+            v-if="song.state !== 'approved' && song.id"
+            variant="outline"
+            :disable="approvePending"
+            size="sm"
+            @click="approve({ id: song.id })"
+          >
             <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
             <Icon name="lucide:check" />
           </Button>
           <template v-if="song.state !== 'rejected' && song.id">
-            <Button variant="outline" :disable="rejectPending" size="sm"
-              @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })">
+            <Button
+              variant="outline"
+              :disable="rejectPending"
+              size="sm"
+              @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })"
+            >
               <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
               <Icon name="lucide:x" />
             </Button>
@@ -238,31 +269,31 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
-import { getImgUrl } from '~~/constants';
+import type { RouterOutput } from "~~/types";
+import { getImgUrl } from "~~/constants";
 
 const {
   song,
-  type = 'public',
+  type = "public",
   selected = false,
   isArrangement = false,
   isMine = false,
 } = defineProps<{
-  type?: 'public' | 'review' | 'songs';
+  type?: "public" | "review" | "songs";
   selected?: boolean;
-  song: Partial<RouterOutput['song']['listMine'][0]>;
+  song: Partial<RouterOutput["song"]["listMine"][0]>;
   isArrangement?: boolean;
   isMine?: boolean;
   isPlaying?: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: 'songExport', songInformation: typeof song): void
-}>()
+  (e: "songExport", songInformation: typeof song): void;
+}>();
 
 const isOpen = ref(false);
 
-const isDesktop = useMediaQuery('(min-width: 768px)');
+const isDesktop = useMediaQuery("(min-width: 768px)");
 const [UseTemplate, SongDrawer] = createReusableTemplate();
 const [DialogTemplate, SongDialog] = createReusableTemplate();
 
@@ -273,56 +304,56 @@ const queryClient = useQueryClient();
 const { mutate: approve, isPending: approvePending } = useMutation({
   mutationFn: $trpc.song.review.approve.mutate,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['song.list'] });
+    queryClient.invalidateQueries({ queryKey: ["song.list"] });
   },
-  onError: err => useErrorHandler(err),
+  onError: (err) => useErrorHandler(err),
 });
 
 const { mutate: reject, isPending: rejectPending } = useMutation({
   mutationFn: $trpc.song.review.reject.mutate,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['song.list'] });
+    queryClient.invalidateQueries({ queryKey: ["song.list"] });
   },
-  onError: err => useErrorHandler(err),
+  onError: (err) => useErrorHandler(err),
 });
 
-const rejectMessage = ref('');
+const rejectMessage = ref("");
 
 const formatDuration = (seconds: number): string => {
-  if (!seconds || seconds <= 0) return '00:00:00';
+  if (!seconds || seconds <= 0) return "00:00:00";
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
-  const pad = (num: number) => num.toString().padStart(2, '0');
+  const pad = (num: number) => num.toString().padStart(2, "0");
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
-}
+};
 
 const { mutate: vote, isPending: isVoting } = useMutation({
   mutationFn: $trpc.song.vote.mutate,
   onSuccess: () => {
-    toast.success('点赞成功');
-    queryClient.invalidateQueries({ queryKey: ['song.listMine'] });
-    queryClient.invalidateQueries({ queryKey: ['song.listSafe'] });
-    queryClient.invalidateQueries({ queryKey: ['arrangement.listSafe']});
+    toast.success("点赞成功");
+    queryClient.invalidateQueries({ queryKey: ["song.listMine"] });
+    queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
+    queryClient.invalidateQueries({ queryKey: ["arrangement.listSafe"] });
   },
-  onError: err => useErrorHandler(err),
-})
+  onError: (err) => useErrorHandler(err),
+});
 
 const { mutate: disvote, isPending: isDisVoting } = useMutation({
   mutationFn: $trpc.song.disvote.mutate,
   onSuccess: () => {
-    toast.success('取消点赞成功');
-    queryClient.invalidateQueries({ queryKey: ['song.listMine'] });
-    queryClient.invalidateQueries({ queryKey: ['song.listSafe'] });
-    queryClient.invalidateQueries({ queryKey: ['arrangement.listSafe']});
+    toast.success("取消点赞成功");
+    queryClient.invalidateQueries({ queryKey: ["song.listMine"] });
+    queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
+    queryClient.invalidateQueries({ queryKey: ["arrangement.listSafe"] });
   },
-  onError: err => useErrorHandler(err),
-})
+  onError: (err) => useErrorHandler(err),
+});
 
 const handleAvatarClick = (e: Event) => {
   e.stopPropagation();
   if (song.songId && song.source && song.songId.length > 0) {
-    emit('songExport', song);
+    emit("songExport", song);
   }
-}
+};
 </script>

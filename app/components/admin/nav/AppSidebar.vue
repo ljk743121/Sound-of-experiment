@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import type { SidebarProps } from '@/components/ui/sidebar'
-import type { TPermission } from '~~/types';
-import NavUser from './NavUser.vue';
-import NavMain from './NavMain.vue';
-import TimeSetting from './TimeSetting.vue';
-import { item } from '@unovis/ts/components/bullet-legend/style';
-
+import type { SidebarProps } from "@/components/ui/sidebar";
+import type { TPermission } from "~~/types";
+import NavUser from "./NavUser.vue";
+import NavMain from "./NavMain.vue";
+import TimeSetting from "./TimeSetting.vue";
+import { item } from "@unovis/ts/components/bullet-legend/style";
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: "icon",
-})
+});
 
 const userStore = useUserStore();
 
@@ -24,7 +23,7 @@ const data = {
       title: "通用界面",
       icon: "lucide:home",
       isActive: true,
-      permissions: ['admin'] as TPermission[],
+      permissions: ["admin"] as TPermission[],
       items: [
         {
           title: "投稿统计",
@@ -47,26 +46,26 @@ const data = {
           title: "歌曲审核",
           url: "/admin/songs/review",
           icon: "lucide:music-4",
-          permissions: ['review'] as TPermission[],
+          permissions: ["review"] as TPermission[],
         },
         {
           title: "管理歌曲",
           icon: "lucide:list-music",
           url: "/admin/songs",
-          permissions: ['review'] as TPermission[],
+          permissions: ["review"] as TPermission[],
         },
         {
           title: "排歌列表",
           url: "/admin/songs/arrange",
           icon: "lucide:arrow-down-wide-narrow",
-          permissions: ['arrange'] as TPermission[],
+          permissions: ["arrange"] as TPermission[],
         },
       ],
     },
     {
       title: "用户管理",
       icon: "lucide:users",
-      permissions: ['manageUser'] as TPermission[],
+      permissions: ["manageUser"] as TPermission[],
       items: [
         {
           title: "查看投稿记录",
@@ -77,19 +76,19 @@ const data = {
           title: "编辑权限",
           url: "/admin/user/editPermissions",
           icon: "lucide:edit",
-          permissions: ['editPermissions'] as TPermission[],
+          permissions: ["editPermissions"] as TPermission[],
         },
         {
           title: "重置密码",
           url: "/admin/user/resetPassword",
           icon: "lucide:lock",
-          permissions: ['resetPassword'] as TPermission[],
+          permissions: ["resetPassword"] as TPermission[],
         },
         {
           title: "删除用户",
           url: "/admin/user/deleteUser",
           icon: "lucide:trash",
-          permissions: ['deleteUser'] as TPermission[],
+          permissions: ["deleteUser"] as TPermission[],
         },
       ],
     },
@@ -97,13 +96,13 @@ const data = {
       title: "屏蔽词",
       url: "/admin/words",
       icon: "lucide:ban",
-      permissions: ['blockWords'] as TPermission[],
+      permissions: ["blockWords"] as TPermission[],
     },
     {
       title: "编辑公告",
       url: "/admin/announcement",
       icon: "lucide:bell",
-      permissions: ['announcement'] as TPermission[],
+      permissions: ["announcement"] as TPermission[],
     },
   ],
   settings: [
@@ -111,10 +110,10 @@ const data = {
       name: "设置开放时间",
       url: "/admin/time",
       icon: "lucide:clock",
-      permissions: ['time'] as TPermission[],
+      permissions: ["time"] as TPermission[],
     },
   ],
-}
+};
 </script>
 
 <template>

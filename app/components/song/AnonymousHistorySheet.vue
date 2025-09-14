@@ -23,9 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 
 defineProps<{
-  songs: RouterOutput['song']['listSafe'];
+  songs: RouterOutput["song"]["listSafe"];
 }>();
 </script>

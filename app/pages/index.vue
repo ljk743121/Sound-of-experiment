@@ -1,14 +1,14 @@
 <template>
-  <main class="container mx-auto grid h-screen max-w-screen-xl grid-cols-1 gap-4 p-5 md:grid-cols-2 md:gap-8 md:p-10">
+  <main
+    class="container mx-auto grid h-screen max-w-screen-xl grid-cols-1 gap-4 p-5 md:grid-cols-2 md:gap-8 md:p-10"
+  >
     <section class="flex flex-col gap-3 md:self-center">
       <LogosSoe class="w-full" />
 
       <div class="grid grid-cols-2 gap-3">
         <div class="grid grid-rows-2 gap-3">
           <Button class="block h-full items-center gap-2" variant="outline">
-            <div class="text-xs">
-              本月已收集歌曲
-            </div>
+            <div class="text-xs">本月已收集歌曲</div>
             <div class="text-2xl font-bold">
               {{ songList?.length || songGuestList?.length || 0 }}
             </div>
@@ -17,15 +17,20 @@
             <TimeAvailability is-card />
           </TimeAvailabilityDialog>
         </div>
-        <Button class="size-full text-xl font-bold" :disabled="!canSubmit" variant="secondary"
-          @click.prevent="navigateTo('/submit')">
+        <Button
+          class="size-full text-xl font-bold"
+          :disabled="!canSubmit"
+          variant="secondary"
+          @click.prevent="navigateTo('/submit')"
+        >
           <div class="flex flex-col items-center">
             <span>
               <Icon name="lucide:music-4" size="26" class="mr-2" />
               投稿
             </span>
-            <span v-if="userStore.loggedIn" class="text-sm font-normal">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0
-              }})</span>
+            <span v-if="userStore.loggedIn" class="text-sm font-normal"
+              >(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span
+            >
             <span v-else class="text-sm font-normal">登录以点歌</span>
           </div>
         </Button>
@@ -34,13 +39,16 @@
         <HomeRule>
           <Button variant="outline" class="w-full">
             <Icon name="lucide:circle-help" class="mr-1" size="16" />
-            <span>
-              规则介绍
-            </span>
+            <span> 规则介绍 </span>
           </Button>
         </HomeRule>
 
-        <Button variant="outline" @click.prevent="navigateTo('/stats')" class="w-full" :disabled="!userStore.loggedIn">
+        <Button
+          variant="outline"
+          class="w-full"
+          :disabled="!userStore.loggedIn"
+          @click.prevent="navigateTo('/stats')"
+        >
           <Icon name="lucide:chart-column" class="mr-1" size="16" />
           数据统计
         </Button>
@@ -64,14 +72,19 @@
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ userStore.name }}</span>
-                <span class="truncate text-xs" v-if="userStore.displayName">{{ userStore.displayName }}</span>
+                <span v-if="userStore.displayName" class="truncate text-xs">{{
+                  userStore.displayName
+                }}</span>
                 <span class="truncate text-xs">{{ userStore.id }}</span>
               </div>
               <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom"
-            :side-offset="4">
+          <DropdownMenuContent
+            class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            side="bottom"
+            :side-offset="4"
+          >
             <DropdownMenuLabel class="p-0 font-normal">
               <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar>
@@ -81,7 +94,9 @@
                 </Avatar>
                 <div class="grid flex-1 text-left text-sm leading-tight">
                   <span class="truncate font-semibold">{{ userStore.name }}</span>
-                  <span class="truncate text-xs" v-if="userStore.displayName">{{ userStore.displayName }}</span>
+                  <span v-if="userStore.displayName" class="truncate text-xs">{{
+                    userStore.displayName
+                  }}</span>
                   <span class="truncate text-xs">{{ userStore.id }}</span>
                 </div>
               </div>
@@ -91,7 +106,10 @@
               <Icon name="lucide:user-check" />
               个人资料
             </DropdownMenuItem>
-            <DropdownMenuItem v-if="userStore.permissions.includes('admin')" @click="navigateTo('/admin')">
+            <DropdownMenuItem
+              v-if="userStore.permissions.includes('admin')"
+              @click="navigateTo('/admin')"
+            >
               <Icon name="lucide:gauge" />
               管理
             </DropdownMenuItem>
@@ -101,7 +119,12 @@
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button v-if="!userStore.loggedIn" variant="outline" class="w-max" @click.prevent="navigateTo('/auth/login')">
+        <Button
+          v-if="!userStore.loggedIn"
+          variant="outline"
+          class="w-max"
+          @click.prevent="navigateTo('/auth/login')"
+        >
           <Icon name="lucide:circle-user" size="20" />
           登录
         </Button>
@@ -114,17 +137,19 @@
       <Tabs v-model="selectedTab" default-value="arrangement">
         <div class="-mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
           <TabsList class="grid grid-cols-3">
-            <TabsTrigger value="arrangement">
-              排歌歌单
-            </TabsTrigger>
-            <TabsTrigger value="list">
-              歌曲列表
-            </TabsTrigger>
-            <TabsTrigger value="notification" :disabled="!userStore.loggedIn" @click="hasNewAnnouncement = false">
+            <TabsTrigger value="arrangement"> 排歌歌单 </TabsTrigger>
+            <TabsTrigger value="list"> 歌曲列表 </TabsTrigger>
+            <TabsTrigger
+              value="notification"
+              :disabled="!userStore.loggedIn"
+              @click="hasNewAnnouncement = false"
+            >
               通知
-              <span v-if="hasNewAnnouncement" class="absolute right-2 top-2 flex h-2 w-2">
-                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
+              <span v-if="hasNewAnnouncement" class="absolute top-2 right-2 flex h-2 w-2">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"
+                />
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
               </span>
             </TabsTrigger>
           </TabsList>
@@ -133,36 +158,67 @@
           <Tabs v-model="listMode" default-value="songList">
             <div>
               <TabsList class="grid grid-cols-2">
-                <TabsTrigger value="songList">
-                  本月歌曲
-                </TabsTrigger>
-                <TabsTrigger value="myList" :disabled="!userStore.loggedIn">
-                  我的歌曲
-                </TabsTrigger>
+                <TabsTrigger value="songList"> 本月歌曲 </TabsTrigger>
+                <TabsTrigger value="myList" :disabled="!userStore.loggedIn"> 我的歌曲 </TabsTrigger>
               </TabsList>
-              <div v-if="selectedTab === 'list'" class="relative mt-1 w-full items-center bg-background">
-                <Input id="search" v-model="searchPrompt" type="text" placeholder="搜索歌曲" class="pl-8" />
+              <div
+                v-if="selectedTab === 'list'"
+                class="relative mt-1 w-full items-center bg-background"
+              >
+                <Input
+                  id="search"
+                  v-model="searchPrompt"
+                  type="text"
+                  placeholder="搜索歌曲"
+                  class="pl-8"
+                />
                 <span class="absolute inset-y-0 start-0 flex items-center justify-center pl-3">
                   <Icon name="lucide:search" class="text-muted-foreground" />
                 </span>
               </div>
             </div>
             <TabsContent value="songList">
-              <SongCard v-for="song in filteredList" :key="song.id" :song @songExport="playMusic"
-                :isPlaying="isTrackPlaying(song.id)" />
+              <SongCard
+                v-for="song in filteredList"
+                :key="song.id"
+                :song
+                :is-playing="isTrackPlaying(song.id)"
+                @song-export="playMusic"
+              />
             </TabsContent>
             <TabsContent value="myList">
-              <SongCard v-if="userStore.loggedIn" v-for="song in filteredList" :key="song.id" :song
-                @songExport="playMusic" isMine :isPlaying="isTrackPlaying(song.id)" />
+              <SongCard
+                v-for="song in filteredList"
+                v-if="userStore.loggedIn"
+                :key="song.id"
+                :song
+                is-mine
+                :is-playing="isTrackPlaying(song.id)"
+                @song-export="playMusic"
+              />
             </TabsContent>
           </Tabs>
         </TabsContent>
         <TabsContent value="arrangement">
-          <DatePicker v-model="selectedDate" mode="date" borderless expanded title-position="left" is-required
-            :attributes="calendarAttr" :is-dark="isDark" class="mb-4 bg-background!" />
+          <DatePicker
+            v-model="selectedDate"
+            mode="date"
+            borderless
+            expanded
+            title-position="left"
+            is-required
+            :attributes="calendarAttr"
+            :is-dark="isDark"
+            class="mb-4 bg-background!"
+          />
           <ul class="flex flex-col gap-3">
             <li v-for="song in arrangementListSongs" :key="song.id">
-              <SongCard :song @songExport="playMusic" is-arrangement :isPlaying="isTrackPlaying(song.id)" />
+              <SongCard
+                :song
+                is-arrangement
+                :is-playing="isTrackPlaying(song.id)"
+                @song-export="playMusic"
+              />
             </li>
           </ul>
         </TabsContent>
@@ -173,37 +229,39 @@
           <HomeAnnouncement v-else :announcement-list="announcementList!" />
         </TabsContent>
       </Tabs>
-      <div class=" h-16"></div>
+      <div class="h-16" />
       <ClientOnly>
-        <MusicFlow v-if="userStore.loggedIn" :options="{
-          autoplay: true,
-        }"
+        <MusicFlow
+          v-if="userStore.loggedIn"
+          :options="{
+            autoplay: true,
+          }"
           :fetch-url="fetchUrl"
-        >
-        </MusicFlow>
+        />
       </ClientOnly>
     </section>
-    <div class="h-40"></div>
+    <div class="h-40" />
   </main>
-
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
-import { useFuse, type UseFuseOptions } from '@vueuse/integrations/useFuse';
-import { DatePicker } from '@ztl-uwu/v-calendar';
+import type { RouterOutput } from "~~/types";
+import { MusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
+import { useFuse, type UseFuseOptions } from "@vueuse/integrations/useFuse";
+import { DatePicker } from "@ztl-uwu/v-calendar";
+import { getImgUrl } from "~~/constants";
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 const queryClient = useQueryClient();
 
 const selectedDate = ref(new Date());
-const isDark = computed(() => useColorMode().preference === 'dark');
+const isDark = computed(() => useColorMode().preference === "dark");
 const hasNewAnnouncement = ref(false);
 
 const { data: songList, refetch: songListRefetch } = useQuery({
   queryFn: () => $trpc.song.listSafe.query(),
-  queryKey: ['song.listSafe'],
+  queryKey: ["song.listSafe"],
   refetchInterval: 10000,
   refetchIntervalInBackground: false,
   refetchOnMount: false,
@@ -212,7 +270,7 @@ const { data: songList, refetch: songListRefetch } = useQuery({
 
 const { data: songGuestList, refetch: songGuestListRefetch } = useQuery({
   queryFn: () => $trpc.song.listGuest.query(),
-  queryKey: ['song.listGuest'],
+  queryKey: ["song.listGuest"],
   refetchInterval: 10000,
   refetchIntervalInBackground: false,
   refetchOnMount: false,
@@ -221,7 +279,7 @@ const { data: songGuestList, refetch: songGuestListRefetch } = useQuery({
 
 const { data: mySongList, refetch: mySongListRefetch } = useQuery({
   queryFn: () => $trpc.song.listMine.query(),
-  queryKey: ['song.listMine'],
+  queryKey: ["song.listMine"],
   refetchIntervalInBackground: false,
   refetchOnMount: false,
   enabled: userStore.loggedIn,
@@ -229,7 +287,7 @@ const { data: mySongList, refetch: mySongListRefetch } = useQuery({
 
 const { data: canSubmit, refetch: canSubmitRefetch } = useQuery({
   queryFn: () => $trpc.song.canSubmit.query(),
-  queryKey: ['song.canSubmit'],
+  queryKey: ["song.canSubmit"],
   refetchInterval: 10000,
   refetchIntervalInBackground: false,
   refetchOnMount: false,
@@ -238,7 +296,7 @@ const { data: canSubmit, refetch: canSubmitRefetch } = useQuery({
 
 const { data: remainSubmitSongs, refetch: remainSubmitSongsRefetch } = useQuery({
   queryFn: () => $trpc.song.remainSubmitSongs.query(),
-  queryKey: ['song.remainSubmitSongs'],
+  queryKey: ["song.remainSubmitSongs"],
   refetchIntervalInBackground: false,
   refetchInterval: 10000,
   refetchOnMount: false,
@@ -247,7 +305,7 @@ const { data: remainSubmitSongs, refetch: remainSubmitSongsRefetch } = useQuery(
 
 const { data: arrangementList, refetch: arrangementListRefetch } = useQuery({
   queryFn: () => $trpc.arrangements.listSafe.query(),
-  queryKey: ['arrangements.listSafe'],
+  queryKey: ["arrangements.listSafe"],
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
   refetchOnMount: false,
@@ -256,37 +314,45 @@ const { data: arrangementList, refetch: arrangementListRefetch } = useQuery({
 
 const { data: arrangementGuestList, refetch: arrangementGuestListRefetch } = useQuery({
   queryFn: () => $trpc.arrangements.listGuest.query(),
-  queryKey: ['arrangements.listGuest'],
+  queryKey: ["arrangements.listGuest"],
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
   refetchOnMount: false,
   enabled: false,
 });
 
-const { data: announcementList, refetch: listRefetch, isPending: isAnnouncementListPending } = useQuery({
+const {
+  data: announcementList,
+  refetch: listRefetch,
+  isPending: isAnnouncementListPending,
+} = useQuery({
   queryFn: () => $trpc.announcement.listSafe.query(),
-  queryKey: ['announcement.listSafe'],
+  queryKey: ["announcement.listSafe"],
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
   enabled: false,
-})
+});
 
 function getDateString(date: Date) {
-  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 }
 
-const arrangementListSongs = computed(
-  () => {
-    if (userStore.loggedIn) {
-      if (arrangementList.value) {
-        return arrangementList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs || [];
-      }
-      return [];
-    } else {
-      return arrangementGuestList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs || [];
+const arrangementListSongs = computed(() => {
+  if (userStore.loggedIn) {
+    if (arrangementList.value) {
+      return (
+        arrangementList.value?.find((e) => e.date === getDateString(selectedDate.value))?.songs ||
+        []
+      );
     }
+    return [];
+  } else {
+    return (
+      arrangementGuestList.value?.find((e) => e.date === getDateString(selectedDate.value))
+        ?.songs || []
+    );
   }
-);
+});
 
 const calendarAttr = computed(() => {
   const res = [];
@@ -320,23 +386,25 @@ if (!userStore.loggedIn) {
       await arrangementListRefetch();
       await remainSubmitSongsRefetch();
     } catch {
-      navigateTo('/auth/login');
+      navigateTo("/auth/login");
     }
     await listRefetch();
-    if (announcementList.value &&
+    if (
+      announcementList.value &&
       announcementList.value.length > 0 &&
       userStore.lastLoginAt &&
-      announcementList.value[0]) {
+      announcementList.value[0]
+    ) {
       const lastLoginTime = new Date(userStore.lastLoginAt).getTime();
       const announcementTime = announcementList.value[0].createdAt.getTime();
       if (lastLoginTime < announcementTime) {
         hasNewAnnouncement.value = true;
         toast.warning("有新的公告等待查看");
         $trpc.user.updateLoginTime.mutate();
-        userStore.lastLoginAt = (new Date()).toISOString();
+        userStore.lastLoginAt = new Date().toISOString();
       } else {
-        userStore.lastLoginAt = (new Date()).toISOString();
-      };
+        userStore.lastLoginAt = new Date().toISOString();
+      }
     }
   } else {
     await arrangementGuestListRefetch();
@@ -346,56 +414,53 @@ if (!userStore.loggedIn) {
 
 function logout() {
   userStore.logout();
-  toast.success('登出成功');
-  navigateTo('/auth/login');
+  toast.success("登出成功");
+  navigateTo("/auth/login");
 }
 
-type TLists = RouterOutput['song']['listSafe'];
-type TGuestLists = RouterOutput['song']['listGuest'];
-const listMode = ref<'songList' | 'myList'>('songList');
+type TLists = RouterOutput["song"]["listSafe"];
+type TGuestLists = RouterOutput["song"]["listGuest"];
+const listMode = ref<"songList" | "myList">("songList");
 
 const fuseOptions: UseFuseOptions<TLists[0]> = {
   fuseOptions: {
-    keys: ['name', 'creator'],
+    keys: ["name", "creator"],
     shouldSort: true,
   },
   matchAllWhenSearchEmpty: true,
 };
 const fuseGuestOptions: UseFuseOptions<TGuestLists[0]> = {
   fuseOptions: {
-    keys: ['name', 'creator'],
+    keys: ["name", "creator"],
     shouldSort: true,
   },
   matchAllWhenSearchEmpty: true,
 };
 
-const searchPrompt = ref('');
+const searchPrompt = ref("");
 const fuse = computed(() => {
   if (!userStore.loggedIn) {
     return songGuestList.value === undefined
       ? useFuse<TGuestLists[0]>(searchPrompt, [], fuseGuestOptions)
       : useFuse<TGuestLists[0]>(searchPrompt, songGuestList, fuseGuestOptions);
   }
-  if (listMode.value === 'songList') {
+  if (listMode.value === "songList") {
     return songList.value === undefined
       ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
       : useFuse<TLists[0]>(searchPrompt, songList, fuseOptions);
   }
-  if (listMode.value === 'myList') {
+  if (listMode.value === "myList") {
     return mySongList.value === undefined
       ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
       : useFuse<TLists[0]>(searchPrompt, mySongList, fuseOptions);
   }
   return useFuse<TLists[0]>(searchPrompt, [], fuseOptions);
-})
+});
 
-const filteredList = computed(() => fuse.value.results.value.map(e => e.item));
+const filteredList = computed(() => fuse.value.results.value.map((e) => e.item));
 
-const selectedTab = ref<'list' | 'arrangement' | 'notification'>('arrangement');
+const selectedTab = ref<"list" | "arrangement" | "notification">("arrangement");
 
-
-import { getImgUrl } from '~~/constants';
-import { MusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
 const { onPlayAsPlaylist, isTrackPlaying } = useMusicFlow();
 
 const tracks = ref<TMusicFlow[]>([]);
@@ -405,48 +470,51 @@ const previousDate = ref(new Date());
 
 const { data: songUrl } = useQuery({
   queryFn: () => $trpc.search.mixGetUrl.query,
-  queryKey: ['search.mixGetUrl'],
+  queryKey: ["search.mixGetUrl"],
   refetchOnWindowFocus: false,
   refetchIntervalInBackground: false,
-  enabled: track.value ? true : false,
+  enabled: !!track.value,
 });
 
-async function fetchUrl(data: Record<string, unknown>){
-  if (!data) return '';
-  if (!data.songId || !data.source) return '';
-  await queryClient.invalidateQueries({ queryKey: ['search.mixGetUrl'] });
+async function fetchUrl(data: Record<string, unknown>) {
+  if (!data) return "";
+  if (!data.songId || !data.source) return "";
+  await queryClient.invalidateQueries({ queryKey: ["search.mixGetUrl"] });
   const song = await queryClient.fetchQuery({
-      queryKey: ['search.mixGetUrl'],
-      queryFn: () => $trpc.search.mixGetUrl.query({
+    queryKey: ["search.mixGetUrl"],
+    queryFn: () =>
+      $trpc.search.mixGetUrl.query({
         id: data.songId! as string,
         source: data.source! as string,
       }),
-    });
-  if (song){
+  });
+  if (song) {
     return song.url;
   }
-  return '';
+  return "";
 }
 
-async function playMusic(song: Partial<RouterOutput['song']['listSafe'][0]>) {
+async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
   if (song.songId === null || song.source === null) {
-    toast.error('无歌曲数据');
+    toast.error("无歌曲数据");
     return;
   }
-  const isOutdate = ((selectedTab.value==='list' ? listMode.value : selectedTab.value) !== previousList.value) || (selectedDate.value !== previousDate.value)
+  const isOutdate =
+    (selectedTab.value === "list" ? listMode.value : selectedTab.value) !== previousList.value ||
+    selectedDate.value !== previousDate.value;
   if (!tracks.value.length || isOutdate) {
-    let TrackList: TLists | undefined = undefined;
-    if (selectedTab.value === 'list') {
-      if (listMode.value === 'songList') {
+    let TrackList: TLists | undefined;
+    if (selectedTab.value === "list") {
+      if (listMode.value === "songList") {
         TrackList = songList.value;
-      } else if (listMode.value === 'myList') {
+      } else if (listMode.value === "myList") {
         TrackList = mySongList.value;
       }
-    }else if (selectedTab.value === 'arrangement') {
+    } else if (selectedTab.value === "arrangement") {
       if (selectedDate.value !== previousDate.value)
-      TrackList = arrangementListSongs.value as TLists;
+        TrackList = arrangementListSongs.value as TLists;
     }
-    previousList.value = selectedTab.value==='list' ? listMode.value : selectedTab.value;
+    previousList.value = selectedTab.value === "list" ? listMode.value : selectedTab.value;
     if (TrackList) {
       tracks.value = Array.from(TrackList, (e) => {
         if (!e.songId || !e.source) return undefined;
@@ -454,13 +522,13 @@ async function playMusic(song: Partial<RouterOutput['song']['listSafe'][0]>) {
           id: e.id!,
           title: e.name!,
           artist: e.creator!,
-          artwork: e.imgId ? getImgUrl(e.imgId, e.source!) : '',
-          album: '',
+          artwork: e.imgId ? getImgUrl(e.imgId, e.source!) : "",
+          album: "",
           data: {
             songId: e.songId,
             source: e.source!,
-          }
-        }
+          },
+        };
       }).filter((e) => e !== undefined);
     }
   }
@@ -468,13 +536,13 @@ async function playMusic(song: Partial<RouterOutput['song']['listSafe'][0]>) {
     id: song.id!,
     title: song.name!,
     artist: song.creator!,
-    artwork: song.imgId ? getImgUrl(song.imgId, song.source!) : '',
-    album: '',
+    artwork: song.imgId ? getImgUrl(song.imgId, song.source!) : "",
+    album: "",
     data: {
       songId: song.songId,
       source: song.source!,
-    }
+    },
   };
-  onPlayAsPlaylist(tracks.value,track.value)
+  onPlayAsPlaylist(tracks.value, track.value);
 }
 </script>

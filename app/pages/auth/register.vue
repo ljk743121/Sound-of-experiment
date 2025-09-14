@@ -1,13 +1,15 @@
 <template>
-  <div class="flex h-svh w-full justify-center lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
+  <div
+    class="flex h-svh w-full justify-center lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]"
+  >
     <div class="flex items-center justify-center py-12">
       <div class="mx-auto grid w-[350px] gap-6">
         <div class="grid gap-2 text-center">
-          <h1 class="text-3xl font-bold">
-            注册
-          </h1>
+          <h1 class="text-3xl font-bold">注册</h1>
           <p class="text-balance text-muted-foreground">
-            注册<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号
+            注册<span class="mx-1 font-mono font-light tracking-tighter text-blue-700"
+              >Voice of SZSY</span
+            >账号
           </p>
         </div>
         <div class="grid gap-4">
@@ -33,7 +35,7 @@
               </FormItem>
             </FormField>
             <FormField v-slot="{ componentField }" name="displayName">
-              <FormItem v-auto-animate> 
+              <FormItem v-auto-animate>
                 <FormLabel>昵称(可选)</FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="Alias" v-bind="componentField" />
@@ -51,7 +53,7 @@
                 <FormMessage />
               </FormItem>
             </FormField>
-            <br>
+            <br />
             <Button type="submit" class="w-full" :disable="isPending">
               <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
               注册
@@ -60,10 +62,10 @@
         </div>
         <div class="mt-4 text-center text-sm">
           <p class="text-muted-foreground">
-            已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
-            <NuxtLink to="/auth/login" class="text-primary">
-              登录
-            </NuxtLink>
+            已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700"
+              >Voice of SZSY</span
+            >账号？
+            <NuxtLink to="/auth/login" class="text-primary"> 登录 </NuxtLink>
           </p>
         </div>
       </div>
@@ -75,39 +77,49 @@
 </template>
 
 <script setup lang="ts">
-import { vAutoAnimate } from '@formkit/auto-animate/vue';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
-import * as z from 'zod';
-import { pwRegex } from '~~/constants';
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
+import * as z from "zod";
+import { pwRegex } from "~~/constants";
 
 const { $trpc } = useNuxtApp();
 
 useHead({
-  title: '账号注册',
+  title: "账号注册",
   meta: [
-    { name: 'description', content: 'Voice of SZSY 注册页面' },
-    { name: 'keywords', content: '点歌,注册,用户注册,广播站系统' },
+    { name: "description", content: "Voice of SZSY 注册页面" },
+    { name: "keywords", content: "点歌,注册,用户注册,广播站系统" },
   ],
 });
 
 try {
-  const isRegisterOpen = await $trpc.config.get.mutate('isRegisterOpen');
-  if (!isRegisterOpen){
-    toast.error('注册已关闭');
-    navigateTo('/auth/login');
+  const isRegisterOpen = await $trpc.config.get.mutate("isRegisterOpen");
+  if (!isRegisterOpen) {
+    toast.error("注册已关闭");
+    navigateTo("/auth/login");
   }
   await $trpc.user.tokenValidity.query();
-  navigateTo('/');
+  navigateTo("/");
 } catch {}
 
 const formSchema = toTypedSchema(
   z.object({
-    id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
-    username: z.string().trim().min(2, '最少为2个字符').max(7, '最多为7个字符').regex(/[一-龥]+/, '输入必须为汉字'),
-    displayName: z.string().trim().min(1, '最少为1个字符').max(32, '最多为32个字符').optional(),
-    password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(pwRegex, '密码需包括至少1个字母,1个数字').trim(),
-  }),
+    id: z.string().length(7, "校园卡号为7位数字").regex(/\d+/, "输入必须为数字").trim(),
+    username: z
+      .string()
+      .trim()
+      .min(2, "最少为2个字符")
+      .max(7, "最多为7个字符")
+      .regex(/[一-龥]+/, "输入必须为汉字"),
+    displayName: z.string().trim().min(1, "最少为1个字符").max(32, "最多为32个字符").optional(),
+    password: z
+      .string()
+      .min(6, "最少为6个字符")
+      .max(16, "最多为16个字符")
+      .regex(pwRegex, "密码需包括至少1个字母,1个数字")
+      .trim(),
+  })
 );
 
 const { handleSubmit } = useForm({
@@ -118,10 +130,10 @@ const { mutate: login, isPending } = useMutation({
   mutationFn: $trpc.user.register.mutate,
   onSuccess: (res) => {
     useUserStore().login(res);
-    toast.success('注册成功，正在登录');
-    navigateTo('/');
+    toast.success("注册成功，正在登录");
+    navigateTo("/");
   },
-  onError: err => useErrorHandler(err),
+  onError: (err) => useErrorHandler(err),
 });
 
 const onSubmit = handleSubmit(async (values) => {

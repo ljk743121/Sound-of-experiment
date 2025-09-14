@@ -5,7 +5,7 @@
         class="max-w-sm"
         placeholder="搜索学号"
         :model-value="table.getColumn('id')?.getFilterValue() as string"
-        @update:model-value=" table.getColumn('id')?.setFilterValue($event)"
+        @update:model-value="table.getColumn('id')?.setFilterValue($event)"
       />
     </div>
     <div class="rounded-md border">
@@ -13,7 +13,11 @@
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
             <TableHead v-for="header in headerGroup.headers" :key="header.id">
-              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
+              <FlexRender
+                v-if="!header.isPlaceholder"
+                :render="header.column.columnDef.header"
+                :props="header.getContext()"
+              />
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -33,12 +37,7 @@
             </template>
           </template>
           <TableRow v-else>
-            <TableCell
-              :colspan="columns.length"
-              class="h-24 text-center"
-            >
-              无结果。
-            </TableCell>
+            <TableCell :colspan="columns.length" class="h-24 text-center"> 无结果。 </TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -72,9 +71,9 @@ import type {
   ExpandedState,
   SortingState,
   VisibilityState,
-} from '@tanstack/vue-table';
+} from "@tanstack/vue-table";
 
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 import {
   FlexRender,
   getCoreRowModel,
@@ -83,20 +82,20 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useVueTable,
-} from '@tanstack/vue-table';
+} from "@tanstack/vue-table";
 
-import Button from '~/components/ui/button/Button.vue';
-import { valueUpdater } from '~/lib/table';
+import Button from "~/components/ui/button/Button.vue";
+import { valueUpdater } from "~/lib/table";
 
 definePageMeta({
-  layout: 'admin',
+  layout: "admin",
 });
 
-type a = Partial<RouterOutput['user']['list'][0]>;
+type a = Partial<RouterOutput["user"]["list"][0]>;
 
 const { columns, data = [] } = defineProps<{
-  columns: ColumnDef<a>[],
-  data: a[],
+  columns: ColumnDef<a>[];
+  data: a[];
 }>();
 
 const sorting = ref<SortingState>([]);
@@ -114,17 +113,27 @@ const table = useVueTable({
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
   getExpandedRowModel: getExpandedRowModel(),
-  onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
-  onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
-  onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
-  onRowSelectionChange: updaterOrValue => valueUpdater(updaterOrValue, rowSelection),
-  onExpandedChange: updaterOrValue => valueUpdater(updaterOrValue, expanded),
+  onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
+  onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
+  onColumnVisibilityChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnVisibility),
+  onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
+  onExpandedChange: (updaterOrValue) => valueUpdater(updaterOrValue, expanded),
   state: {
-    get sorting() { return sorting.value; },
-    get columnFilters() { return columnFilters.value; },
-    get columnVisibility() { return columnVisibility.value; },
-    get rowSelection() { return rowSelection.value; },
-    get expanded() { return expanded.value; },
+    get sorting() {
+      return sorting.value;
+    },
+    get columnFilters() {
+      return columnFilters.value;
+    },
+    get columnVisibility() {
+      return columnVisibility.value;
+    },
+    get rowSelection() {
+      return rowSelection.value;
+    },
+    get expanded() {
+      return expanded.value;
+    },
   },
   initialState: {
     pagination: {

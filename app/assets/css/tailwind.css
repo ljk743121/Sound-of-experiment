@@ -43,19 +43,19 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   @keyframes accordion-down {
-  from {
-    height: 0;
+    from {
+      height: 0;
     }
-  to {
-    height: var(--reka-accordion-content-height);
+    to {
+      height: var(--reka-accordion-content-height);
     }
   }
   @keyframes accordion-up {
-  from {
-    height: var(--reka-accordion-content-height);
+    from {
+      height: var(--reka-accordion-content-height);
     }
-  to {
-    height: 0;
+    to {
+      height: 0;
     }
   }
 }
@@ -131,7 +131,8 @@
   --sidebar-ring: oklch(0.442 0.017 285.786);
 }
 
-:root, :host {
+:root,
+:host {
   --color-mw-primary-dark: oklch(0.1296 0.0274 261.69);
   --color-mw-primary: oklch(0.2099 0.0341 263.44);
   --color-mw-secondary: oklch(0.2784 0.0335 257.67);

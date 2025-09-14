@@ -14,33 +14,31 @@
           </div>
         </div>
         <div v-else-if="announcementList && announcementList.length">
-          <HomeAnnouncement :announcement-list="announcementList!"/>
+          <HomeAnnouncement :announcement-list="announcementList!" />
         </div>
-        <div v-else> 
-          无公告
-        </div>
+        <div v-else>无公告</div>
       </CardContent>
     </Card>
   </div>
 </template>
 <script setup lang="ts">
 definePageMeta({
-  layout: 'admin',
+  layout: "admin",
 });
 const userStore = useUserStore();
 
 const { $trpc } = useNuxtApp();
 
-try{
+try {
   await $trpc.user.adminValidity.query();
-}catch{
-  navigateTo('/')
+} catch {
+  navigateTo("/");
 }
 
 const { data: announcementList, isPending } = useQuery({
   queryFn: () => $trpc.announcement.listAdmin.query(),
-  queryKey: ['announcement.listAdmin'],
+  queryKey: ["announcement.listAdmin"],
   refetchOnWindowFocus: false,
   refetchIntervalInBackground: false,
-})
+});
 </script>

@@ -9,9 +9,7 @@
       <SheetHeader>
         <SheetTitle class="flex gap-2">
           <span>点歌记录</span>
-          <Badge variant="secondary">
-            {{ songs.length }} 首
-          </Badge>
+          <Badge variant="secondary"> {{ songs.length }} 首 </Badge>
         </SheetTitle>
         <SheetDescription />
       </SheetHeader>
@@ -23,9 +21,9 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 
 defineProps<{
-  songs: RouterOutput['user']['listSongs'][0]['songs'];
+  songs: RouterOutput["user"]["listSongs"][0]["songs"];
 }>();
 </script>

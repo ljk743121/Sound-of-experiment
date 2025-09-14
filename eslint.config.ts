@@ -23,6 +23,7 @@ export default antfu(
         },
       ],
       "style/brace-style": ["warn", "1tbs", { allowSingleLine: true }],
+      "node/prefer-global/process": "off",
     },
   }
 );

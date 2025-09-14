@@ -8,7 +8,10 @@
               <AdminTimeCard
                 :time
                 :selected="selectedTime === time"
-                @click="rightPanel = 'edit'; selectedTime = time;"
+                @click="
+                  rightPanel = 'edit';
+                  selectedTime = time;
+                "
               />
             </li>
           </TransitionGroup>
@@ -24,7 +27,9 @@
       <ScrollArea class="h-[calc(100svh-4rem)] p-4">
         <AdminTimeCreateForm v-if="rightPanel === 'create'" />
         <AdminTimeEditForm
-          v-for="time in timeList?.filter(x => rightPanel === 'edit' && selectedTime?.id === x.id)"
+          v-for="time in timeList?.filter(
+            (x) => rightPanel === 'edit' && selectedTime?.id === x.id
+          )"
           :key="time.id"
           :time
         />
@@ -34,23 +39,23 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 
 definePageMeta({
-  layout: 'admin',
+  layout: "admin",
 });
 
 const { $trpc } = useNuxtApp();
-const layout = useCookie<number[]>('time-resizable:layout', {
+const layout = useCookie<number[]>("time-resizable:layout", {
   default: () => [35, 65],
 });
 
-const rightPanel = ref<'unset' | 'create' | 'edit'>('unset');
+const rightPanel = ref<"unset" | "create" | "edit">("unset");
 
 const { data: timeList } = useQuery({
   queryFn: () => $trpc.time.list.query(),
-  queryKey: ['time.list'],
+  queryKey: ["time.list"],
 });
 
-const selectedTime = ref<RouterOutput['time']['list'][0]>();
+const selectedTime = ref<RouterOutput["time"]["list"][0]>();
 </script>

@@ -1,9 +1,9 @@
+import type { TPermission } from "~~/types";
+import * as readline from "node:readline";
+import { eq } from "drizzle-orm";
+import { permissionNames } from "~~/constants";
 import { db } from "~~/server/db";
 import { users } from "~~/server/db/schema";
-import type { TPermission } from "~~/types";
-import { permissionNames } from "~~/constants";
-import { eq } from "drizzle-orm";
-import * as readline from "node:readline";
 
 const permissions: TPermission[] = Array.from(permissionNames, (name) => name.value);
 
@@ -12,12 +12,13 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const question = (query: string): Promise<string> =>
-  new Promise((resolve) => rl.question(query, resolve));
+function question(query: string): Promise<string> {
+  return new Promise((resolve) => rl.question(query, resolve));
+}
 
 const id = await question("请输入管理员ID: ");
 
-if ((await db.select().from(users).where(eq(users.id, id))).length == 0) {
+if ((await db.select().from(users).where(eq(users.id, id))).length === 0) {
   console.log("管理员不存在");
   process.exit(1);
 }

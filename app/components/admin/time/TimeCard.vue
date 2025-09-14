@@ -7,18 +7,23 @@
       <Badge variant="secondary">
         {{ time.name }}
       </Badge>
-      <Switch :model-value="time.isActive" @update:model-value="mutate({ id: time.id, isActive: !time.isActive })" />
+      <Switch
+        :model-value="time.isActive"
+        @update:model-value="mutate({ id: time.id, isActive: !time.isActive })"
+      />
     </div>
-    <div class="mb-6 mt-4 flex flex-row">
+    <div class="mt-4 mb-6 flex flex-row">
       <span class="px-5 pt-2 lg:px-10">
         <div v-if="time.repeats" class="text-center text-2xl font-bold">
           {{ `${dayString[time.startAt.getDay()]}` }}
         </div>
         <div v-else class="text-center text-2xl font-bold">
-          {{ time.startAt.toLocaleDateString('zh-CN').replaceAll('/', '-') }}
+          {{ time.startAt.toLocaleDateString("zh-CN").replaceAll("/", "-") }}
         </div>
         <div class="text-center text-lg">
-          {{ `${time.startAt.getHours().toString().padStart(2, '0')}:${time.startAt.getMinutes().toString().padStart(2, '0')}` }}
+          {{
+            `${time.startAt.getHours().toString().padStart(2, "0")}:${time.startAt.getMinutes().toString().padStart(2, "0")}`
+          }}
         </div>
       </span>
       <span class="flex grow">
@@ -29,10 +34,12 @@
           {{ `${dayString[time.endAt.getDay()]}` }}
         </div>
         <div v-else class="text-center text-2xl font-bold">
-          {{ time.endAt.toLocaleDateString('zh-CN').replaceAll('/', '-') }}
+          {{ time.endAt.toLocaleDateString("zh-CN").replaceAll("/", "-") }}
         </div>
         <div class="text-center text-lg">
-          {{ `${time.endAt.getHours().toString().padStart(2, '0')}:${time.endAt.getMinutes().toString().padStart(2, '0')}` }}
+          {{
+            `${time.endAt.getHours().toString().padStart(2, "0")}:${time.endAt.getMinutes().toString().padStart(2, "0")}`
+          }}
         </div>
       </span>
     </div>
@@ -40,24 +47,24 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 
 const { selected = false } = defineProps<{
   selected?: boolean;
-  time: RouterOutput['time']['list'][0];
+  time: RouterOutput["time"]["list"][0];
 }>();
 
 const { $trpc } = useNuxtApp();
 
-const dayString = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const dayString = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
 const queryClient = useQueryClient();
 const { mutate } = useMutation({
   mutationFn: $trpc.time.modifyActive.mutate,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['time.list'] });
-    queryClient.invalidateQueries({ queryKey: ['time.currently'] });
+    queryClient.invalidateQueries({ queryKey: ["time.list"] });
+    queryClient.invalidateQueries({ queryKey: ["time.currently"] });
   },
-  onError: err => useErrorHandler(err),
+  onError: (err) => useErrorHandler(err),
 });
 </script>
