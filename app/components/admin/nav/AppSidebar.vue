@@ -126,7 +126,7 @@ const data = {
     {
       title: "获取机器人令牌",
       url: "/admin/robot",
-      icon: "lucide:bot",
+      icon: "lucide:robot",
       permissions: ["robot"] as TPermission[],
     },
   ],
