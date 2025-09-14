@@ -88,6 +88,10 @@ export default defineNuxtConfig({
         from: 'vue-sonner',
         imports: ['toast'],
       },
+      {
+        from: '@ljk743121/vue-music-flow',
+        imports: ['useMusicFlow'],
+      }
     ],
   },
 
@@ -97,7 +101,7 @@ export default defineNuxtConfig({
   },
 
   build: {
-    transpile: ['trpc-nuxt'],
+    transpile: ['trpc-nuxt','@ljk743121/vue-music-flow'],
   },
 
   nitro: {

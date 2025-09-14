@@ -395,8 +395,8 @@ const selectedTab = ref<'list' | 'arrangement' | 'notification'>('arrangement');
 
 
 import { getImgUrl } from '~~/constants';
-import { MusicFlow, useMusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
-const { onPlayAsPlaylist, isTrackPlaying,  } = useMusicFlow();
+import { MusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
+const { onPlayAsPlaylist, isTrackPlaying } = useMusicFlow();
 
 const tracks = ref<TMusicFlow[]>([]);
 const track = ref<TMusicFlow>();
@@ -414,6 +414,7 @@ const { data: songUrl } = useQuery({
 async function fetchUrl(data: Record<string, unknown>){
   if (!data) return '';
   if (!data.songId || !data.source) return '';
+  await queryClient.invalidateQueries({ queryKey: ['search.mixGetUrl'] });
   const song = await queryClient.fetchQuery({
       queryKey: ['search.mixGetUrl'],
       queryFn: () => $trpc.search.mixGetUrl.query({
