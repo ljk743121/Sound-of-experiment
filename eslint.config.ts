@@ -10,7 +10,7 @@ export default antfu(
       quotes: "double",
       semi: true,
     },
-    ignores: ["public/**", "app/components/ui/**", ".github/**"],
+    ignores: ["public/**", "app/components/ui/**", ".github/**", ".husky/**"],
     regexp: false,
   },
   {

@@ -3,4 +3,5 @@ build
 public
 app/components/ui
 .github
+.husky
 pnpm-lock.yaml
