@@ -9,28 +9,6 @@ export default defineNuxtConfig({
       },
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
-      meta: [
-        {
-          name: "description",
-          content:
-            "Voice of SZSY 点歌系统,Made by Ljk743121。开源校园广播站管理系统,支持歌曲在线试听、在线投稿、智能审核、一键排歌和歌单导出",
-        },
-        {
-          name: "keywords",
-          content:
-            "深圳实验,校园点歌系统,广播站,管理系统,点歌平台,开源广播系统,教育科技,Nuxt3,Vue3,Voice of SZSY,voszsy,Github项目,开源项目",
-        },
-        { name: "theme-color", content: "#007bff" },
-        { name: "mobile-web-app-capable", content: "yes" },
-        { name: "apple-mobile-web-app-title", content: "Voice of SZSY" },
-        { name: "author", content: "Ljk743121 and contributors" },
-        { "http-equiv": "X-UA-Compatible", "content": "IE=edge" },
-      ],
-      link: [
-        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
-        { rel: "canonical", href: "https://voszsy.ddns.net/" },
-        { rel: "apple-touch-icon", sizes: "180x180", href: "/favicon.ico" },
-      ],
     },
   },
 

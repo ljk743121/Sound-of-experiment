@@ -29,7 +29,7 @@
     "@formkit/auto-animate": "^0.8.2",
     "@iconify-json/lucide": "^1.2.26",
     "@internationalized/date": "^3.7.0",
-    "@ljk743121/vue-music-flow": "^1.0.5",
+    "@ljk743121/vue-music-flow": "^2.0.2",
     "@mdit/plugin-abbr": "^0.22.1",
     "@mdit/plugin-alert": "^0.22.2",
     "@mdit/plugin-align": "^0.22.1",

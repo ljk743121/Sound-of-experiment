@@ -232,13 +232,7 @@
       </Tabs>
       <div class="h-16" />
       <ClientOnly>
-        <MusicFlow
-          v-if="userStore.loggedIn"
-          :options="{
-            autoplay: true,
-          }"
-          :fetch-url="fetchUrl"
-        />
+        <MusicFlow v-if="userStore.loggedIn" :options="MusicFlowConfig" :fetch-url="fetchUrl" />
       </ClientOnly>
     </section>
     <div class="h-40" />
@@ -250,7 +244,7 @@ import type { RouterOutput } from "~~/types";
 import { MusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
 import { useFuse, type UseFuseOptions } from "@vueuse/integrations/useFuse";
 import { DatePicker } from "@ztl-uwu/v-calendar";
-import { getImgUrl } from "~~/constants";
+import { getImgUrl, MusicFlowConfig } from "~~/constants";
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();

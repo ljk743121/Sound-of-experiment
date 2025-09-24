@@ -58,3 +58,21 @@ export const imgBaseURL: Record<string, string> = {
 export function getImgUrl(imgId: string, source: string) {
   return `${imgBaseURL[source]}${imgId}.jpg`;
 }
+
+export const MusicFlowConfig = {
+  height: 50,
+  waveColor: "#ffffff",
+  progressColor: "#348ada",
+  cursorColor: "#5834da",
+  cursorWidth: 1,
+  barWidth: 4,
+  barGap: 4,
+  barRadius: 4,
+  barHeight: 0.8,
+  minPxPerSec: 0,
+  autoScroll: false,
+  autoCenter: false,
+  hideScrollbar: false,
+  interact: true,
+  autoplay: true,
+};
