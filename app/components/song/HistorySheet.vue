@@ -9,7 +9,9 @@
       <SheetHeader>
         <SheetTitle class="flex gap-2">
           <span>点歌记录</span>
-          <Badge variant="secondary"> {{ songs.length }} 首 </Badge>
+          <Badge variant="secondary">
+            {{ songs.length }} 首
+          </Badge>
         </SheetTitle>
         <SheetDescription />
       </SheetHeader>

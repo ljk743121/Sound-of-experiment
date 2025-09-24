@@ -1,6 +1,8 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="mb-8 text-center text-3xl font-bold">常见问题 FAQ</h1>
+    <h1 class="mb-8 text-center text-3xl font-bold">
+      常见问题 FAQ
+    </h1>
 
     <Accordion type="single" collapsible class="mx-auto w-full max-w-3xl">
       <AccordionItem value="item-1">
@@ -65,7 +67,9 @@
     </Accordion>
     <div class="mt-8 text-center">
       <Button as-child>
-        <NuxtLink to="/"> 返回首页 </NuxtLink>
+        <NuxtLink to="/">
+          返回首页
+        </NuxtLink>
       </Button>
     </div>
   </div>

@@ -9,7 +9,9 @@
             </div>
           </CardTitle>
           <CardDescription>
-            <p class="ml-2 text-muted-foreground">发布人：{{ item.creatorName }}</p>
+            <p class="ml-2 text-muted-foreground">
+              发布人：{{ item.creatorName }}
+            </p>
           </CardDescription>
           <CardContent>
             <div
@@ -20,7 +22,9 @@
         </Card>
       </div>
     </div>
-    <div v-else>无公告</div>
+    <div v-else>
+      无公告
+    </div>
   </ClientOnly>
 </template>
 

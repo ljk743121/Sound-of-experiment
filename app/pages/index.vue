@@ -8,7 +8,9 @@
       <div class="grid grid-cols-2 gap-3">
         <div class="grid grid-rows-2 gap-3">
           <Button class="block h-full items-center gap-2" variant="outline">
-            <div class="text-xs">本月已收集歌曲</div>
+            <div class="text-xs">
+              本月已收集歌曲
+            </div>
             <div class="text-2xl font-bold">
               {{ songList?.length || songGuestList?.length || 0 }}
             </div>
@@ -28,9 +30,7 @@
               <Icon name="lucide:music-4" size="26" class="mr-2" />
               投稿
             </span>
-            <span v-if="userStore.loggedIn" class="text-sm font-normal"
-              >(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span
-            >
+            <span v-if="userStore.loggedIn" class="text-sm font-normal">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span>
             <span v-else class="text-sm font-normal">登录以点歌</span>
           </div>
         </Button>
@@ -137,8 +137,12 @@
       <Tabs v-model="selectedTab" default-value="arrangement">
         <div class="-mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
           <TabsList class="grid grid-cols-3">
-            <TabsTrigger value="arrangement"> 排歌歌单 </TabsTrigger>
-            <TabsTrigger value="list"> 歌曲列表 </TabsTrigger>
+            <TabsTrigger value="arrangement">
+              排歌歌单
+            </TabsTrigger>
+            <TabsTrigger value="list">
+              歌曲列表
+            </TabsTrigger>
             <TabsTrigger
               value="notification"
               :disabled="!userStore.loggedIn"
@@ -158,8 +162,12 @@
           <Tabs v-model="listMode" default-value="songList">
             <div>
               <TabsList class="grid grid-cols-2">
-                <TabsTrigger value="songList"> 本月歌曲 </TabsTrigger>
-                <TabsTrigger value="myList" :disabled="!userStore.loggedIn"> 我的歌曲 </TabsTrigger>
+                <TabsTrigger value="songList">
+                  本月歌曲
+                </TabsTrigger>
+                <TabsTrigger value="myList" :disabled="!userStore.loggedIn">
+                  我的歌曲
+                </TabsTrigger>
               </TabsList>
               <div
                 v-if="selectedTab === 'list'"
@@ -336,15 +344,14 @@ const arrangementListSongs = computed(() => {
   if (userStore.loggedIn) {
     if (arrangementList.value) {
       return (
-        arrangementList.value?.find((e) => e.date === getDateString(selectedDate.value))?.songs ||
-        []
+        arrangementList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs || []
       );
     }
     return [];
   } else {
     return (
-      arrangementGuestList.value?.find((e) => e.date === getDateString(selectedDate.value))
-        ?.songs || []
+      arrangementGuestList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs
+      || []
     );
   }
 });
@@ -385,10 +392,10 @@ if (!userStore.loggedIn) {
     }
     await listRefetch();
     if (
-      announcementList.value &&
-      announcementList.value.length > 0 &&
-      userStore.lastLoginAt &&
-      announcementList.value[0]
+      announcementList.value
+      && announcementList.value.length > 0
+      && userStore.lastLoginAt
+      && announcementList.value[0]
     ) {
       const lastLoginTime = new Date(userStore.lastLoginAt).getTime();
       const announcementTime = announcementList.value[0].createdAt.getTime();
@@ -452,7 +459,7 @@ const fuse = computed(() => {
   return useFuse<TLists[0]>(searchPrompt, [], fuseOptions);
 });
 
-const filteredList = computed(() => fuse.value.results.value.map((e) => e.item));
+const filteredList = computed(() => fuse.value.results.value.map(e => e.item));
 
 const selectedTab = ref<"list" | "arrangement" | "notification">("arrangement");
 
@@ -472,8 +479,10 @@ useQuery({
 });
 
 async function fetchUrl(data: Record<string, unknown>) {
-  if (!data) return "";
-  if (!data.songId || !data.source) return "";
+  if (!data)
+    return "";
+  if (!data.songId || !data.source)
+    return "";
   await queryClient.invalidateQueries({ queryKey: ["search.mixGetUrl"] });
   const song = await queryClient.fetchQuery({
     queryKey: ["search.mixGetUrl"],
@@ -494,9 +503,9 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
     toast.error("无歌曲数据");
     return;
   }
-  const isOutdate =
-    (selectedTab.value === "list" ? listMode.value : selectedTab.value) !== previousList.value ||
-    selectedDate.value !== previousDate.value;
+  const isOutdate
+    = (selectedTab.value === "list" ? listMode.value : selectedTab.value) !== previousList.value
+      || selectedDate.value !== previousDate.value;
   if (!tracks.value.length || isOutdate) {
     let TrackList: TLists | undefined;
     if (selectedTab.value === "list") {
@@ -512,7 +521,8 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
     previousList.value = selectedTab.value === "list" ? listMode.value : selectedTab.value;
     if (TrackList) {
       tracks.value = Array.from(TrackList, (e) => {
-        if (!e.songId || !e.source) return undefined;
+        if (!e.songId || !e.source)
+          return undefined;
         return {
           id: e.id!,
           title: e.name!,
@@ -524,7 +534,7 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
             source: e.source!,
           },
         };
-      }).filter((e) => e !== undefined);
+      }).filter(e => e !== undefined);
     }
   }
   track.value = {

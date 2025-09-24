@@ -8,7 +8,9 @@
         <div class="space-y-6">
           <div v-if="!isPending">
             <div v-if="!isEditing || !isEditing.status" class="space-y-4 rounded-lg border p-4">
-              <h3 class="font-semibold">发布公告</h3>
+              <h3 class="font-semibold">
+                发布公告
+              </h3>
               <MdEditor
                 v-model="newAnnouncement"
                 language="zh-CN"
@@ -31,8 +33,12 @@
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="admin"> 仅管理人员可见 </SelectItem>
-                    <SelectItem value="all"> 所有人可见 </SelectItem>
+                    <SelectItem value="admin">
+                      仅管理人员可见
+                    </SelectItem>
+                    <SelectItem value="all">
+                      所有人可见
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -42,7 +48,9 @@
               </Button>
             </div>
             <div v-else class="space-y-4 rounded-lg border p-4">
-              <h3 class="font-semibold">编辑公告</h3>
+              <h3 class="font-semibold">
+                编辑公告
+              </h3>
               <p>创建者：{{ isEditing.creatorId }}</p>
               <p>创建时间：{{ isEditing.createAt }}</p>
               <!-- <p>最后修改时间：{{ isEditing.updateAt }}</p> -->
@@ -54,8 +62,12 @@
                 preview-theme="github"
                 no-img-zoom-in
               />
-              <Button :disabled="isUpdatePending" @click="updateAnnouncement"> 确认修改 </Button>
-              <Button @click="cancelEdit"> 取消修改 </Button>
+              <Button :disabled="isUpdatePending" @click="updateAnnouncement">
+                确认修改
+              </Button>
+              <Button @click="cancelEdit">
+                取消修改
+              </Button>
             </div>
           </div>
           <div class="overflow-x-auto">
@@ -85,7 +97,9 @@
                   <TableCell>
                     <Dialog>
                       <DialogTrigger as-child>
-                        <Button variant="outline"> 查看 </Button>
+                        <Button variant="outline">
+                          查看
+                        </Button>
                       </DialogTrigger>
                       <DialogScrollContent class="sm:max-w-[425px]">
                         <DialogHeader class="p-6 pb-0">
@@ -236,7 +250,7 @@ const { mutate: post, isPending: isPostPending } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["announcement.list"] });
     toast.success("发布成功");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 async function postAnnouncement() {
@@ -260,7 +274,7 @@ const { mutate: remove, isPending: isRemovePending } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["announcement.list"] });
     toast.success("删除成功");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 function removePost(id: number) {
@@ -290,7 +304,7 @@ const { mutate: update, isPending: isUpdatePending } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["announcement.list"] });
     toast.success("更新成功");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 // function editAnnouncement() {

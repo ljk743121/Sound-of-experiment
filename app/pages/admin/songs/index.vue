@@ -12,7 +12,7 @@
           </div>
 
           <TransitionGroup name="list" tag="ul" class="flex flex-col gap-3 p-4">
-            <li v-for="song in songList?.filter((x) => x.state === panel.value)" :key="song.id">
+            <li v-for="song in songList?.filter(x => x.state === panel.value)" :key="song.id">
               <SongCard :song type="songs" />
             </li>
           </TransitionGroup>
@@ -25,8 +25,12 @@
         <div class="sticky top-0 flex h-16 items-center border-b bg-background px-4">
           <Tabs v-model="selectedTab" class="w-full" default-value="used">
             <TabsList class="grid grid-cols-2">
-              <TabsTrigger value="used"> 入选 </TabsTrigger>
-              <TabsTrigger value="dropped"> 落选 </TabsTrigger>
+              <TabsTrigger value="used">
+                入选
+              </TabsTrigger>
+              <TabsTrigger value="dropped">
+                落选
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -37,7 +41,7 @@
           tag="ul"
           class="flex flex-col gap-3 p-4"
         >
-          <li v-for="song in songList?.filter((x) => x.state === 'used')" :key="song.id">
+          <li v-for="song in songList?.filter(x => x.state === 'used')" :key="song.id">
             <SongCard :song type="songs" />
           </li>
         </TransitionGroup>
@@ -47,7 +51,7 @@
           tag="ul"
           class="flex flex-col gap-3 p-4"
         >
-          <li v-for="song in songList?.filter((x) => x.state === 'dropped')" :key="song.id">
+          <li v-for="song in songList?.filter(x => x.state === 'dropped')" :key="song.id">
             <SongCard :song type="songs" />
           </li>
         </TransitionGroup>

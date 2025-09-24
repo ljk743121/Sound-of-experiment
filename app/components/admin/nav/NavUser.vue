@@ -14,10 +14,7 @@
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-semibold">{{ user.name }}</span>
-              <span v-if="user.displayName" class="truncate text-xs"
-                ><span class="text-sm text-muted-foreground">昵称：</span
-                >{{ user.displayName }}</span
-              >
+              <span v-if="user.displayName" class="truncate text-xs"><span class="text-sm text-muted-foreground">昵称：</span>{{ user.displayName }}</span>
               <span class="truncate text-xs">{{ user.id }}</span>
             </div>
             <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
@@ -38,9 +35,7 @@
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ user.name }}</span>
-                <span v-if="user.displayName" class="truncate text-xs"
-                  >昵称：{{ user.displayName }}</span
-                >
+                <span v-if="user.displayName" class="truncate text-xs">昵称：{{ user.displayName }}</span>
                 <span class="truncate text-xs">{{ user.id }}</span>
               </div>
             </div>

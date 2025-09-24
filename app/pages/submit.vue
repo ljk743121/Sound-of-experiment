@@ -1,9 +1,6 @@
 <template>
   <UseTemplate>
-    <form
-      class="mx-auto grid max-w-(--breakpoint-md) grid-cols-1 gap-6 p-4 md:p-6"
-      @submit="onSubmit"
-    >
+    <form class="mx-auto grid max-w-(--breakpoint-md) grid-cols-1 gap-6 p-4 md:p-6" @submit="onSubmit">
       <FormField v-slot="{ componentField }" name="name">
         <FormItem>
           <FormLabel>歌曲名: {{ form.values.name }}</FormLabel>
@@ -43,8 +40,12 @@
                 <SelectValue placeholder="请选择" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="wy"> 网易云 </SelectItem>
-                <SelectItem value="tx"> QQ音乐 </SelectItem>
+                <SelectItem value="wy">
+                  网易云
+                </SelectItem>
+                <SelectItem value="tx">
+                  QQ音乐
+                </SelectItem>
               </SelectContent>
             </Select>
           </FormControl>
@@ -54,10 +55,7 @@
 
       <div class="flex w-full items-center gap-1.5">
         <Input
-          id="search"
-          v-model="SearchInput"
-          type="text"
-          :placeholder="tabStatus === 'search' ? '歌曲名或歌手' : '歌曲ID'"
+          id="search" v-model="SearchInput" type="text" :placeholder="tabStatus === 'search' ? '歌曲名或歌手' : '歌曲ID'"
           :disabled="isPending || songFetching"
         />
         <Button :disabled="isPending || songFetching || submitDisabled" @click.prevent="onSearch()">
@@ -81,10 +79,8 @@
                     <div class="shrink-0">
                       <Avatar class="size-12 rounded">
                         <NuxtImg
-                          :src="getImgUrl(songInfo.imgId, songInfo.source)"
-                          class="object-cover"
-                          :alt="songInfo.name"
-                          loading="lazy"
+                          :src="getImgUrl(songInfo.imgId, songInfo.source)" class="object-cover"
+                          :alt="songInfo.name" loading="lazy"
                         />
                         <Icon name="lucide:music" size="24" />
                       </Avatar>
@@ -101,11 +97,8 @@
 
                       <div class="flex flex-wrap gap-2">
                         <Button
-                          variant="outline"
-                          size="sm"
-                          class="min-w-[120px] flex-1 sm:flex-none"
-                          :disable="submitDisabled"
-                          @click.prevent="
+                          variant="outline" size="sm" class="min-w-[120px] flex-1 sm:flex-none"
+                          :disable="submitDisabled" @click.prevent="
                             () => {
                               songPlayingConfig = songInfo;
                             }
@@ -116,9 +109,7 @@
                         </Button>
 
                         <Button
-                          size="sm"
-                          class="min-w-[120px] flex-1 sm:flex-none"
-                          :disabled="submitDisabled"
+                          size="sm" class="min-w-[120px] flex-1 sm:flex-none" :disabled="submitDisabled"
                           @click.prevent="
                             () => {
                               form.setFieldValue('name', songInfo.name);
@@ -151,16 +142,14 @@
               选择歌曲试听或确认歌曲信息
             </div>
             <SongPlayer
-              v-if="songPlayingConfig.id.length > 0"
-              :id="songPlayingConfig.id"
-              :name="songPlayingConfig.name"
-              :artists="songPlayingConfig.artists"
-              :album="songPlayingConfig.album"
-              :source="songPlayingConfig.source"
+              v-if="songPlayingConfig.id.length > 0" :id="songPlayingConfig.id" :name="songPlayingConfig.name"
+              :artists="songPlayingConfig.artists" :album="songPlayingConfig.album" :source="songPlayingConfig.source"
               :img-id="songPlayingConfig.imgId"
             />
           </div>
-          <div v-else class="flex w-full flex-col items-center justify-center">无搜索结果。</div>
+          <div v-else class="flex w-full flex-col items-center justify-center">
+            无搜索结果。
+          </div>
         </div>
         <div v-else class="flex h-[calc(100svh-10rem)] w-full flex-col items-center justify-center">
           <Icon name="lucide:loader-circle" class="animate-spin" size="35" />
@@ -176,13 +165,17 @@
                 <FormControl>
                   <RadioGroupItem value="realName" />
                 </FormControl>
-                <FormLabel class="font-normal"> 实名 </FormLabel>
+                <FormLabel class="font-normal">
+                  实名
+                </FormLabel>
               </FormItem>
               <FormItem class="flex items-center space-y-0 gap-x-3">
                 <FormControl>
                   <RadioGroupItem value="anonymous" />
                 </FormControl>
-                <FormLabel class="font-normal"> 匿名 </FormLabel>
+                <FormLabel class="font-normal">
+                  匿名
+                </FormLabel>
               </FormItem>
               <FormItem class="flex items-center space-y-0 gap-x-3">
                 <FormControl>
@@ -233,12 +226,16 @@
           <Icon name="lucide:arrow-right" class="h-4 w-4" />
         </Button>
       </div>
-      <CardTitle class="text-lg font-semibold"> 歌曲投稿 </CardTitle>
+      <CardTitle class="text-lg font-semibold">
+        歌曲投稿
+      </CardTitle>
       <CardDescription>
         投稿前请确认：
         <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
           <li class="text-destructive">
-            已阅读投稿规则和<NuxtLink to="/faq" class="text-blue-600"> 常见问题 </NuxtLink>
+            已阅读投稿规则和<NuxtLink to="/faq" class="text-blue-600">
+              常见问题
+            </NuxtLink>
           </li>
           <li>检查是否已有相同歌曲</li>
           <li>选择合适的投稿方式</li>
@@ -248,8 +245,12 @@
     <CardContent>
       <Tabs default-value="search">
         <TabsList class="grid w-full grid-cols-2">
-          <TabsTrigger value="search" @click="tabStatus = 'search'"> 搜索歌曲 </TabsTrigger>
-          <TabsTrigger value="id" @click="tabStatus = 'id'"> 歌曲ID </TabsTrigger>
+          <TabsTrigger value="search" @click="tabStatus = 'search'">
+            搜索歌曲
+          </TabsTrigger>
+          <TabsTrigger value="id" @click="tabStatus = 'id'">
+            歌曲ID
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="search">
           <GridForm />
@@ -311,8 +312,8 @@ const formSchema = toTypedSchema(
       .min(1, "请输入歌名")
       .max(128, "歌名长度最大为128")
       .refine(
-        (val) => !(val.trim().startsWith("《") || val.trim().endsWith("》")),
-        "歌曲名不需带书名号"
+        val => !(val.trim().startsWith("《") || val.trim().endsWith("》")),
+        "歌曲名不需带书名号",
       ),
     creator: z
       .string({ required_error: "请输入歌手名" })
@@ -326,7 +327,7 @@ const formSchema = toTypedSchema(
     submitType: z.custom<TSubmitType>(),
     message: z.string().trim().optional(),
     msgPublic: z.string().trim().optional(),
-  })
+  }),
 );
 
 const form = useForm({
@@ -340,7 +341,7 @@ const { mutate, isPending } = useMutation({
     submitDisabled.value = true;
     navigateTo("/");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const songPlayingConfig = ref<RouterOutput["search"]["mixSearch"][0]>({
@@ -459,6 +460,6 @@ watch(
       imgId: "",
       duration: 0,
     };
-  }
+  },
 );
 </script>

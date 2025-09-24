@@ -38,7 +38,9 @@
 
       <DialogFooter>
         <DialogClose as-child>
-          <Button type="button" variant="secondary"> 取消 </Button>
+          <Button type="button" variant="secondary">
+            取消
+          </Button>
         </DialogClose>
         <Button :disable="isPending" @click="mutate({ id, permissions: editPermission })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -50,10 +52,10 @@
 
   <Badge v-for="permission in permissions" :key="permission" variant="outline">
     <Icon
-      :name="permissionNames.find((x) => x.value === permission)?.icon || 'lucide:help-circle'"
+      :name="permissionNames.find(x => x.value === permission)?.icon || 'lucide:help-circle'"
       class="mr-1"
     />
-    {{ permissionNames.find((x) => x.value === permission)?.label || permission }}
+    {{ permissionNames.find(x => x.value === permission)?.label || permission }}
   </Badge>
 </template>
 
@@ -73,7 +75,8 @@ const isOpen = ref(false);
 const editPermission = ref(Array.from(permissions));
 
 watch(isOpen, (v) => {
-  if (!v) editPermission.value = Array.from(permissions);
+  if (!v)
+    editPermission.value = Array.from(permissions);
 });
 
 const queryClient = useQueryClient();
@@ -85,11 +88,12 @@ const { mutate, isPending } = useMutation({
     toast.success("修改成功");
     isOpen.value = false;
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 function togglePermission(permission: TPermission) {
-  if (!editPermission.value.includes(permission)) editPermission.value.push(permission);
+  if (!editPermission.value.includes(permission))
+    editPermission.value.push(permission);
   else editPermission.value.splice(editPermission.value.indexOf(permission), 1);
 }
 </script>

@@ -28,7 +28,9 @@
 
       <DialogFooter>
         <DialogClose as-child>
-          <Button type="button" variant="secondary"> 取消 </Button>
+          <Button type="button" variant="secondary">
+            取消
+          </Button>
         </DialogClose>
         <Button :disable="isPending" @click="mutate({ id, maxSongs: editMaxSongs })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -52,7 +54,8 @@ const isOpen = ref(false);
 const editMaxSongs = ref(maxSongs);
 
 watch(isOpen, (v) => {
-  if (!v) editMaxSongs.value = maxSongs;
+  if (!v)
+    editMaxSongs.value = maxSongs;
 });
 
 const queryClient = useQueryClient();
@@ -64,6 +67,6 @@ const { mutate, isPending } = useMutation({
     editMaxSongs.value = maxSongs;
     isOpen.value = false;
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

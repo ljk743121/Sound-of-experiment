@@ -13,8 +13,8 @@
           <CollapsibleTrigger as-child>
             <SidebarMenuButton
               v-if="
-                !item.permissions ||
-                userPermissions.some((permission) => item.permissions?.includes(permission))
+                !item.permissions
+                  || userPermissions.some(permission => item.permissions?.includes(permission))
               "
               :tooltip="item.title"
             >
@@ -30,8 +30,8 @@
               <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
                 <NuxtLink
                   v-if="
-                    !subItem.permissions ||
-                    userPermissions.some((permission) => subItem.permissions?.includes(permission))
+                    !subItem.permissions
+                      || userPermissions.some(permission => subItem.permissions?.includes(permission))
                   "
                   class="flex items-center gap-2 text-sm"
                   :to="subItem.url"
@@ -48,8 +48,8 @@
         <SidebarMenuItem v-else>
           <NuxtLink
             v-if="
-              !item.permissions ||
-              userPermissions.some((permission) => item.permissions?.includes(permission))
+              !item.permissions
+                || userPermissions.some(permission => item.permissions?.includes(permission))
             "
             :to="item.url"
           >

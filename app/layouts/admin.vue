@@ -56,7 +56,7 @@ const route = useRoute();
 
 function generateBreadcrumb(url: string): Item[] {
   const breadcrumbItems: Item[] = [];
-  const segments = url.split("/").filter((segment) => segment !== ""); // Remove empty segments
+  const segments = url.split("/").filter(segment => segment !== ""); // Remove empty segments
 
   // Construct breadcrumb for each segment
   let href = "";

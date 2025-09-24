@@ -3,7 +3,9 @@
     <div class="grid gap-4 md:gap-8 lg:grid-cols-3">
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle class="text-sm font-medium"> 历史投稿数 </CardTitle>
+          <CardTitle class="text-sm font-medium">
+            历史投稿数
+          </CardTitle>
           <Icon name="lucide:chart-no-axes-column" class="text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -14,7 +16,9 @@
       </Card>
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle class="text-sm font-medium"> 用户数 </CardTitle>
+          <CardTitle class="text-sm font-medium">
+            用户数
+          </CardTitle>
           <Icon name="lucide:users" class="text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -25,7 +29,9 @@
       </Card>
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle class="text-sm font-medium"> 投稿状态 </CardTitle>
+          <CardTitle class="text-sm font-medium">
+            投稿状态
+          </CardTitle>
           <Icon name="lucide:clock" class="text-muted-foreground" />
         </CardHeader>
         <CardContent>

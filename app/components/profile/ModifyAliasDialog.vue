@@ -44,7 +44,7 @@ const formSchema = toTypedSchema(
       .trim()
       .min(1, "用户昵称长度应至少为1")
       .max(32, "用户密码长度应至多为32"),
-  })
+  }),
 );
 
 const { handleSubmit } = useForm({
@@ -59,7 +59,7 @@ const { mutate: modifyAlias, isPending } = useMutation({
     toast.success("修改成功");
     userStore.displayName = alias.value;
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const onSubmit = handleSubmit(async (values) => {

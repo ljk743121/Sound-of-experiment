@@ -10,28 +10,38 @@
   <div v-else class="flex flex-col gap-4 rounded-lg border p-5 shadow-xs">
     <div class="flex items-center gap-3 border-b pb-3">
       <Icon name="lucide:music-4" class="text-primary" size="20" />
-      <h3 class="text-xl font-semibold">当前播放</h3>
+      <h3 class="text-xl font-semibold">
+        当前播放
+      </h3>
     </div>
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
       <div class="col-span-2 space-y-4">
         <div>
-          <p class="mb-1 text-sm">歌曲名称</p>
+          <p class="mb-1 text-sm">
+            歌曲名称
+          </p>
           <h4 class="max-w-md truncate text-2xl font-bold">
             {{ props.name }}
           </h4>
-          <Badge v-if="isVip" variant="destructive"> VIP </Badge>
+          <Badge v-if="isVip" variant="destructive">
+            VIP
+          </Badge>
         </div>
 
         <div>
-          <p class="mb-1 text-sm">艺术家</p>
+          <p class="mb-1 text-sm">
+            艺术家
+          </p>
           <p class="text-lg font-medium">
             {{ props.artists }}
           </p>
         </div>
 
         <div v-if="props.album">
-          <p class="mb-1 text-sm">专辑</p>
+          <p class="mb-1 text-sm">
+            专辑
+          </p>
           <p class="text-lg font-medium">
             {{ props.album }}
           </p>
@@ -102,7 +112,7 @@ const { status: songUrlStatus, isFetching: UrlFetching } = useQuery({
   refetchOnWindowFocus: false,
   enabled: computed(
     () =>
-      props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0
+      props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0,
   ),
 });
 
@@ -119,7 +129,7 @@ const config = ref(
     color: {
       detect: true,
     },
-  })
+  }),
 );
 const isVip = ref(false);
 

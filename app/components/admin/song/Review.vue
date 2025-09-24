@@ -15,7 +15,9 @@
     <Input v-model="rejectMessage" placeholder="拒绝理由（≥ 4个字符）" />
   </div>
   <div v-if="song.message">
-    <div class="m-5 text-left text-2xl text-foreground">私密留言</div>
+    <div class="m-5 text-left text-2xl text-foreground">
+      私密留言
+    </div>
     <div class="m-8 text-left text-base">
       {{ song.message }}
     </div>
@@ -47,7 +49,7 @@ watch(
   () => song,
   async () => {
     rejectMessage.value = "";
-  }
+  },
 );
 
 const { mutate: approve, isPending: approvePending } = useMutation({
@@ -55,7 +57,7 @@ const { mutate: approve, isPending: approvePending } = useMutation({
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["song.listReview"] });
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const { mutate: reject, isPending: rejectPending } = useMutation({
@@ -63,6 +65,6 @@ const { mutate: reject, isPending: rejectPending } = useMutation({
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["song.listReview"] });
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

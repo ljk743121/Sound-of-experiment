@@ -27,9 +27,7 @@
       <ScrollArea class="h-[calc(100svh-4rem)] p-4">
         <AdminTimeCreateForm v-if="rightPanel === 'create'" />
         <AdminTimeEditForm
-          v-for="time in timeList?.filter(
-            (x) => rightPanel === 'edit' && selectedTime?.id === x.id
-          )"
+          v-for="time in timeList?.filter(x => rightPanel === 'edit' && selectedTime?.id === x.id)"
           :key="time.id"
           :time
         />

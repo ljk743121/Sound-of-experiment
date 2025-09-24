@@ -3,7 +3,9 @@
     <div class="flex w-max">
       <div class="flex h-full w-min flex-col justify-between border-r bg-sidebar p-4">
         <div>
-          <div class="justify-center text-center text-sm text-muted-foreground">排歌选取</div>
+          <div class="justify-center text-center text-sm text-muted-foreground">
+            排歌选取
+          </div>
           <RangeCalendar
             v-model="calendarValue"
             :is-date-unavailable="isDateUnavailable"
@@ -153,12 +155,14 @@ function setApi(val: CarouselApi) {
 }
 
 function onThumbClick(index: number) {
-  if (!api.value) return;
+  if (!api.value)
+    return;
   api.value.scrollTo(index);
 }
 
 watchOnce(api, (api) => {
-  if (!api) return;
+  if (!api)
+    return;
 
   totalCount.value = api.scrollSnapList().length;
   current.value = api.selectedScrollSnap() + 1;
@@ -203,7 +207,8 @@ function downloadCsv(csvContent: string) {
     URL.revokeObjectURL(url); // 清理内存
     toast.success("正在下载csv文件...");
   } catch (e: any) {
-    if (e.message) toast.error(e.message);
+    if (e.message)
+      toast.error(e.message);
     else toast.error(e.toString());
   }
 }
@@ -289,16 +294,16 @@ const requirementList = computed<
   ];
 });
 
-const canArrange = computed(() => requirementList.value.every((x) => x.value));
+const canArrange = computed(() => requirementList.value.every(x => x.value));
 
 const songCount = ref(0);
 
 function isDateUnavailable(date: DateValue) {
-  return arrangementList.value?.some((x) => x.date === date.toString()) ?? false;
+  return arrangementList.value?.some(x => x.date === date.toString()) ?? false;
 }
 
 function isDateAvailable(date: DateValue) {
-  return !arrangementList.value?.some((x) => x.date === date.toString());
+  return !arrangementList.value?.some(x => x.date === date.toString());
 }
 
 const queryClient = useQueryClient();
@@ -308,6 +313,6 @@ const { mutate: arrange, isPending } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["arrangements.list"] });
     toast.success("排歌成功！");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

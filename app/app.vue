@@ -31,43 +31,6 @@ useHead({
       content:
         "深圳实验,校园点歌系统,广播站,管理系统,点歌平台,开源广播系统,教育科技,Nuxt3,Vue3,Voice of SZSY,voszsy,Github项目,开源项目",
     },
-    { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-    { name: "edu:target_audience", content: "middle_school, high_school, university" },
-    { name: "edu:subject", content: "music,technology" },
-  ],
-  script: [
-    {
-      type: "application/ld+json",
-      innerHTML: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        name: "实验之声广播站点歌系统",
-        description: "开源校园广播站管理平台",
-        applicationCategory: "Education",
-        operatingSystem: "Web",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "CNY",
-        },
-        featureList: [
-          "歌曲在线投稿",
-          "在线审核系统",
-          "智能排歌算法",
-          "歌单导出功能",
-          "实时音乐播放",
-        ],
-        screenshot: [
-          "https://voszsy.ddns.net/images/0.png",
-          "https://voszsy.ddns.net/images/1.png",
-          "https://voszsy.ddns.net/images/2.png",
-        ],
-      }),
-    },
-  ],
-  link: [
-    { rel: "canonical", href: "https://voszsy.ddns.net/" },
-    { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
   ],
 });
 </script>

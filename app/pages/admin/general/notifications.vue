@@ -16,7 +16,9 @@
         <div v-else-if="announcementList && announcementList.length">
           <HomeAnnouncement :announcement-list="announcementList!" />
         </div>
-        <div v-else>无公告</div>
+        <div v-else>
+          无公告
+        </div>
       </CardContent>
     </Card>
   </div>

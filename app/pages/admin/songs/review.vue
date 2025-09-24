@@ -66,6 +66,6 @@ const { mutate: acceptAll, isPending: acceptAllPending } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["song.listReview"] });
     toast.success("已通过所有歌曲");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

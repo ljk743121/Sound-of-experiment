@@ -100,9 +100,7 @@
                   </Avatar>
                   <div class="grid flex-1 text-left text-sm leading-tight">
                     <span class="truncate font-semibold">{{ userStore.name }}</span>
-                    <span v-if="userStore.displayName" class="truncate text-xs"
-                      >昵称：{{ userStore.displayName }}</span
-                    >
+                    <span v-if="userStore.displayName" class="truncate text-xs">昵称：{{ userStore.displayName }}</span>
                     <span class="truncate text-xs">{{ userStore.id }}</span>
                   </div>
                   <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
@@ -120,9 +118,7 @@
                     </Avatar>
                     <div class="grid flex-1 text-left text-sm leading-tight">
                       <span class="truncate font-semibold">{{ userStore.name }}</span>
-                      <span v-if="userStore.displayName" class="truncate text-xs"
-                        >昵称：{{ userStore.displayName }}</span
-                      >
+                      <span v-if="userStore.displayName" class="truncate text-xs">昵称：{{ userStore.displayName }}</span>
                       <span class="truncate text-xs">{{ userStore.id }}</span>
                     </div>
                   </div>
@@ -201,7 +197,7 @@ const route = useRoute();
 
 function generateBreadcrumb(url: string): Item[] {
   const breadcrumbItems: Item[] = [];
-  const segments = url.split("/").filter((segment) => segment !== ""); // Remove empty segments
+  const segments = url.split("/").filter(segment => segment !== ""); // Remove empty segments
 
   // Construct breadcrumb for each segment
   let href = "";

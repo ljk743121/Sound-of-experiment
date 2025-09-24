@@ -9,7 +9,9 @@
             <Icon name="lucide:arrow-right" class="h-4 w-4" />
           </Button>
         </div>
-        <CardTitle class="text-2xl"> 个人资料 </CardTitle>
+        <CardTitle class="text-2xl">
+          个人资料
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid gap-4">
@@ -31,8 +33,8 @@
             你的权限：
             <div>
               <Badge
-                v-for="(permission, index) in permissionNames.filter((pm) =>
-                  userStore.permissions.includes(pm.value)
+                v-for="(permission, index) in permissionNames.filter(pm =>
+                  userStore.permissions.includes(pm.value),
                 )"
                 :key="index"
                 class="mr-2"

@@ -37,7 +37,9 @@
             </template>
           </template>
           <TableRow v-else>
-            <TableCell :colspan="columns.length" class="h-24 text-center"> 无结果。 </TableCell>
+            <TableCell :colspan="columns.length" class="h-24 text-center">
+              无结果。
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -121,7 +123,7 @@ const columns: ColumnDef<a>[] = [
         h(DeleteUser, {
           id: row.original.id,
           name: row.original.name,
-        })
+        }),
       ),
   },
 ];
@@ -140,11 +142,11 @@ const table = useVueTable({
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
   getExpandedRowModel: getExpandedRowModel(),
-  onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
-  onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
-  onColumnVisibilityChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnVisibility),
-  onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
-  onExpandedChange: (updaterOrValue) => valueUpdater(updaterOrValue, expanded),
+  onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
+  onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
+  onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
+  onRowSelectionChange: updaterOrValue => valueUpdater(updaterOrValue, rowSelection),
+  onExpandedChange: updaterOrValue => valueUpdater(updaterOrValue, expanded),
   state: {
     get sorting() {
       return sorting.value;

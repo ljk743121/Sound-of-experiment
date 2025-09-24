@@ -151,7 +151,7 @@ const { data: weekData } = useQuery({
   refetchIntervalInBackground: false,
   refetchInterval: 60000,
 });
-const weekMax = computed(() => Math.max(...(weekData.value?.map((week) => week.count) ?? [0])));
+const weekMax = computed(() => Math.max(...(weekData.value?.map(week => week.count) ?? [0])));
 
 const { data: singerData } = useQuery({
   queryFn: () => $trpc.stats.singer.query(),
@@ -160,7 +160,7 @@ const { data: singerData } = useQuery({
   refetchInterval: 60000,
 });
 const singerMax = computed(() =>
-  Math.max(...(singerData.value?.map((singer) => singer.count) ?? [0]))
+  Math.max(...(singerData.value?.map(singer => singer.count) ?? [0])),
 );
 
 const { data: countData } = useQuery({
@@ -176,5 +176,5 @@ const { data: likeData } = useQuery({
   refetchIntervalInBackground: false,
   refetchInterval: 60000,
 });
-const likeMax = computed(() => Math.max(...(likeData.value?.map((like) => like.count) ?? [0])));
+const likeMax = computed(() => Math.max(...(likeData.value?.map(like => like.count) ?? [0])));
 </script>

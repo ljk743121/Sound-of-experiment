@@ -32,7 +32,9 @@
           {{ useTimeAgo(song.createdAt) }}
         </span>
       </div>
-      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">留言: {{ song.msgPublic }}</p>
+      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
+        留言: {{ song.msgPublic }}
+      </p>
       <SongState v-if="!isArrangement" :song />
     </CardHeader>
     <ClientOnly>
@@ -207,7 +209,9 @@
         </Badge>
         <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
       </p>
-      <p v-if="song.message" class="text-xs text-muted-foreground">私密留言: {{ song.message }}</p>
+      <p v-if="song.message" class="text-xs text-muted-foreground">
+        私密留言: {{ song.message }}
+      </p>
     </CardDescription>
   </div>
   <Card v-else-if="type === 'songs'">
@@ -232,7 +236,9 @@
           {{ useTimeAgo(song.createdAt) }}
         </span>
       </div>
-      <p v-if="song.message" class="text-xs text-muted-foreground">私密留言: {{ song.message }}</p>
+      <p v-if="song.message" class="text-xs text-muted-foreground">
+        私密留言: {{ song.message }}
+      </p>
       <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
         公开留言: {{ song.msgPublic }}
       </p>
@@ -306,7 +312,7 @@ const { mutate: approve, isPending: approvePending } = useMutation({
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["song.list"] });
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const { mutate: reject, isPending: rejectPending } = useMutation({
@@ -314,13 +320,14 @@ const { mutate: reject, isPending: rejectPending } = useMutation({
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["song.list"] });
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const rejectMessage = ref("");
 
 function formatDuration(seconds: number): string {
-  if (!seconds || seconds <= 0) return "00:00:00";
+  if (!seconds || seconds <= 0)
+    return "00:00:00";
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
@@ -336,7 +343,7 @@ const { mutate: vote, isPending: isVoting } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
     queryClient.invalidateQueries({ queryKey: ["arrangement.listSafe"] });
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const { mutate: disvote, isPending: isDisVoting } = useMutation({
@@ -347,7 +354,7 @@ const { mutate: disvote, isPending: isDisVoting } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
     queryClient.invalidateQueries({ queryKey: ["arrangement.listSafe"] });
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 function handleAvatarClick(e: Event) {

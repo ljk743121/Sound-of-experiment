@@ -65,6 +65,6 @@ const { mutate } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["time.list"] });
     queryClient.invalidateQueries({ queryKey: ["time.currently"] });
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

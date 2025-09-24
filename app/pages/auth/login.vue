@@ -5,11 +5,11 @@
     <div class="flex items-center justify-center py-12">
       <div class="mx-auto grid w-[350px] gap-6">
         <div class="grid gap-2 text-center">
-          <h1 class="text-3xl font-bold">登录</h1>
+          <h1 class="text-3xl font-bold">
+            登录
+          </h1>
           <p class="text-balance text-muted-foreground">
-            使用<span class="mx-1 font-mono font-light tracking-tighter text-blue-700"
-              >Voice of SZSY</span
-            >账号登录
+            使用<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号登录
           </p>
         </div>
         <div class="grid gap-4">
@@ -33,7 +33,7 @@
                 <FormMessage />
               </FormItem>
             </FormField>
-            <br />
+            <br>
             <Button type="submit" class="w-full" :disable="isPending">
               <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
               登录
@@ -42,10 +42,10 @@
         </div>
         <div class="mt-4 text-center text-sm">
           <p class="text-muted-foreground">
-            没有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700"
-              >Voice of SZSY</span
-            >账号？
-            <NuxtLink to="/auth/register" class="text-primary"> 注册 </NuxtLink>
+            没有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
+            <NuxtLink to="/auth/register" class="text-primary">
+              注册
+            </NuxtLink>
           </p>
         </div>
       </div>
@@ -87,7 +87,7 @@ const formSchema = toTypedSchema(
       .max(16, "最多为16个字符")
       .regex(pwRegex, "密码需包括至少1个字母,1个数字")
       .trim(),
-  })
+  }),
 );
 
 const { handleSubmit } = useForm({
@@ -101,7 +101,7 @@ const { mutate: login, isPending } = useMutation({
     toast.success("登录成功");
     navigateTo("/");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const onSubmit = handleSubmit(async (values) => {

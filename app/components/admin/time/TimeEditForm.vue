@@ -26,7 +26,9 @@
 
       <FormField v-slot="{ value, handleChange }" name="repeats">
         <FormItem>
-          <FormLabel class="block"> 每周重复 </FormLabel>
+          <FormLabel class="block">
+            每周重复
+          </FormLabel>
           <FormControl>
             <Switch :model-value="value" @update:model-value="handleChange" />
           </FormControl>
@@ -37,7 +39,9 @@
       <div v-show="!values.repeats" class="grid grid-cols-2 gap-10">
         <FormField v-slot="{ handleChange, value }" name="startAt">
           <FormItem>
-            <FormLabel class="block"> 开始时间 </FormLabel>
+            <FormLabel class="block">
+              开始时间
+            </FormLabel>
             <DatePicker
               borderless
               :model-value="value"
@@ -58,7 +62,9 @@
         </FormField>
         <FormField v-slot="{ handleChange, value }" name="endAt">
           <FormItem>
-            <FormLabel class="block"> 结束时间 </FormLabel>
+            <FormLabel class="block">
+              结束时间
+            </FormLabel>
             <DatePicker
               borderless
               :model-value="value"
@@ -81,7 +87,9 @@
       <div v-show="values.repeats" class="grid grid-cols-2 gap-10">
         <FormField v-slot="{ handleChange, value }" name="startAt">
           <FormItem>
-            <FormLabel class="block"> 开始时间 </FormLabel>
+            <FormLabel class="block">
+              开始时间
+            </FormLabel>
             <FormControl>
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
@@ -102,7 +110,9 @@
 
         <FormField v-slot="{ handleChange, value }" name="endAt">
           <FormItem>
-            <FormLabel class="block"> 结束时间 </FormLabel>
+            <FormLabel class="block">
+              结束时间
+            </FormLabel>
             <FormControl>
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
@@ -127,7 +137,9 @@
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
           修改
         </Button>
-        <Button type="button" variant="outline" @click="remove(time.id)"> 删除 </Button>
+        <Button type="button" variant="outline" @click="remove(time.id)">
+          删除
+        </Button>
       </div>
     </form>
   </CardContent>
@@ -151,7 +163,7 @@ const formSchema = toTypedSchema(
     startAt: z.date(),
     endAt: z.date(),
     isActive: z.boolean(),
-  })
+  }),
 );
 
 const { handleSubmit, values } = useForm({
@@ -171,7 +183,7 @@ const { mutate: modify, isPending } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["time.currently"] });
     toast.success("修改成功");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const { mutate: remove } = useMutation({
@@ -181,7 +193,7 @@ const { mutate: remove } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["time.currently"] });
     toast.success("删除成功");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const onSubmit = handleSubmit(async (values) => {

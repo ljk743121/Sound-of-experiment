@@ -48,7 +48,7 @@ const { mutate: create, isPending } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["blockWords.list"] });
     newWord.value = "";
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const { mutate: remove } = useMutation({
@@ -57,6 +57,6 @@ const { mutate: remove } = useMutation({
     queryClient.invalidateQueries({ queryKey: ["blockWords.list"] });
     newWord.value = "";
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

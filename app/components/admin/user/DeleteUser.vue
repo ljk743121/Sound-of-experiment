@@ -21,7 +21,9 @@
       </div>
       <DialogFooter>
         <DialogClose as-child>
-          <Button type="button" variant="secondary"> 取消 </Button>
+          <Button type="button" variant="secondary">
+            取消
+          </Button>
         </DialogClose>
         <Button variant="destructive" :disable="isPending" @click="mutate({ id, pwd })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -51,6 +53,6 @@ const { mutate, isPending } = useMutation({
     toast.success("删除成功");
     isOpen.value = false;
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

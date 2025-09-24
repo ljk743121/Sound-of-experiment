@@ -59,7 +59,7 @@ const formSchema = toTypedSchema(
       .min(6, "用户密码长度应至少为6")
       .max(16, "用户密码长度应至多为16")
       .regex(pwRegex, "密码必须包含字母、数字"),
-  })
+  }),
 );
 
 const { handleSubmit } = useForm({
@@ -73,7 +73,7 @@ const { mutate: modifyPassword, isPending } = useMutation({
     userStore.logout();
     navigateTo("/auth/login");
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 
 const onSubmit = handleSubmit(async (values) => {

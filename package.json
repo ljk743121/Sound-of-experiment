@@ -121,7 +121,7 @@
     "vue-tsc": "2.2.10"
   },
   "lint-staged": {
-    "**/*.{js,ts}": "eslint --fix",
-    "**/*.{js,jsx,ts,tsx,md,vue,json,css}": "prettier --write"
+    "**/*.{js,ts,vue}": "eslint --fix",
+    "**/*.{md,json,css}": "prettier --write"
   }
 }

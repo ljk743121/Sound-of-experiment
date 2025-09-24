@@ -11,14 +11,17 @@
       <DialogHeader>
         <DialogTitle>删除排期</DialogTitle>
         <DialogDescription>
-          确认要删除<span text="text-muted-foreground">{{ date }}</span
-          >排期吗？
-          <p class="text-destructive">删除排期不会删除该排期中的歌曲</p>
+          确认要删除<span text="text-muted-foreground">{{ date }}</span>排期吗？
+          <p class="text-destructive">
+            删除排期不会删除该排期中的歌曲
+          </p>
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
         <DialogClose as-child>
-          <Button type="button" variant="secondary"> 取消 </Button>
+          <Button type="button" variant="secondary">
+            取消
+          </Button>
         </DialogClose>
         <Button variant="destructive" :disable="isPending" @click="mutate({ date })">
           <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -46,6 +49,6 @@ const { mutate, isPending } = useMutation({
     toast.success("删除成功");
     isOpen.value = false;
   },
-  onError: (err) => useErrorHandler(err),
+  onError: err => useErrorHandler(err),
 });
 </script>

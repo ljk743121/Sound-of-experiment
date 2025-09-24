@@ -5,7 +5,9 @@
     class="block size-full items-center gap-2"
     :class="`bg-gradient-to-r ${stateColor.from[state]} from-[-10%] ${stateColor.via[state]} via-30% to-white to-80%`"
   >
-    <div class="text-xs text-zinc-950">目前投稿状态</div>
+    <div class="text-xs text-zinc-950">
+      目前投稿状态
+    </div>
     <div class="text-2xl font-bold" :class="stateColor.text[state]">
       {{ stateText[state] }}
     </div>

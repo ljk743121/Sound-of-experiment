@@ -7,7 +7,7 @@
   "trailingComma": "es5",
   "jsxBracketSameLine": true,
   "bracketSpacing": true,
-  "arrowParens": "always",
+  "arrowParens": "avoid",
   "plugins": ["prettier-plugin-tailwindcss"],
   "tailwindStylesheet": "./app/assets/css/tailwind.css"
 }
