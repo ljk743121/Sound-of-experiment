@@ -63,6 +63,7 @@ import { useForm } from "vee-validate";
 import * as z from "zod";
 import { pwRegex } from "~~/constants";
 
+const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
 useHead({
@@ -73,6 +74,8 @@ useHead({
   ],
 });
 
+if (userStore.loggedIn)
+  navigateTo("/");
 try {
   await $trpc.user.tokenValidity.query();
   navigateTo("/");

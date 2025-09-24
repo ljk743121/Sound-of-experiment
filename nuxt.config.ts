@@ -93,6 +93,12 @@ export default defineNuxtConfig({
     },
   },
 
+  routeRules: {
+    "/admin": { redirect: "/admin/general/songs" },
+    "/admin/general": { redirect: "/admin/general/notifications" },
+    "/admin/user": { redirect: "/admin/user/watchSongs" },
+  },
+
   runtimeConfig: {
     // private
     public: {

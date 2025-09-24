@@ -85,6 +85,7 @@ import { useForm } from "vee-validate";
 import * as z from "zod";
 import { pwRegex } from "~~/constants";
 
+const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
 useHead({
@@ -95,6 +96,8 @@ useHead({
   ],
 });
 
+if (userStore.loggedIn)
+  navigateTo("/");
 try {
   const isRegisterOpen = await $trpc.config.get.mutate("isRegisterOpen");
   if (!isRegisterOpen) {

@@ -59,11 +59,11 @@ export const useUserStore = defineStore(
   {
     persist: [
       {
-        pick: ["loggedIn", "accessToken", "permissions", "lastLoginAt"],
+        pick: ["loggedIn", "accessToken", "permissions", "lastLoginAt", "id", "name", "displayName", "remainSubmitSongs"],
         storage: piniaPluginPersistedstate.cookies(),
       },
       {
-        pick: ["id", "name", "displayName", "remainSubmitSongs", "songCache"],
+        pick: ["songCache"],
         storage: piniaPluginPersistedstate.localStorage(),
       },
     ],
