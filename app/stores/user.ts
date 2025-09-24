@@ -12,6 +12,7 @@ export const useUserStore = defineStore(
     const permissions = ref<TPermission[]>([]);
     const remainSubmitSongs = ref(0);
     const lastLoginAt = ref("");
+    const songCache = ref<Record<string, string>>({});
 
     const login = (data: RouterOutput["user"]["login"]) => {
       loggedIn.value = true;
@@ -33,6 +34,11 @@ export const useUserStore = defineStore(
       remainSubmitSongs.value = 0;
       permissions.value = [];
       lastLoginAt.value = new Date(0).toISOString();
+      songCache.value = {};
+    };
+
+    const cacheSong = (id: string, url: string) => {
+      songCache.value[id] = url;
     };
 
     return {
@@ -44,11 +50,22 @@ export const useUserStore = defineStore(
       remainSubmitSongs,
       permissions,
       lastLoginAt,
+      songCache,
       login,
       logout,
+      cacheSong,
     };
   },
   {
-    persist: true,
+    persist: [
+      {
+        pick: ["loggedIn", "accessToken", "permissions", "lastLoginAt"],
+        storage: piniaPluginPersistedstate.cookies(),
+      },
+      {
+        pick: ["id", "name", "displayName", "remainSubmitSongs", "songCache"],
+        storage: piniaPluginPersistedstate.localStorage(),
+      },
+    ],
   },
 );

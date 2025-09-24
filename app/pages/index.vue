@@ -483,6 +483,10 @@ async function fetchUrl(data: Record<string, unknown>) {
     return "";
   if (!data.songId || !data.source)
     return "";
+  const id = `${data.songId as string}-${data.source as string}`;
+  if (userStore.songCache[id]) {
+    return userStore.songCache[id]!;
+  }
   await queryClient.invalidateQueries({ queryKey: ["search.mixGetUrl"] });
   const song = await queryClient.fetchQuery({
     queryKey: ["search.mixGetUrl"],
@@ -493,6 +497,9 @@ async function fetchUrl(data: Record<string, unknown>) {
       }),
   });
   if (song) {
+    if (song.url) {
+      userStore.cacheSong(id, song.url);
+    }
     return song.url;
   }
   return "";
