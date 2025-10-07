@@ -24,26 +24,30 @@
           <p>
             这个项目的代码是开源的，你可以在
             <NuxtLink
-              to="https://github.com/ljk743121/the1068fm"
+              to="https://github.com/ljk743121/Sound-of-experiment"
               class="font-semibold underline underline-offset-4"
             >
               <span>这里</span>
             </NuxtLink>
             查看源代码。期待各位同学的反馈！
           </p>
-        </section>
-        <section class="prose text-sm text-gray-600">
           <p>
-            此项目为
-            <NuxtLink to="https://github.com/SMS-COSMO/the1068fm" class="font-bold">
-              <span>the1068fm</span>
+            该项目的使用文档以及开发文档可在
+            <NuxtLink
+              to="https://voszsy.netlify.app/"
+              class="font-semibold underline underline-offset-4"
+            >
+              <span>这里</span>
             </NuxtLink>
-            的二次开发项目，原项目由
-            <NuxtLink to="https://github.com/SMS-COSMO" class="font-bold">
-              <span>SMS-COSMO</span>
-            </NuxtLink>
-            开发。
+            查看。
           </p>
+        </section>
+
+        <section>
+          <p>
+            项目贡献者：
+          </p>
+          <NuxtImg src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment" alt="Contributors" />
         </section>
 
         <div class="flex items-center justify-between text-xs">
