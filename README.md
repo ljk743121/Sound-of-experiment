@@ -14,31 +14,38 @@
 
 ## 说明
 
-本项目基于[SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm)的[v2.0.1](https://github.com/SMS-COSMO/the1068fm/releases/tag/v2.0.1)版本进行二次开发，非常感谢该项目带给开发者的灵感和项目基础架构
-
 所用技术栈：
 
 - Nuxt 3
 - Vue 3
 - TRPC
+- Drizzle ORM
+- PostgreSQL
+- Tailwind CSS
+- shadcn-vue
 
 主要功能：
 
-- 用户管理
-- 歌曲审核
+- 用户管理（创建、编辑权限、重置密码等）
+- 歌曲审核系统
 - 歌曲投稿&排歌
-- 歌曲在线播放
+- 歌曲在线播放（无需跳转第三方网站）
+- 自定义音源插件
 - 歌曲数据批量导出
+- 公告管理
+- 敏感词管理
+- 投稿时段设置
+- 暗黑模式支持
 
 ### 歌曲CSV数据导出支持
 
 从 v2.0.1 起支持 CSV数据导出，内容包括歌曲名(name),作曲家(creator),音源(source),歌曲ID(songID)，你可以使用此功能获取批量歌曲的数据进行统计
 
-若你想自己更改导出数据，可修改`app\pages\admin\arrange.vue`内逻辑
+若你想自己更改导出数据，可修改`app\pages\admin\songs\arrange.vue`内逻辑
 
 ### 歌曲播放支持
 
-从 v2.0.1 起，网站可以无需跳转第三方网站即可播放歌曲，本项目的歌曲播放器使用[nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)项目
+从 v2.0.1 起，网站可以无需跳转第三方网站即可播放歌曲，本项目的歌曲播放器使用[nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)(投稿和审核界面)以及[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)(主界面)(v2.3.0开始使用)
 
 ## 用户界面
 
@@ -46,12 +53,18 @@
 <p><img width="100%" src="./public/images/1.png" alt="admin ui"></p>
 <p><img width="100%" src="./public/images/2.png" alt="submit ui"></p>
 
-## 使用方法
+## 项目初始化
 
-将本项目源代码克隆至本地，或下载release文件后解压，在文件目录内运行
+首次使用时，建议运行初始化脚本以配置基本环境：
 
 ```bash
 pnpm install
+pnpm run init
+```
+
+再启动开发服务器：
+
+```bash
 pnpm run dev
 ```
 
@@ -59,32 +72,87 @@ pnpm run dev
 
 1. `dev`: 启动开发环境
 2. `build`: 构建生产环境
-3. `db:push`: 将架构更改推送到数据库
-4. `auth:genKey`: 生成公钥和私钥
+3. `postinstall`: 项目安装后自动执行（Nuxt准备）
+4. `preview`: 预览生产环境构建
+5. `db:push`: 将架构更改推送到数据库
+6. `db:studio`: 启动Drizzle Studio数据库管理界面
+7. `auth:genKey`: 生成公钥和私钥
+8. `user:admin`: 创建管理员用户
+9. `user:robot`: 创建机器人用户
+10. `lint`: 运行ESLint检查
+11. `lint:fix`: 自动修复ESLint问题
+12. `lint:lint-staged`: 对暂存文件运行ESLint
+13. `lint:format`: 使用Prettier格式化代码
+14. `husky:prepare`: 初始化Husky Git钩子
+15. `init`: 运行项目初始化脚本
 
 ## 自定义音乐源：
 
-Step 1：定义音乐数据解析逻辑
-在路径 `server/utils/song.ts` 文件中新增你的专属音乐源解析函数：
+项目使用插件系统管理不同的音乐源。要添加自定义音乐源，请按照以下步骤操作：
 
-#### 📌 数据格式要求
+### Step 1：创建音乐源插件
 
-返回值必须严格遵守以下类型定义：
+在`server/utils/plugins/`目录中创建一个新的TypeScript文件（例如`MyMusicSource.ts`），实现`MusicSourcePlugin`接口：
 
 ```typescript
-interface MusicData {
-  id: string; //  音乐标识符
-  name: string; //  曲目名称
-  artists: string; //  艺术家信息
-  album?: string; //  专辑名称（非必填）
-  source: string; //  源名称
-  imgId: string; //  封面图标识符（用于获取缩略图）
-  duration: number; //  时长（单位：s）
+// ...existing code
+
+export default function MyMusicSourcePlugin(): MusicSourcePlugin {
+  return {
+    name: "mySource", // 源标识符
+    alias: "我的音乐源", // 显示名称
+    async searchSongs(key: string, type?: string): Promise<TSong[]> {
+      // 实现搜索逻辑
+      // 返回符合TSong类型的歌曲数组
+    },
+    async getMusicUrl(id: string): Promise<{ url: string; pay: boolean }> {
+      // 实现获取歌曲URL的逻辑
+      // 歌曲为vip时若要调用vip请求请返回defaultVipSign
+      if (isVip) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: defaultVipSign });
+      }
+    },
+    // 可选：实现获取VIP歌曲URL的逻辑
+    async getVipMusicUrl(id: string): Promise<{ url: string; pay: boolean }> {
+      // 实现获取VIP歌曲URL的逻辑
+    },
+  };
 }
 ```
 
-Step 2：在搜索接口注入新数据源
-请打开 TRPC 路由配置文件 `server/trpc/routers/search.ts`，在`mixSearch`和`mixGetUrl`API中添加自定义源逻辑
+### Step 2：注册音乐源插件
+
+在`server/utils/plugins/index.ts`文件中导入并注册你的自定义插件：
+
+```typescript
+export * from "./MyMusicSource";
+```
+
+然后在`server/utils/plugins.ts`文件中添加你的插件：
+
+```typescript
+// ...existing code
+pluginManager
+  .use(plugins.WYMusicSourcePlugin())
+  // ...
+  .use(plugins.MyMusicSourcePlugin()); // 添加你的插件
+```
+
+### 📌 数据格式要求
+
+自定义音乐源插件返回的歌曲数据必须严格遵守`TSong`类型定义：
+
+```typescript
+interface TSong {
+  id: string; // 音乐标识符
+  name: string; // 曲目名称
+  artists: string; // 艺术家信息
+  album?: string; // 专辑名称（非必填）
+  source: TMediaSource; // 源名称
+  imgId: string; // 封面图标识符（用于获取缩略图）
+  duration: number; // 时长（单位：s）
+}
+```
 
 ## 项目协议
 
@@ -92,7 +160,7 @@ Step 2：在搜索接口注入新数据源
 
 ---
 
-_词语约定：本协议中的“本项目”指 Sound of Experiment（Voice of SZSY）项目；“使用者”指签署本协议的使用者；“官方音乐平台”指对本项目内置的包括网易云，QQ等音乐源的官方平台统称；“版权数据”指包括但不限于图像、音频、名字等在内的他人拥有所属版权的数据。_
+_词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZSY）项目；"使用者"指签署本协议的使用者；"官方音乐平台"指对本项目内置的包括网易云，QQ等音乐源的官方平台统称；"版权数据"指包括但不限于图像、音频、名字等在内的他人拥有所属版权的数据。_
 
 ### 一、数据来源
 
@@ -132,9 +200,10 @@ _词语约定：本协议中的“本项目”指 Sound of Experiment（Voice of
 
 ## 致谢
 
-1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm)
+1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm) 本项目基于该项目的[v2.0.1](https://github.com/SMS-COSMO/the1068fm/releases/tag/v2.0.1)版本进行二次开发
 2. [copws/qq-music-api](https://github.com/copws/qq-music-api)
 3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
+4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow)
 
 ## 贡献者
 
