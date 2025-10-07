@@ -88,3 +88,8 @@ export const announcement = pgTable("announcement", {
   type: text().notNull().default("notification"),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
+
+export const configs = pgTable("configs", {
+  key: text().primaryKey(),
+  value: text().notNull(),
+});

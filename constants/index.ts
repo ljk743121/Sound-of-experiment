@@ -1,4 +1,4 @@
-import type { TPermission } from "~~/types";
+import type { TMediaSource, TPermission } from "~~/types";
 
 export const permissionNames: { value: TPermission; label: string; icon: string }[] = [
   { value: "login", label: "登录", icon: "lucide:log-in" },
@@ -17,6 +17,17 @@ export const permissionNames: { value: TPermission; label: string; icon: string 
   { value: "deleteArrangement", label: "删除排歌", icon: "lucide:trash" },
 ];
 
+export const musicSources: { value: TMediaSource; label: string }[] = [
+  { value: "wy", label: "网易云" },
+  { value: "tx", label: "QQ音乐" },
+  { value: "bilibili", label: "Bilibili" },
+];
+
+export const defaultConfigs: { key: string; value: string; label: string }[] = [
+  { key: "isRegisterOpen", value: "true", label: "是否开放注册" },
+  { key: "blockWordsApi", value: "true", label: "是否开启第三方屏蔽词检测" },
+];
+
 export const breadCrumb: Record<string, string> = {
   admin: "管理",
   user: "用户管理",
@@ -32,11 +43,13 @@ export const breadCrumb: Record<string, string> = {
   editPermissions: "编辑权限",
   deleteUser: "删除用户",
   resetPassword: "重置密码",
+  config: "配置管理",
 };
 
 export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;
 
 export const resetPassword = "Abc123456";
+export const defaultVipSign = "vip-song";
 
 export const searchBaseURL = {
   wySearch: "https://music.163.com/api/search/get",
@@ -53,10 +66,17 @@ export const mediaBaseURL = {
 export const imgBaseURL: Record<string, string> = {
   wy: "https://", // no imgId
   tx: "https://y.qq.com/music/photo_new/T002R1200x1200M000",
+  bilibili: "",
 };
 
 export function getImgUrl(imgId: string, source: string) {
   return `${imgBaseURL[source]}${imgId}.jpg`;
+}
+
+export function getMusicSourceName(id: TMediaSource | undefined | null) {
+  if (!id)
+    return "无音源";
+  return musicSources.find(source => source.value === id)?.label;
 }
 
 export const MusicFlowConfig = {

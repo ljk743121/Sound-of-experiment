@@ -22,7 +22,8 @@
     "lint:fix": "eslint . --fix",
     "lint:lint-staged": "npx lint-staged",
     "lint:format": "npx prettier . --write",
-    "husky:prepare": "npx husky-init && husky install"
+    "husky:prepare": "npx husky-init && husky install",
+    "init": "tsx scripts/initializer.ts"
   },
   "dependencies": {
     "@adonisjs/hash": "^9.1.1",

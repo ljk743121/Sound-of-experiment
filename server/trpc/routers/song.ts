@@ -41,7 +41,7 @@ export const songRouter = router({
         songId: z.string({ required_error: "请输入歌曲ID" }),
         source: z.custom<TMediaSource>(),
         imgId: z.string(),
-        duration: z.number().positive(),
+        duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
         submitType: z.custom<TSubmitType>(),
         message: z.string().trim().optional(),
         msgPublic: z.string().trim().optional(),

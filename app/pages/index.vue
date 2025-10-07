@@ -254,6 +254,15 @@ import { useFuse, type UseFuseOptions } from "@vueuse/integrations/useFuse";
 import { DatePicker } from "@ztl-uwu/v-calendar";
 import { getImgUrl, MusicFlowConfig } from "~~/constants";
 
+useHead({
+  meta: [
+    {
+      name: "referrer",
+      content: "no-referrer",
+    },
+  ],
+});
+
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 const queryClient = useQueryClient();
@@ -262,7 +271,7 @@ const selectedDate = ref(new Date());
 const isDark = computed(() => useColorMode().preference === "dark");
 const hasNewAnnouncement = ref(false);
 
-const { data: songList, refetch: songListRefetch } = useQuery({
+const { data: songList, suspense: songListSuspense } = useQuery({
   queryFn: () => $trpc.song.listSafe.query(),
   queryKey: ["song.listSafe"],
   refetchInterval: 10000,
@@ -271,7 +280,7 @@ const { data: songList, refetch: songListRefetch } = useQuery({
   enabled: userStore.loggedIn,
 });
 
-const { data: songGuestList, refetch: songGuestListRefetch } = useQuery({
+const { data: songGuestList, suspense: songGuestListSuspense } = useQuery({
   queryFn: () => $trpc.song.listGuest.query(),
   queryKey: ["song.listGuest"],
   refetchInterval: 10000,
@@ -280,7 +289,7 @@ const { data: songGuestList, refetch: songGuestListRefetch } = useQuery({
   enabled: false,
 });
 
-const { data: mySongList, refetch: mySongListRefetch } = useQuery({
+const { data: mySongList, suspense: mySongListSuspense } = useQuery({
   queryFn: () => $trpc.song.listMine.query(),
   queryKey: ["song.listMine"],
   refetchIntervalInBackground: false,
@@ -288,7 +297,7 @@ const { data: mySongList, refetch: mySongListRefetch } = useQuery({
   enabled: userStore.loggedIn,
 });
 
-const { data: canSubmit, refetch: canSubmitRefetch } = useQuery({
+const { data: canSubmit, suspense: canSubmitSuspense } = useQuery({
   queryFn: () => $trpc.song.canSubmit.query(),
   queryKey: ["song.canSubmit"],
   refetchInterval: 10000,
@@ -297,7 +306,7 @@ const { data: canSubmit, refetch: canSubmitRefetch } = useQuery({
   enabled: userStore.loggedIn,
 });
 
-const { data: remainSubmitSongs, refetch: remainSubmitSongsRefetch } = useQuery({
+const { data: remainSubmitSongs, suspense: remainSubmitSongsSuspense } = useQuery({
   queryFn: () => $trpc.song.remainSubmitSongs.query(),
   queryKey: ["song.remainSubmitSongs"],
   refetchIntervalInBackground: false,
@@ -306,7 +315,7 @@ const { data: remainSubmitSongs, refetch: remainSubmitSongsRefetch } = useQuery(
   enabled: userStore.loggedIn,
 });
 
-const { data: arrangementList, refetch: arrangementListRefetch } = useQuery({
+const { data: arrangementList, suspense: arrangementListSuspense } = useQuery({
   queryFn: () => $trpc.arrangements.listSafe.query(),
   queryKey: ["arrangements.listSafe"],
   refetchIntervalInBackground: false,
@@ -315,25 +324,19 @@ const { data: arrangementList, refetch: arrangementListRefetch } = useQuery({
   enabled: userStore.loggedIn,
 });
 
-const { data: arrangementGuestList, refetch: arrangementGuestListRefetch } = useQuery({
+const { data: arrangementGuestList, suspense: arrangementGuestListSuspense } = useQuery({
   queryFn: () => $trpc.arrangements.listGuest.query(),
   queryKey: ["arrangements.listGuest"],
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
   refetchOnMount: false,
-  enabled: false,
 });
 
-const {
-  data: announcementList,
-  refetch: listRefetch,
-  isPending: isAnnouncementListPending,
-} = useQuery({
+const { data: announcementList, suspense: announcementListSuspense, isPending: isAnnouncementListPending } = useQuery({
   queryFn: () => $trpc.announcement.listSafe.query(),
   queryKey: ["announcement.listSafe"],
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
-  enabled: false,
 });
 
 function getDateString(date: Date) {
@@ -371,26 +374,27 @@ const calendarAttr = computed(() => {
 
 if (!userStore.loggedIn) {
   // navigateTo('/auth/login');
-  await arrangementGuestListRefetch();
-  await songGuestListRefetch();
+  await arrangementGuestListSuspense();
+  await songGuestListSuspense();
 } else {
   try {
     await $trpc.user.tokenValidity.query();
   } catch {
     // navigateTo('/auth/login');
     userStore.loggedIn = false;
+    userStore.accessToken = "";
   }
   if (userStore.loggedIn) {
     try {
-      await songListRefetch();
-      await canSubmitRefetch();
-      await mySongListRefetch();
-      await arrangementListRefetch();
-      await remainSubmitSongsRefetch();
+      await songListSuspense();
+      await canSubmitSuspense();
+      await mySongListSuspense();
+      await arrangementListSuspense();
+      await remainSubmitSongsSuspense();
     } catch {
       navigateTo("/auth/login");
     }
-    await listRefetch();
+    await announcementListSuspense();
     if (
       announcementList.value
       && announcementList.value.length > 0
@@ -409,8 +413,8 @@ if (!userStore.loggedIn) {
       }
     }
   } else {
-    await arrangementGuestListRefetch();
-    await songGuestListRefetch();
+    await arrangementGuestListSuspense();
+    await songGuestListSuspense();
   }
 }
 

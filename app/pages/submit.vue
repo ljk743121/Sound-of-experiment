@@ -2,37 +2,47 @@
   <UseTemplate>
     <form class="mx-auto grid max-w-(--breakpoint-md) grid-cols-1 gap-6 p-4 md:p-6" @submit="onSubmit">
       <FormField v-slot="{ componentField }" name="name">
-        <FormItem>
-          <FormLabel>歌曲名: {{ form.values.name }}</FormLabel>
+        <FormItem v-auto-animate>
+          <FormLabel>歌曲名</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" type="hidden" disabled class="cursor-not-allowed" />
+            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
       </FormField>
 
       <FormField v-slot="{ componentField }" name="creator">
-        <FormItem>
-          <FormLabel>歌手：{{ form.values.creator }}</FormLabel>
+        <FormItem v-auto-animate>
+          <FormLabel>歌手</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" type="hidden" disabled class="cursor-not-allowed" />
+            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
       </FormField>
 
       <FormField v-slot="{ componentField }" name="songId">
-        <FormItem>
-          <FormLabel>歌曲ID：{{ form.values.songId }}</FormLabel>
+        <FormItem v-auto-animate>
+          <FormLabel>歌曲ID</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" type="hidden" disabled class="cursor-not-allowed" />
+            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <FormField v-slot="{ componentField }" name="duration">
+        <FormItem v-auto-animate>
+          <FormLabel>时长</FormLabel>
+          <FormControl>
+            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
       </FormField>
 
       <FormField v-slot="{ componentField }" name="source">
-        <FormItem>
+        <FormItem v-auto-animate>
           <FormLabel>来源</FormLabel>
           <FormControl>
             <Select v-bind="componentField">
@@ -40,11 +50,8 @@
                 <SelectValue placeholder="请选择" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="wy">
-                  网易云
-                </SelectItem>
-                <SelectItem value="tx">
-                  QQ音乐
+                <SelectItem v-for="(source, index) in musicSources" :key="index" :value="source.value">
+                  {{ source.label }}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -157,7 +164,7 @@
         </div>
       </div>
       <FormField v-slot="{ componentField }" type="radio" name="submitType">
-        <FormItem class="space-y-3">
+        <FormItem v-auto-animate class="space-y-3">
           <FormLabel>投稿时名称</FormLabel>
           <FormControl>
             <RadioGroup class="flex flex-col space-y-1" v-bind="componentField">
@@ -193,7 +200,7 @@
       </FormField>
 
       <FormField v-slot="{ componentField }" name="message">
-        <FormItem>
+        <FormItem v-auto-animate>
           <FormLabel>私密留言（可选）</FormLabel>
           <FormControl>
             <Textarea v-bind="componentField" />
@@ -203,7 +210,7 @@
       </FormField>
 
       <FormField v-slot="{ componentField }" name="msgPublic">
-        <FormItem>
+        <FormItem v-auto-animate>
           <FormLabel>公开留言（可选）</FormLabel>
           <FormControl>
             <Textarea v-bind="componentField" />
@@ -265,9 +272,9 @@
 
 <script lang="ts" setup>
 import type { RouterOutput, TMediaSource, TSubmitType } from "~~/types";
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import * as z from "zod";
-import { getImgUrl } from "~~/constants";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { getImgUrl, musicSources } from "~~/constants";
 
 import SongPlayer from "~/components/song/SongPlayer.vue";
 // import { songFetching } from '~/composables/ClientSearch';
@@ -278,6 +285,16 @@ const userStore = useUserStore();
 definePageMeta({
   title: "歌曲投稿",
 });
+
+useHead({
+  meta: [
+    {
+      name: "referrer",
+      content: "no-referrer",
+    },
+  ],
+});
+
 const submitDisabled = ref(true);
 
 if (!userStore.loggedIn) {
@@ -323,7 +340,7 @@ const formSchema = toTypedSchema(
     songId: z.string({ required_error: "请输入歌曲ID" }).trim().min(1, "请输入歌曲ID"),
     imgId: z.string().trim(),
     source: z.custom<TMediaSource>(),
-    duration: z.number().positive(),
+    duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
     submitType: z.custom<TSubmitType>(),
     message: z.string().trim().optional(),
     msgPublic: z.string().trim().optional(),
@@ -348,7 +365,7 @@ const songPlayingConfig = ref<RouterOutput["search"]["mixSearch"][0]>({
   id: "",
   name: "",
   album: "",
-  source: "",
+  source: "" as TMediaSource,
   artists: "",
   imgId: "",
   duration: 0,
@@ -455,7 +472,7 @@ watch(
       id: "",
       name: "",
       album: "",
-      source: "",
+      source: "" as TMediaSource,
       artists: "",
       imgId: "",
       duration: 0,

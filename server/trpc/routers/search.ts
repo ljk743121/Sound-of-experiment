@@ -1,25 +1,29 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import * as searchApi from "~~/server/utils/song";
+import { defaultVipSign } from "~~/constants";
+import { pluginManager } from "~~/server/utils/plugin";
 import { protectedProcedure, router } from "../trpc";
 
 export const searchRouter = router({
+  // availableSources: protectedProcedure.query(() => {
+  //   return pluginManager.getAvailablePlugins();
+  // }),
   mixSearch: protectedProcedure
     .input(
       z.object({
         key: z.string(),
         source: z.string(),
-        type: z.enum(["search", "id"]),
+        type: z.enum(["search", "id"]).optional(),
       }),
     )
     .query(async ({ input }) => {
-      if (input.source === "wy") {
-        return await searchApi.searchSongsWy(input.key, input.type);
-      } else if (input.source === "tx") {
-        return await searchApi.searchSongsQQ(input.key, input.type);
-      } else {
+      if (!input.key || !input.source)
+        throw new TRPCError({ code: "BAD_REQUEST", message: "缺少参数" });
+      const musicSource = pluginManager.get(input.source);
+      if (!musicSource) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "未知的源" });
       }
+      return await musicSource.searchSongs(input.key, input.type);
     }),
   mixGetUrl: protectedProcedure
     .input(
@@ -28,32 +32,26 @@ export const searchRouter = router({
         source: z.string(),
       }),
     )
-    .query(async ({ ctx, input }) => {
-      if (!input.id)
-        throw new TRPCError({ code: "BAD_REQUEST", message: "缺少ID参数" });
+    .query(async ({ input }) => {
+      if (!input.id || !input.source)
+        throw new TRPCError({ code: "BAD_REQUEST", message: "缺少参数" });
       let songInfo = { url: "", pay: false };
-      if (input.source === "wy") {
-        try {
-          songInfo = await searchApi.getSongUrlWy(input.id);
-        } catch (e: any) {
-          if (e.message === "歌曲为VIP歌曲") {
-            songInfo = await searchApi.getSongUrlWyVip(input.id, ctx.user);
-          } else {
-            throw new TRPCError({ code: "BAD_REQUEST", message: `失败:${e.message}` });
-          }
-        }
-      } else if (input.source === "tx") {
-        try {
-          songInfo = await searchApi.getSongUrlQQ(input.id);
-        } catch (e: any) {
-          if (e.message === "歌曲为VIP歌曲") {
-            songInfo = await searchApi.getSongUrlQQVip(input.id, ctx.user);
-          } else {
-            throw new TRPCError({ code: "BAD_REQUEST", message: `失败:${e.message}` });
-          }
-        }
-      } else {
+      const musicSource = pluginManager.get(input.source);
+      if (!musicSource) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "未知的源" });
+      }
+      try {
+        songInfo = await musicSource.getMusicUrl(input.id);
+      } catch (e: any) {
+        if (e.message === defaultVipSign) {
+          if (musicSource.getVipMusicUrl) {
+            songInfo = await musicSource.getVipMusicUrl(input.id);
+          } else {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "因版权问题，无法播放歌曲" });
+          }
+        } else {
+          throw new TRPCError({ code: "BAD_REQUEST", message: e.message });
+        }
       }
       if (!songInfo.url)
         throw new TRPCError({ code: "BAD_REQUEST", message: "歌曲链接为空" });

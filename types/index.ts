@@ -1,8 +1,27 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import type { InferSelectModel } from "drizzle-orm";
+import type { users } from "~~/server/db/schema";
 import type { AppRouter } from "~~/server/trpc/routers";
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 export type RouterInput = inferRouterInputs<AppRouter>;
+
+export type User = InferSelectModel<typeof users>;
+export type TMediaSource =
+  | "wy"
+  | "tx"
+  | "bilibili";
+export interface TSong {
+  id: string;
+  name: string;
+  artists: string;
+  album?: string;
+  source: TMediaSource;
+  imgId: string;
+  duration: number;
+};
+
+export type TSongState = "pending" | "approved" | "rejected" | "used" | "dropped";
 
 export type TPermission =
   | "login" // login to home page
@@ -20,8 +39,7 @@ export type TPermission =
   | "deleteSong"
   | "robot";
 
-export type TSongState = "pending" | "approved" | "rejected" | "used" | "dropped";
-
+// haven't used
 export type TIdentity =
   | "student"
   | "teacher"
@@ -33,8 +51,7 @@ export type TIdentity =
 
 export type TSubmitType = "realName" | "anonymous" | "alias";
 
-export type TMediaSource = "wy" | "tx";
-
+// for vue-music-flow
 export interface TMusicFlow {
   id: number;
   audio: string;

@@ -100,7 +100,7 @@ if (userStore.loggedIn)
   navigateTo("/");
 try {
   const isRegisterOpen = await $trpc.config.get.mutate("isRegisterOpen");
-  if (!isRegisterOpen) {
+  if (isRegisterOpen === "false") {
     toast.error("注册已关闭");
     navigateTo("/auth/login");
   }

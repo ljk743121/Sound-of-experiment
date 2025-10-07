@@ -12,7 +12,7 @@ export default defineNuxtConfig({
     },
   },
 
-  devtools: { enabled: true },
+  devtools: { enabled: false },
 
   css: ["@ljk743121/vue-music-flow/dist/vue-music-flow.css", "~/assets/css/tailwind.css"],
   vite: {

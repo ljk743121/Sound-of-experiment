@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { blockWords } from "~~/server/db/schema";
+import { getConfig, hasBlockWord, updateConfig } from "~~/server/utils/universal";
 import { adminProcedure, requirePermission, router } from "../trpc";
 
 export const blockWordsRouter = router({
@@ -33,5 +34,36 @@ export const blockWordsRouter = router({
     )
     .mutation(async ({ input }) => {
       await db.delete(blockWords).where(eq(blockWords.word, input.word));
+    }),
+
+  isBlocked: adminProcedure
+    .use(requirePermission(["blockWords"]))
+    .input(
+      z.object({
+        content: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return {
+        content: input.content,
+        isBlocked: (await hasBlockWord(input.content)) as boolean,
+      };
+    }),
+
+  isThirdPartyApiOpen: adminProcedure
+    .use(requirePermission(["blockWords"]))
+    .query(async () => {
+      return await getConfig("blockWordsApi");
+    }),
+
+  updateThirdPartyApi: adminProcedure
+    .use(requirePermission(["blockWords"]))
+    .input(
+      z.object({
+        open: z.boolean(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await updateConfig("blockWordsApi", input.open.toString());
     }),
 });

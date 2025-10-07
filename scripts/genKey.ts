@@ -15,3 +15,4 @@ console.log(`ENC_KID="${encKeyId}"`);
 console.log(`SIGN_PRIVATE_KEY="${(await exportPKCS8(signPrivate)).trim()}"`);
 console.log(`SIGN_PUBLIC_KEY="${(await exportSPKI(signPublic)).trim()}"`);
 console.log(`SIGN_KID="${signKeyId}"`);
+process.exit(0);

@@ -21,6 +21,9 @@
             歌手:{{ song.creator }}
             <p class="mt-1">
               <Badge variant="outline">
+                {{ getMusicSourceName(song.source as TMediaSource) }}
+              </Badge>
+              <Badge variant="secondary">
                 {{ song.isRealName ? "实名" : "匿名" }}
               </Badge>
               <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
@@ -145,6 +148,9 @@
               歌手:{{ song.creator }}
               <p class="mt-2">
                 <Badge variant="outline">
+                  {{ getMusicSourceName(song.source as TMediaSource) }}
+                </Badge>
+                <Badge variant="secondary">
                   {{ song.isRealName ? "实名" : "匿名" }}
                 </Badge>
                 <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
@@ -203,14 +209,16 @@
     </CardTitle>
     <CardDescription>
       歌手:{{ song.creator }}
-      <p>
+      <p class="mt-1 text-foreground">
         <Badge variant="outline">
-          {{ song.isRealName ? "实名" : "匿名" }}
+          {{ getMusicSourceName(song.source as TMediaSource) }}
         </Badge>
-        <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
-      </p>
-      <p v-if="song.message" class="text-xs text-muted-foreground">
-        私密留言: {{ song.message }}
+        <Badge v-if="song.duration" variant="secondary">
+          {{ formatDuration(song.duration) }}
+        </Badge>
+        <Badge v-if="song.message" variant="destructive">
+          有留言
+        </Badge>
       </p>
     </CardDescription>
   </div>
@@ -224,6 +232,9 @@
           <CardDescription>
             歌手:{{ song.creator }}
             <p>
+              <Badge variant="outline">
+                {{ getMusicSourceName(song.source as TMediaSource) }}
+              </Badge>
               <Badge variant="outline">
                 {{ song.isRealName ? "实名" : "匿名" }}
               </Badge>
@@ -275,8 +286,8 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from "~~/types";
-import { getImgUrl } from "~~/constants";
+import type { RouterOutput, TMediaSource } from "~~/types";
+import { getImgUrl, getMusicSourceName } from "~~/constants";
 
 const {
   song,

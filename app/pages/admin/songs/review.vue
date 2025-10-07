@@ -13,6 +13,7 @@
           >
             <Icon name="lucide:check-circle" size="17" class="mr-2" />
             通过全部歌曲
+            <Icon v-if="acceptAllPending" name="lucide:loader-circle" class="ml-2 animate-spin" />
           </Button>
         </div>
         <TransitionGroup name="list" tag="ul" class="flex flex-col gap-3 p-4">
@@ -41,6 +42,15 @@ import type { RouterOutput } from "~~/types";
 
 definePageMeta({
   layout: "admin",
+});
+
+useHead({
+  meta: [
+    {
+      name: "referrer",
+      content: "no-referrer",
+    },
+  ],
 });
 
 const { $trpc } = useNuxtApp();
