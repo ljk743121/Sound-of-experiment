@@ -286,7 +286,7 @@ const { data: songGuestList, suspense: songGuestListSuspense } = useQuery({
   refetchInterval: 10000,
   refetchIntervalInBackground: false,
   refetchOnMount: false,
-  enabled: false,
+  enabled: !userStore.loggedIn,
 });
 
 const { data: mySongList, suspense: mySongListSuspense } = useQuery({
@@ -330,6 +330,7 @@ const { data: arrangementGuestList, suspense: arrangementGuestListSuspense } = u
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
   refetchOnMount: false,
+  enabled: !userStore.loggedIn,
 });
 
 const { data: announcementList, suspense: announcementListSuspense, isPending: isAnnouncementListPending } = useQuery({
@@ -337,6 +338,7 @@ const { data: announcementList, suspense: announcementListSuspense, isPending: i
   queryKey: ["announcement.listSafe"],
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
+  enabled: userStore.loggedIn,
 });
 
 function getDateString(date: Date) {
