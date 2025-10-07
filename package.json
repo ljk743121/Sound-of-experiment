@@ -61,7 +61,6 @@
     "@unovis/vue": "^1.5.2",
     "@vee-validate/nuxt": "^4.15.0",
     "@vee-validate/zod": "^4.15.1",
-    "@vercel/edge-config": "^1.4.0",
     "@vueuse/core": "^12.8.2",
     "@vueuse/integrations": "^12.5.0",
     "@vueuse/nuxt": "^12.8.2",
