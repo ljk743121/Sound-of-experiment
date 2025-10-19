@@ -53,6 +53,21 @@ export function requirePermission(permissions: TPermission[]) {
   });
 }
 
+export function requireOptionalPermission(permissions: TPermission[]) {
+  return enforceUserIsAuthed.unstable_pipe(({ ctx, next }) => {
+    for (const permission of permissions) {
+      if (ctx.user.permissions.includes(permission)) {
+        return next({
+          ctx: {
+            user: ctx.user,
+          },
+        });
+      }
+    }
+    throw new TRPCError({ code: "FORBIDDEN", message: "超出权限范围" });
+  });
+}
+
 /**
  * Unprotected procedure
  */

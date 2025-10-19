@@ -4,6 +4,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { promisify } from "node:util";
 import * as dotenv from "dotenv";
+import { eq } from "drizzle-orm";
 import { defaultConfigs } from "~~/constants";
 
 const exec = promisify(childProcess.exec);
@@ -155,12 +156,28 @@ async function main() {
 
     const configCount = await db.select().from(configs).limit(1);
 
-    if (configCount.length === 0) {
-      console.log("- 配置表为空，开始初始化...");
-      await db.insert(configs).values(defaultConfigs.map(item => ({ key: item.key, value: item.value })));
-      console.log(`- 已添加 ${defaultConfigs.length} 个默认配置项`);
+    if (configCount.length !== defaultConfigs.length) {
+      console.log("- 数据库配置表与本地配置不相同，开始初始化...");
+
+      // 检查哪些配置项已经存在，只插入不存在的项
+      for (const item of defaultConfigs) {
+        try {
+          // 尝试选择已存在的配置项
+          const existing = await db.select().from(configs).where(eq(configs.key, item.key)).limit(1);
+
+          if (existing.length === 0) {
+            // 如果不存在，则插入
+            await db.insert(configs).values({ key: item.key, value: item.value });
+            console.log(`  - 已添加配置项: ${item.key}`);
+          } else {
+            console.log(`  - 配置项已存在: ${item.key}`);
+          }
+        } catch (insertError) {
+          console.error(`  - 插入配置项 ${item.key} 失败:`, insertError);
+        }
+      }
     } else {
-      console.log("- 配置表已有数据，无需初始化");
+      console.log("- 数据库配置表数据与本地相同，无需初始化");
     }
   } catch (error) {
     console.error("错误: 检测或初始化配置表失败", error);

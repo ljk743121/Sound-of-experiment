@@ -1,6 +1,6 @@
 import { parseDate } from "@internationalized/date";
 import { TRPCError } from "@trpc/server";
-import { desc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { arrangements, songs } from "~~/server/db/schema";
@@ -33,7 +33,7 @@ export const arrangementsRouter = router({
       },
       with: {
         songs: {
-          orderBy: desc(songs.createdAt),
+          orderBy: [asc(songs.position), desc(songs.createdAt)],
           columns: {
             id: true,
             creator: true,
@@ -53,6 +53,62 @@ export const arrangementsRouter = router({
     });
   }),
 
+  listApproved: adminProcedure
+    .use(requirePermission(["manualArrange"]))
+    .query(async () => {
+      return await db.query.songs.findMany({
+        where: eq(songs.state, "approved"),
+        orderBy: desc(songs.createdAt),
+      });
+    }),
+
+  updateOrder: adminProcedure
+    .use(requirePermission(["manualArrange"]))
+    .input(
+      z.array(
+        z.object({
+          date: z.string(),
+          songOrder: z.array(z.number()), // song id array
+        }),
+      ),
+    )
+    .mutation(async ({ input }) => {
+      await db.transaction(async (tx) => {
+        for (const dayChange of input) {
+          if (dayChange.date === "approved") {
+            for (const songId of dayChange.songOrder) {
+              await tx.update(songs)
+                .set({
+                  state: "approved",
+                  arrangementDate: null,
+                  position: null,
+                })
+                .where(eq(songs.id, songId));
+            }
+            continue;
+          }
+          const arrangement = await tx.query.arrangements.findFirst({
+            where: eq(arrangements.date, dayChange.date),
+          });
+          if (!arrangement) {
+            await tx.insert(arrangements).values({
+              date: dayChange.date,
+            });
+          }
+          for (let i = 0; i < dayChange.songOrder.length; i++) {
+            const songId = dayChange.songOrder[i];
+            await tx.update(songs)
+              .set({
+                state: "used",
+                arrangementDate: dayChange.date,
+                position: i + 1,
+              })
+              .where(eq(songs.id, songId));
+          }
+        }
+      });
+    }),
+
   listSafe: protectedProcedure.query(async () => {
     return await db.query.arrangements.findMany({
       orderBy: desc(arrangements.date),
@@ -61,7 +117,7 @@ export const arrangementsRouter = router({
       },
       with: {
         songs: {
-          orderBy: desc(songs.createdAt),
+          orderBy: [asc(songs.position), desc(songs.createdAt)],
           columns: {
             id: true,
             creator: true,
@@ -91,7 +147,7 @@ export const arrangementsRouter = router({
       },
       with: {
         songs: {
-          orderBy: desc(songs.createdAt),
+          orderBy: [asc(songs.position), desc(songs.createdAt)],
           columns: {
             id: true,
             creator: true,
@@ -230,7 +286,7 @@ export const arrangementsRouter = router({
       },
       with: {
         songs: {
-          orderBy: desc(songs.createdAt),
+          orderBy: [asc(songs.position), desc(songs.createdAt)],
           columns: {
             creator: true,
             name: true,

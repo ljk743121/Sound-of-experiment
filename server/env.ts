@@ -8,8 +8,6 @@ dotenv.config({ path: ".env.local" });
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   DATABASE_URL_DEV: z.string().url().optional(),
-  WY_URL: z.string().url().optional(),
-  TX_URL: z.string().url().optional(),
   DB_ENV: z.enum(["development", "production"]).default("production"),
   TOKEN_EXPIRATION_TIME: z.string().optional().default("7d"),
   SIGN_PUBLIC_KEY: z.string(),
@@ -18,8 +16,6 @@ const envSchema = z.object({
   ENC_PRIVATE_KEY: z.string(),
   SIGN_KID: z.string(),
   ENC_KID: z.string(),
-  EDGE_CONFIG_ID: z.string().optional(),
-  EDGE_CONFIG_TOKEN: z.string().optional(),
   CF_TOKEN: z.string().optional(),
 });
 

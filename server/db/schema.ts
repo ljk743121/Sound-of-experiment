@@ -42,6 +42,7 @@ export const songs = pgTable("songs", {
   rejectMessage: text(),
   message: text(),
   msgPublic: text(),
+  position: integer(), // 添加position字段用于排序
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 

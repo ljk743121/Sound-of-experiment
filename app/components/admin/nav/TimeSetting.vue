@@ -9,7 +9,7 @@
           <span>设置开放时间</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem>
+      <SidebarMenuItem v-if="userStore.permissions.includes('config')">
         <SidebarMenuButton @click="navigateTo('/admin/config')">
           <Icon name="lucide:settings" />
           <span>管理系统配置</span>
@@ -18,3 +18,7 @@
     </SidebarMenu>
   </SidebarGroup>
 </template>
+
+<script setup lang="ts">
+const userStore = useUserStore();
+</script>

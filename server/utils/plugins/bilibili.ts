@@ -1,6 +1,7 @@
 // modify from listen 1 bilibili.js by ljk743121
 import type { TMediaSource } from "~~/types";
 import { TRPCError } from "@trpc/server";
+import { createPlugin } from "../plugin";
 
 interface SongInfo {
   id: number;
@@ -150,11 +151,11 @@ async function search(keyword: string) {
   });
 };
 
-export function BiliBiliSourcePlugin(): MusicSourcePlugin {
-  return {
-    name: "bilibili",
-    alias: "哔哩哔哩",
-    searchSongs: search,
-    getMusicUrl: getTrackUrl,
-  };
-}
+export const bilibili = createPlugin({
+  name: "bilibili",
+  alias: "哔哩哔哩",
+  searchSongs: search,
+  getMusicUrl: [
+    { fn: getTrackUrl, priority: 1 },
+  ],
+});

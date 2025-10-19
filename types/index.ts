@@ -10,7 +10,8 @@ export type User = InferSelectModel<typeof users>;
 export type TMediaSource =
   | "wy"
   | "tx"
-  | "bilibili";
+  | "bilibili"
+  | "custom";
 export interface TSong {
   id: string;
   name: string;
@@ -37,7 +38,9 @@ export type TPermission =
   | "resetPassword"
   | "announcement" // manage announcement
   | "deleteSong"
-  | "robot";
+  | "robot"
+  | "config"
+  | "manualArrange";
 
 // haven't used
 export type TIdentity =

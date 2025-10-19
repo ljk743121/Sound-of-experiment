@@ -4,9 +4,8 @@ import * as plugins from "./plugins";
 export interface MusicSourcePlugin {
   name: string;
   alias: string;
-  searchSongs: (key: string, type?: string) => Promise<TSong[]>;
-  getMusicUrl: (id: string) => Promise<{ url: string; pay: boolean }>;
-  getVipMusicUrl?: (id: string) => Promise<{ url: string; pay: boolean }>;
+  searchSongs: (key: string) => Promise<TSong[]>;
+  getMusicUrl: { fn: (id: string) => Promise<{ url: string; pay: boolean }>; priority: number }[];
 }
 
 class PluginManager {
@@ -39,10 +38,16 @@ class PluginManager {
 }
 
 const pluginManager = new PluginManager();
+
+export function createPlugin(plugin: MusicSourcePlugin) {
+  return plugin;
+}
+
 pluginManager
-  .use(plugins.WYMusicSourcePlugin())
-  .use(plugins.QQMusicSourcePlugin())
-  .use(plugins.BiliBiliSourcePlugin());
+  .use(plugins.netease)
+  .use(plugins.qqmusic)
+  .use(plugins.bilibili);
+// .use(plugins.custom);
 
 export { pluginManager };
 export const PluginSources = pluginManager.getAllPluginNames();

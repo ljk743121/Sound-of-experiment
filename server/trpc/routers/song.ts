@@ -38,13 +38,14 @@ export const songRouter = router({
       z.object({
         name: z.string().min(1, "请输入歌名").max(128, "歌名长度最大为128"),
         creator: z.string().min(1, "请输入歌手名").max(128, "歌手长度最大128"),
-        songId: z.string({ required_error: "请输入歌曲ID" }),
+        songId: z.string({ required_error: "请输入歌曲ID" }).optional(),
         source: z.custom<TMediaSource>(),
         imgId: z.string(),
         duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
         submitType: z.custom<TSubmitType>(),
         message: z.string().trim().optional(),
         msgPublic: z.string().trim().optional(),
+        customUrl: z.string().trim().url().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -68,10 +69,19 @@ export const songRouter = router({
       } else if (input.submitType === "anonymous") {
         displayName = "";
       }
+      let songId = input.songId ? input.songId.toString() : "";
+      if (input.source === "custom") {
+        if (!input.customUrl)
+          throw new TRPCError({ code: "BAD_REQUEST", message: "请填写歌曲链接" });
+        songId = input.customUrl;
+      }
+      if (!songId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "请输入歌曲ID" });
+      }
       const now = new Date();
       await db.insert(songs).values({
         ...input,
-        songId: input.songId.toString(),
+        songId,
         ownerId: ctx.user.id,
         isRealName,
         ownerDisplayName: displayName,

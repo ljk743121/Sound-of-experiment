@@ -1,11 +1,132 @@
 <template>
+  <SearchTemplate>
+    <FormField v-slot="{ componentField }" name="source">
+      <FormItem v-auto-animate>
+        <FormLabel>来源</FormLabel>
+        <FormControl>
+          <Select v-bind="componentField">
+            <SelectTrigger>
+              <SelectValue placeholder="请选择" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="(source, index) in musicSources" :key="index" :value="source.value">
+                {{ source.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
+    <div class="flex w-full items-center gap-1.5">
+      <Input id="search" v-model="SearchInput" type="text" placeholder="搜你想搜" :disabled="isPending || songFetching" />
+      <Button :disabled="isPending || songFetching || submitDisabled" @click.prevent="onSearch()">
+        搜索
+      </Button>
+    </div>
+
+    <div v-if="SearchKey.trim()" class="mt-4">
+      <div v-if="!songFetching">
+        <div v-if="songsList && songsList.length" class="flex flex-col gap-3 p-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>搜索结果</CardTitle>
+              <CardDescription>共 {{ songsList.length }} 首</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div v-for="songInfo in songsList" :key="songInfo.id" class="w-full">
+                <div
+                  class="mx-auto flex flex-col gap-4 rounded-lg border p-4 shadow-xs transition-colors sm:max-w-md sm:flex-row"
+                >
+                  <div class="shrink-0">
+                    <Avatar class="size-12 rounded">
+                      <NuxtImg
+                        :src="getImgUrl(songInfo.imgId, songInfo.source)" class="object-cover"
+                        :alt="songInfo.name" loading="lazy"
+                      />
+                      <Icon name="lucide:music" size="24" />
+                    </Avatar>
+                  </div>
+                  <div class="min-w-0 grow">
+                    <div class="mb-3 text-start">
+                      <CardTitle class="line-clamp-1 text-base font-medium">
+                        {{ songInfo.name }}
+                      </CardTitle>
+                      <CardDescription class="line-clamp-1 text-sm">
+                        {{ songInfo.artists }}
+                      </CardDescription>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline" size="sm" class="min-w-[120px] flex-1 sm:flex-none"
+                        :disable="submitDisabled" @click.prevent="
+                          () => {
+                            songPlayingConfig = songInfo;
+                          }
+                        "
+                      >
+                        <Icon name="lucide:play" class="mr-1" size="16" />
+                        播放
+                      </Button>
+
+                      <Button
+                        size="sm" class="min-w-[120px] flex-1 sm:flex-none" :disabled="submitDisabled"
+                        @click.prevent="
+                          () => {
+                            form.setFieldValue('name', songInfo.name);
+                            form.setFieldValue('creator', songInfo.artists);
+                            form.setFieldValue('songId', songInfo.id);
+                            form.setFieldValue('imgId', songInfo.imgId);
+                            form.setFieldValue('duration', songInfo.duration);
+                            selectedSong = {
+                              songId: songInfo.id,
+                              name: songInfo.name,
+                              creator: songInfo.artists,
+                              source: songInfo.source,
+                              imgId: songInfo.imgId,
+                              duration: songInfo.duration,
+                            };
+                          }
+                        "
+                      >
+                        <Icon name="lucide:check" class="mr-1" size="16" />
+                        选择
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div v-if="songPlayingConfig.id.length < 1" class="text-center text-sm">
+            选择歌曲试听或确认歌曲信息
+          </div>
+          <SongPlayer
+            v-if="songPlayingConfig.id.length > 0" :id="songPlayingConfig.id" :name="songPlayingConfig.name"
+            :artists="songPlayingConfig.artists" :album="songPlayingConfig.album" :source="songPlayingConfig.source"
+            :img-id="songPlayingConfig.imgId"
+          />
+        </div>
+        <div v-else class="flex w-full flex-col items-center justify-center">
+          无搜索结果。
+        </div>
+      </div>
+      <div v-else class="flex h-[calc(100svh-10rem)] w-full flex-col items-center justify-center">
+        <Icon name="lucide:loader-circle" class="animate-spin" size="35" />
+        正在搜索中...
+      </div>
+    </div>
+  </SearchTemplate>
   <UseTemplate>
     <form class="mx-auto grid max-w-(--breakpoint-md) grid-cols-1 gap-6 p-4 md:p-6" @submit="onSubmit">
       <FormField v-slot="{ componentField }" name="name">
         <FormItem v-auto-animate>
           <FormLabel>歌曲名</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
+            <Input v-bind="componentField" :disabled="tabStatus === 'search'" class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -15,13 +136,13 @@
         <FormItem v-auto-animate>
           <FormLabel>歌手</FormLabel>
           <FormControl>
-            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
+            <Input v-bind="componentField" :disabled="tabStatus === 'search'" class="cursor-not-allowed" />
           </FormControl>
           <FormMessage />
         </FormItem>
       </FormField>
 
-      <FormField v-slot="{ componentField }" name="songId">
+      <FormField v-if="tabStatus === 'search'" v-slot="{ componentField }" name="songId">
         <FormItem v-auto-animate>
           <FormLabel>歌曲ID</FormLabel>
           <FormControl>
@@ -30,6 +151,16 @@
           <FormMessage />
         </FormItem>
       </FormField>
+
+      <!-- <FormField v-if="tabStatus === 'custom'" v-slot="{ componentField }" name="customUrl">
+        <FormItem v-auto-animate>
+          <FormLabel>音频链接(URL)</FormLabel>
+          <FormControl>
+            <Input v-bind="componentField" />
+          </FormControl>
+        </FormItem>
+        <Button @click.prevent="getDuration(form.values.)">获取歌曲时长</Button>
+      </FormField> -->
 
       <FormField v-slot="{ componentField }" name="duration">
         <FormItem v-auto-animate>
@@ -41,128 +172,8 @@
         </FormItem>
       </FormField>
 
-      <FormField v-slot="{ componentField }" name="source">
-        <FormItem v-auto-animate>
-          <FormLabel>来源</FormLabel>
-          <FormControl>
-            <Select v-bind="componentField">
-              <SelectTrigger>
-                <SelectValue placeholder="请选择" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem v-for="(source, index) in musicSources" :key="index" :value="source.value">
-                  {{ source.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+      <SearchModule v-if="tabStatus === 'search'" />
 
-      <div class="flex w-full items-center gap-1.5">
-        <Input
-          id="search" v-model="SearchInput" type="text" :placeholder="tabStatus === 'search' ? '歌曲名或歌手' : '歌曲ID'"
-          :disabled="isPending || songFetching"
-        />
-        <Button :disabled="isPending || songFetching || submitDisabled" @click.prevent="onSearch()">
-          搜索
-        </Button>
-      </div>
-
-      <div v-if="SearchKey.trim()" class="mt-4">
-        <div v-if="!songFetching">
-          <div v-if="songsList && songsList.length" class="flex flex-col gap-3 p-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>搜索结果</CardTitle>
-                <CardDescription>共 {{ songsList.length }} 首</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div v-for="songInfo in songsList" :key="songInfo.id" class="w-full">
-                  <div
-                    class="mx-auto flex flex-col gap-4 rounded-lg border p-4 shadow-xs transition-colors sm:max-w-md sm:flex-row"
-                  >
-                    <div class="shrink-0">
-                      <Avatar class="size-12 rounded">
-                        <NuxtImg
-                          :src="getImgUrl(songInfo.imgId, songInfo.source)" class="object-cover"
-                          :alt="songInfo.name" loading="lazy"
-                        />
-                        <Icon name="lucide:music" size="24" />
-                      </Avatar>
-                    </div>
-                    <div class="min-w-0 grow">
-                      <div class="mb-3 text-start">
-                        <CardTitle class="line-clamp-1 text-base font-medium">
-                          {{ songInfo.name }}
-                        </CardTitle>
-                        <CardDescription class="line-clamp-1 text-sm">
-                          {{ songInfo.artists }}
-                        </CardDescription>
-                      </div>
-
-                      <div class="flex flex-wrap gap-2">
-                        <Button
-                          variant="outline" size="sm" class="min-w-[120px] flex-1 sm:flex-none"
-                          :disable="submitDisabled" @click.prevent="
-                            () => {
-                              songPlayingConfig = songInfo;
-                            }
-                          "
-                        >
-                          <Icon name="lucide:play" class="mr-1" size="16" />
-                          播放
-                        </Button>
-
-                        <Button
-                          size="sm" class="min-w-[120px] flex-1 sm:flex-none" :disabled="submitDisabled"
-                          @click.prevent="
-                            () => {
-                              form.setFieldValue('name', songInfo.name);
-                              form.setFieldValue('creator', songInfo.artists);
-                              form.setFieldValue('songId', songInfo.id);
-                              form.setFieldValue('imgId', songInfo.imgId);
-                              form.setFieldValue('duration', songInfo.duration);
-                              selectedSong = {
-                                songId: songInfo.id,
-                                name: songInfo.name,
-                                creator: songInfo.artists,
-                                source: songInfo.source,
-                                imgId: songInfo.imgId,
-                                duration: songInfo.duration,
-                              };
-                            }
-                          "
-                        >
-                          <Icon name="lucide:check" class="mr-1" size="16" />
-                          选择
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div v-if="songPlayingConfig.id.length < 1" class="text-center text-sm">
-              选择歌曲试听或确认歌曲信息
-            </div>
-            <SongPlayer
-              v-if="songPlayingConfig.id.length > 0" :id="songPlayingConfig.id" :name="songPlayingConfig.name"
-              :artists="songPlayingConfig.artists" :album="songPlayingConfig.album" :source="songPlayingConfig.source"
-              :img-id="songPlayingConfig.imgId"
-            />
-          </div>
-          <div v-else class="flex w-full flex-col items-center justify-center">
-            无搜索结果。
-          </div>
-        </div>
-        <div v-else class="flex h-[calc(100svh-10rem)] w-full flex-col items-center justify-center">
-          <Icon name="lucide:loader-circle" class="animate-spin" size="35" />
-          正在搜索中...
-        </div>
-      </div>
       <FormField v-slot="{ componentField }" type="radio" name="submitType">
         <FormItem v-auto-animate class="space-y-3">
           <FormLabel>投稿时名称</FormLabel>
@@ -251,20 +262,20 @@
     </CardHeader>
     <CardContent>
       <Tabs default-value="search">
-        <TabsList class="grid w-full grid-cols-2">
+        <TabsList class="grid w-full grid-cols-1">
           <TabsTrigger value="search" @click="tabStatus = 'search'">
             搜索歌曲
           </TabsTrigger>
-          <TabsTrigger value="id" @click="tabStatus = 'id'">
-            歌曲ID
-          </TabsTrigger>
+          <!-- <TabsTrigger value="custom" @click="tabStatus = 'custom'">
+            手动投稿
+          </TabsTrigger> -->
         </TabsList>
         <TabsContent value="search">
           <GridForm />
         </TabsContent>
-        <TabsContent value="id">
+        <!-- <TabsContent value="custom">
           <GridForm />
-        </TabsContent>
+        </TabsContent> -->
       </Tabs>
     </CardContent>
   </Card>
@@ -318,8 +329,9 @@ try {
 
 // Reuse `form` section
 const [UseTemplate, GridForm] = createReusableTemplate();
+const [SearchTemplate, SearchModule] = createReusableTemplate();
 
-const tabStatus = ref<"search" | "id">("search");
+const tabStatus = ref<"search" | "custom">("search");
 
 const formSchema = toTypedSchema(
   z.object({
@@ -327,23 +339,20 @@ const formSchema = toTypedSchema(
       .string({ required_error: "请输入歌名" })
       .trim()
       .min(1, "请输入歌名")
-      .max(128, "歌名长度最大为128")
-      .refine(
-        val => !(val.trim().startsWith("《") || val.trim().endsWith("》")),
-        "歌曲名不需带书名号",
-      ),
+      .max(128, "歌名长度最大为128"),
     creator: z
       .string({ required_error: "请输入歌手名" })
       .trim()
       .min(1, "请输入歌手名")
       .max(128, "歌手长度最大为128"),
-    songId: z.string({ required_error: "请输入歌曲ID" }).trim().min(1, "请输入歌曲ID"),
+    songId: z.string({ required_error: "请输入歌曲ID" }).trim().min(1, "请输入歌曲ID").optional(),
     imgId: z.string().trim(),
     source: z.custom<TMediaSource>(),
     duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
     submitType: z.custom<TSubmitType>(),
     message: z.string().trim().optional(),
     msgPublic: z.string().trim().optional(),
+    customUrl: z.string().trim().url().optional(),
   }),
 );
 
@@ -371,7 +380,6 @@ const songPlayingConfig = ref<RouterOutput["search"]["mixSearch"][0]>({
   duration: 0,
 });
 const SearchKey = ref("");
-// const SearchCount = ref(0);
 const SearchInput = ref("");
 const selectedSong = ref({
   songId: "",
@@ -404,11 +412,7 @@ function onSearch() {
   //   SearchKey.value = `${form.values.name?.trim() || ''} ${form.values.creator?.trim() || ''}`.trim();
   // }
   if (SearchInput.value.trim().length < 1) {
-    if (tabStatus.value === "search") {
-      toast.error("请输入歌曲名或歌手名！");
-    } else {
-      toast.error("请输入歌曲名或歌手名！");
-    }
+    toast.error("请输入歌曲名或歌手名！");
   } else if (!form.values.source) {
     toast.error("请选择歌曲来源！");
   } else {
@@ -427,7 +431,6 @@ const { isFetching: songFetching, data: songsList } = useQuery({
   queryFn: () =>
     $trpc.search.mixSearch.query({
       key: SearchKey.value,
-      type: tabStatus.value as "search" | "id",
       source: form.values.source!,
     }),
   queryKey: ["search.mixSearch"],
@@ -435,13 +438,16 @@ const { isFetching: songFetching, data: songsList } = useQuery({
   enabled: computed(() => SearchKey.value.trim().length > 0),
 });
 
+// function getDuration(url: string){
+
+// }
+
 // new song selected
 watch([() => SearchKey.value, () => form.values.source], async () => {
   if (SearchKey.value.trim().length === 0 || !form.values.source || !tabStatus.value) {
     return;
   }
   queryClient.invalidateQueries({ queryKey: ["search.mixSearch"] });
-  // songsList.value = await searchSongs(SearchKey.value, tabStatus.value as 'search' | 'id', form.values.source!);
 });
 
 watch(

@@ -15,6 +15,8 @@ export const permissionNames: { value: TPermission; label: string; icon: string 
   { value: "resetPassword", label: "重置密码", icon: "lucide:key" },
   { value: "deleteSong", label: "删除歌曲", icon: "lucide:trash" },
   { value: "deleteArrangement", label: "删除排歌", icon: "lucide:trash" },
+  { value: "config", label: "管理配置", icon: "lucide:settings" },
+  { value: "manualArrange", label: "手动排歌", icon: "lucide:arrow-down-wide-narrow" },
 ];
 
 export const musicSources: { value: TMediaSource; label: string }[] = [
@@ -24,8 +26,9 @@ export const musicSources: { value: TMediaSource; label: string }[] = [
 ];
 
 export const defaultConfigs: { key: string; value: string; label: string }[] = [
-  { key: "isRegisterOpen", value: "true", label: "是否开放注册" },
-  { key: "blockWordsApi", value: "true", label: "是否开启第三方屏蔽词检测" },
+  { key: "isRegisterOpen", value: "true", label: "开放注册" },
+  { key: "blockWordsApi", value: "true", label: "第三方屏蔽词检测" },
+  { key: "auth", value: "false", label: "学校注册认证" },
 ];
 
 export const breadCrumb: Record<string, string> = {
@@ -44,6 +47,7 @@ export const breadCrumb: Record<string, string> = {
   deleteUser: "删除用户",
   resetPassword: "重置密码",
   config: "配置管理",
+  manualArrange: "手动排歌",
 };
 
 export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;
@@ -59,13 +63,18 @@ export const searchBaseURL = {
 };
 
 export const mediaBaseURL = {
-  wy: "https://music.163.com/song/media/outer/url?id=",
-  qq: "http://ws.stream.qqmusic.qq.com/",
+  wyOfficial: "https://music.163.com/api/song/enhance/player/url",
+  wyOfficial2: "https://music.163.com/song/media/outer/url?id=",
+  qqOfficial: "http://ws.stream.qqmusic.qq.com/",
+  wyMeting: "https://api.qijieya.cn/meting/?server=netease&type=url&id=",
+  qqMeting: "https://api.qijieya.cn/meting/?server=tencent&type=url&id=",
+  wyVkey: "https://api.vkeys.cn/v2/music/netease",
+  qqVkey: "https://api.vkeys.cn/v2/music/tencent/geturl",
 };
 
 export const imgBaseURL: Record<string, string> = {
   wy: "https://", // no imgId
-  tx: "https://y.qq.com/music/photo_new/T002R1200x1200M000",
+  tx: "https://y.qq.com/music/photo_new/T002R800x800M000",
   bilibili: "",
 };
 

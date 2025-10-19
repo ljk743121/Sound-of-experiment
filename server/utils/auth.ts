@@ -82,5 +82,7 @@ export async function verifyPassword(hashedPassword: string, plainPassword: stri
 }
 
 export async function isRegisterUserValid(id: string, name: string) {
+  if (await getConfig("auth") === "false")
+    return true;
   return validateUser(id, name);
 }

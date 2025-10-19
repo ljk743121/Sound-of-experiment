@@ -9,13 +9,13 @@ export const configRouter = router({
       return getConfig(input);
     }),
   update: adminProcedure
-    .use(requirePermission(["manageUser"]))
+    .use(requirePermission(["config"]))
     .input(z.object({ key: z.string(), value: z.any() }))
     .mutation(async ({ input }) => {
       await updateConfig(input.key, input.value);
     }),
   getAll: adminProcedure
-    .use(requirePermission(["manageUser"]))
+    .use(requirePermission(["config"]))
     .query(async () => {
       return getAllConfigs();
     }),

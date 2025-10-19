@@ -1,14 +1,11 @@
 import type { TMediaSource } from "~~/types";
-import type { MusicSourcePlugin } from "../plugin";
 import { TRPCError } from "@trpc/server";
 // import { consola } from "consola";
 import { defaultVipSign, mediaBaseURL, searchBaseURL } from "~~/constants";
-import { env } from "~~/server/env";
+import { createPlugin } from "../plugin";
 
-async function searchSongsQQ(key: string, type?: string) {
+async function officialSearch(key: string) {
   const searchBase = searchBaseURL.qqSearch;
-  if (type === "id")
-    throw new TRPCError({ code: "BAD_REQUEST", message: "id搜索暂未实现" });
 
   interface TSearchDataItem {
     albummid: string;
@@ -59,8 +56,8 @@ async function searchSongsQQ(key: string, type?: string) {
   return songList;
 }
 
-async function getSongUrlQQ(mid: string) {
-  const serverBaseURL = mediaBaseURL.qq;
+async function officialFetch(mid: string) {
+  const serverBaseURL = mediaBaseURL.qqOfficial;
   const songBaseURL = searchBaseURL.qqPURL;
   const PREFIX = "M500";
   const SUFFIX = "mp3";
@@ -102,8 +99,8 @@ async function getSongUrlQQ(mid: string) {
   };
 }
 
-async function getSongUrlQQVip(mid: string) {
-  const songBaseURL = env.TX_URL;
+async function vkeyFetch(mid: string) {
+  const songBaseURL = mediaBaseURL.qqVkey;
   if (!songBaseURL)
     throw new TRPCError({ code: "BAD_REQUEST", message: "服务器未配置请求源" });
   interface TSongURL {
@@ -137,30 +134,32 @@ async function getSongUrlQQVip(mid: string) {
   if (!resSongsUrl.data.url) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "获取VIP歌曲链接失败" });
   }
-  // consola.log(
-  //   new Date().toLocaleString("zh-CN"),
-  //   "|",
-  //   `[${resSongsUrl.code}]`,
-  //   `[VIPRequest]`,
-  //   user.id,
-  //   user.name,
-  //   "->",
-  //   "tx",
-  //   "|",
-  //   mid,
-  // );
   return {
     url: resSongsUrl.data.url.replace(/^http:/, "https:"),
     pay: true,
   };
 }
 
-export function QQMusicSourcePlugin(): MusicSourcePlugin {
-  return {
-    name: "tx",
-    alias: "QQ音乐",
-    searchSongs: searchSongsQQ,
-    getMusicUrl: getSongUrlQQ,
-    getVipMusicUrl: getSongUrlQQVip,
-  };
+async function metingapiFetch(id: string) {
+  const target_url = mediaBaseURL.qqMeting;
+  const res = await fetch(`${target_url}${id}`, {
+    method: "GET",
+    redirect: "follow",
+  }).then((res) => {
+    if (res.url === `${target_url}${id}`)
+      throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲链接失败" });
+    return res;
+  });
+  return { url: res.url, pay: false };
 }
+
+export const qqmusic = createPlugin({
+  name: "tx",
+  alias: "QQ音乐",
+  searchSongs: officialSearch,
+  getMusicUrl: [
+    { fn: officialFetch, priority: 1 },
+    { fn: metingapiFetch, priority: 0.9 },
+    { fn: vkeyFetch, priority: 0.8 },
+  ],
+});

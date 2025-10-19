@@ -79,6 +79,12 @@ const data = {
           icon: "lucide:arrow-down-wide-narrow",
           permissions: ["arrange"] as TPermission[],
         },
+        {
+          title: "手动排歌",
+          url: "/admin/songs/manualArrange",
+          icon: "lucide:arrow-down-wide-narrow",
+          permissions: ["manualArrange"] as TPermission[],
+        },
       ],
     },
     {

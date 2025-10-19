@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
+import { consola } from "consola";
 import { z } from "zod";
-import { defaultVipSign } from "~~/constants";
 import { pluginManager } from "~~/server/utils/plugin";
 import { protectedProcedure, router } from "../trpc";
 
@@ -13,7 +13,6 @@ export const searchRouter = router({
       z.object({
         key: z.string(),
         source: z.string(),
-        type: z.enum(["search", "id"]).optional(),
       }),
     )
     .query(async ({ input }) => {
@@ -23,7 +22,7 @@ export const searchRouter = router({
       if (!musicSource) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "未知的源" });
       }
-      return await musicSource.searchSongs(input.key, input.type);
+      return await musicSource.searchSongs(input.key);
     }),
   mixGetUrl: protectedProcedure
     .input(
@@ -40,21 +39,33 @@ export const searchRouter = router({
       if (!musicSource) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "未知的源" });
       }
-      try {
-        songInfo = await musicSource.getMusicUrl(input.id);
-      } catch (e: any) {
-        if (e.message === defaultVipSign) {
-          if (musicSource.getVipMusicUrl) {
-            songInfo = await musicSource.getVipMusicUrl(input.id);
-          } else {
-            throw new TRPCError({ code: "BAD_REQUEST", message: "因版权问题，无法播放歌曲" });
-          }
-        } else {
-          throw new TRPCError({ code: "BAD_REQUEST", message: e.message });
+      for (const source of musicSource.getMusicUrl.sort((a, b) => b.priority - a.priority)) {
+        try {
+          songInfo = await source.fn(input.id).then((res) => {
+            if (res.url) {
+              return res;
+            } else {
+              throw new TRPCError({ code: "BAD_REQUEST", message: "音乐链接为空" });
+            }
+          });
+          return songInfo;
+        } catch (e: any) {
+          consola.log(
+            new Date().toLocaleString("zh-CN"),
+            "|",
+            `[SongRequest]`,
+            input.id,
+            "->",
+            input.source,
+            source.fn.name,
+            "|",
+            e.message,
+          );
         }
       }
-      if (!songInfo.url)
-        throw new TRPCError({ code: "BAD_REQUEST", message: "歌曲链接为空" });
+      if (!songInfo.url) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "获取音乐链接失败" });
+      }
       return songInfo;
     }),
 });

@@ -119,7 +119,7 @@ const columns: ColumnDef<a>[] = [
     cell: ({ row }) =>
       h(
         "div",
-        { class: "flex gap-1" },
+        { class: "flex gap-1 flex-wrap" },
         h(TablePermission, {
           id: row.original.id!,
           permissions: row.original.permissions!,

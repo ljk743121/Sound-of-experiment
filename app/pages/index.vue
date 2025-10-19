@@ -136,7 +136,7 @@
     <section class="md:overflow-auto md:px-4">
       <Tabs v-model="selectedTab" default-value="arrangement">
         <div class="-mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
-          <TabsList class="grid grid-cols-3">
+          <TabsList class="grid w-full grid-cols-3">
             <TabsTrigger value="arrangement">
               排歌歌单
             </TabsTrigger>
@@ -161,7 +161,7 @@
         <TabsContent value="list" class="space-y-3">
           <Tabs v-model="listMode" default-value="songList">
             <div>
-              <TabsList class="grid grid-cols-2">
+              <TabsList class="grid w-full grid-cols-2">
                 <TabsTrigger value="songList">
                   本月歌曲
                 </TabsTrigger>

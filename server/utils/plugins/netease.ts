@@ -1,14 +1,10 @@
 import type { TMediaSource } from "~~/types";
-import type { MusicSourcePlugin } from "../plugin";
 import { TRPCError } from "@trpc/server";
 // import { consola } from "consola";
-import { defaultVipSign, mediaBaseURL, searchBaseURL } from "~~/constants";
-import { env } from "~~/server/env";
+import { mediaBaseURL, searchBaseURL } from "~~/constants";
+import { createPlugin } from "../plugin";
 
-async function searchSongsWy(key: string, type?: string) {
-  if (!type) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "缺少搜索类型" });
-  }
+async function officialSearch(key: string) {
   const searchBase = searchBaseURL.wySearch;
   const detailsBase = searchBaseURL.wyDetails;
 
@@ -47,36 +43,31 @@ async function searchSongsWy(key: string, type?: string) {
   let songsIdList = <string[]>[];
   let resSongs = <TSearchResponse>{};
 
-  if (type === "search") {
-    resSongs = await $fetch<TSearchResponse>(searchBase, {
-      method: "GET",
-      params: {
-        s: key,
-        type: 1,
-        offset: 0,
-        limit: 10,
-        total: true,
-      },
-      parseResponse(responseText) {
-        try {
-          return JSON.parse(responseText);
-        } catch {
-          return responseText;
-        }
-      },
-    });
-    if (resSongs.code !== 200) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "搜索失败" });
-    }
-    if (!resSongs.result.songs) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "搜索结果为空" });
-    }
-
-    songsIdList = resSongs.result.songs.map(song => song.id);
-  } else {
-    // id
-    songsIdList = [key];
+  resSongs = await $fetch<TSearchResponse>(searchBase, {
+    method: "GET",
+    params: {
+      s: key,
+      type: 1,
+      offset: 0,
+      limit: 10,
+      total: true,
+    },
+    parseResponse(responseText) {
+      try {
+        return JSON.parse(responseText);
+      } catch {
+        return responseText;
+      }
+    },
+  });
+  if (resSongs.code !== 200) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "搜索失败" });
   }
+  if (!resSongs.result.songs) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "搜索结果为空" });
+  }
+
+  songsIdList = resSongs.result.songs.map(song => song.id);
 
   const resAlbums = await $fetch<TAlbumsResponse>(detailsBase, {
     method: "GET",
@@ -114,24 +105,58 @@ async function searchSongsWy(key: string, type?: string) {
   return transformSongs;
 }
 
-async function getSongUrlWy(id: string) {
-  const baseUrl = mediaBaseURL.wy;
-  const res = await fetch(`${baseUrl}${id}.mp3`);
-  if (!res.ok) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲链接失败" });
-  } else if (res.url.replace(/^http:/, "https:") === "https://music.163.com/404") {
-    throw new TRPCError({ code: "BAD_REQUEST", message: defaultVipSign });
-  } else {
-    return {
-      url: res.url.replace(/^http:/, "https:"),
-      pay: false,
-    };
+async function officialFetch(id: string) {
+  interface TApiRes {
+    code: number;
+    data: {
+      url: string;
+    }[];
   }
+
+  const target_url = mediaBaseURL.wyOfficial;
+  const res = await $fetch<TApiRes>(target_url, {
+    method: "GET",
+    params: {
+      ids: `[${id}]`,
+      br: 999000,
+    },
+    parseResponse(responseText) {
+      try {
+        return JSON.parse(responseText);
+      } catch {
+        return responseText;
+      }
+    },
+  });
+  if (res.code !== 200) {
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "获取歌曲链接失败" });
+  }
+  if (!res.data[0].url) {
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "获取歌曲链接失败" });
+  }
+  return { url: res.data[0].url, pay: false };
 }
-async function getSongUrlWyVip(id: string) {
-  const songBaseURL = env.WY_URL;
-  if (!songBaseURL)
-    throw new TRPCError({ code: "BAD_REQUEST", message: "服务器未配置请求源" });
+
+// async function officialFetch2(id: string) {
+//   const baseUrl = mediaBaseURL.wyOfficial2;
+//   const res = await fetch(`${baseUrl}${id}`, {
+//     method: 'GET',
+//     redirect: 'follow',
+//   });
+//   if (!res.ok) {
+//     throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲链接失败" });
+//   } else if (res.url.replace(/^http:/, "https:") === "https://music.163.com/404") {
+//     throw new TRPCError({ code: "BAD_REQUEST", message: defaultVipSign });
+//   } else {
+//     return {
+//       url: res.url.replace(/^http:/, "https:"),
+//       pay: false,
+//     };
+//   }
+// }
+
+async function vkeyFetch(id: string) {
+  const songBaseURL = mediaBaseURL.wyVkey;
   interface TSongURL {
     code: number;
     data: {
@@ -162,30 +187,33 @@ async function getSongUrlWyVip(id: string) {
   if (!resSongsUrl.data.url) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "获取VIP歌曲链接失败" });
   }
-  // consola.log(
-  //   new Date().toLocaleString("zh-CN"),
-  //   "|",
-  //   `[${resSongsUrl.code}]`,
-  //   `[VIPRequest]`,
-  //   user.id,
-  //   user.name,
-  //   "->",
-  //   "wy",
-  //   "|",
-  //   id,
-  // );
   return {
     url: resSongsUrl.data.url.replace(/^http:/, "https:"),
     pay: true,
   };
 }
 
-export function WYMusicSourcePlugin(): MusicSourcePlugin {
-  return {
-    name: "wy",
-    alias: "网易云音乐",
-    searchSongs: searchSongsWy,
-    getMusicUrl: getSongUrlWy,
-    getVipMusicUrl: getSongUrlWyVip,
-  };
+async function metingapiFetch(id: string) {
+  const target_url = mediaBaseURL.wyMeting;
+  const res = await fetch(`${target_url}${id}`, {
+    method: "GET",
+    redirect: "follow",
+  }).then((res) => {
+    if (res.url === `${target_url}${id}`)
+      throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲链接失败" });
+    return res;
+  });
+  return { url: res.url, pay: true };
 }
+
+export const netease = createPlugin({
+  name: "wy",
+  alias: "网易云音乐",
+  searchSongs: officialSearch,
+  getMusicUrl: [
+    { fn: officialFetch, priority: 1 },
+    // { fn: officialFetch2, priority: 0.9 },
+    { fn: metingapiFetch, priority: 0.9 },
+    { fn: vkeyFetch, priority: 0.8 },
+  ],
+});
