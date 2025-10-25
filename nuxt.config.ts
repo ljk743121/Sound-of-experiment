@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from "@tailwindcss/vite";
+import { proxy } from "./constants";
 
 export default defineNuxtConfig({
   app: {
@@ -97,6 +98,7 @@ export default defineNuxtConfig({
     "/admin": { redirect: "/admin/general/songs" },
     "/admin/general": { redirect: "/admin/general/notifications" },
     "/admin/user": { redirect: "/admin/user/watchSongs" },
+    ...proxy,
   },
 
   runtimeConfig: {

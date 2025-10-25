@@ -283,10 +283,11 @@
 
 <script lang="ts" setup>
 import type { RouterOutput, TMediaSource, TSubmitType } from "~~/types";
+import { searchSongs } from "#shared/plugin";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import * as z from "zod";
-import { getImgUrl, musicSources } from "~~/constants";
 
+import { getImgUrl, musicSources } from "~~/constants";
 import SongPlayer from "~/components/song/SongPlayer.vue";
 // import { songFetching } from '~/composables/ClientSearch';
 
@@ -427,13 +428,19 @@ function onSearch() {
 
 const queryClient = useQueryClient();
 // const songsList = ref<RouterOutput['search']['mixSearch']>([]);
+// const { isFetching: songFetching, data: songsList } = useQuery({
+//   queryFn: () =>
+//     $trpc.search.mixSearch.query({
+//       key: SearchKey.value,
+//       source: form.values.source!,
+//     }),
+//   queryKey: ["search.mixSearch"],
+//   refetchOnWindowFocus: false,
+//   enabled: computed(() => SearchKey.value.trim().length > 0),
+// });
 const { isFetching: songFetching, data: songsList } = useQuery({
-  queryFn: () =>
-    $trpc.search.mixSearch.query({
-      key: SearchKey.value,
-      source: form.values.source!,
-    }),
-  queryKey: ["search.mixSearch"],
+  queryFn: () => searchSongs(SearchKey.value, form.values.source!),
+  queryKey: ["mixSearch"],
   refetchOnWindowFocus: false,
   enabled: computed(() => SearchKey.value.trim().length > 0),
 });
@@ -447,7 +454,7 @@ watch([() => SearchKey.value, () => form.values.source], async () => {
   if (SearchKey.value.trim().length === 0 || !form.values.source || !tabStatus.value) {
     return;
   }
-  queryClient.invalidateQueries({ queryKey: ["search.mixSearch"] });
+  queryClient.invalidateQueries({ queryKey: ["mixSearch"] });
 });
 
 watch(

@@ -25,6 +25,12 @@ export const musicSources: { value: TMediaSource; label: string }[] = [
   { value: "bilibili", label: "Bilibili" },
 ];
 
+export const requestHeaders = {
+  wy: "https://music.163.com",
+  tx: "https://y.qq.com",
+  bilibili: "https://www.bilibili.com",
+};
+
 export const defaultConfigs: { key: string; value: string; label: string }[] = [
   { key: "isRegisterOpen", value: "true", label: "开放注册" },
   { key: "blockWordsApi", value: "true", label: "第三方屏蔽词检测" },
@@ -60,6 +66,7 @@ export const searchBaseURL = {
   wyDetails: "https://music.163.com/api/song/detail",
   qqSearch: "https://c.y.qq.com/soso/fcgi-bin/client_search_cp",
   qqPURL: "https://u.y.qq.com/cgi-bin/musicu.fcg",
+  bbSearch: "https://api.bilibili.com/x/web-interface/search/type",
 };
 
 export const mediaBaseURL = {
@@ -70,6 +77,8 @@ export const mediaBaseURL = {
   qqMeting: "https://api.qijieya.cn/meting/?server=tencent&type=url&id=",
   wyVkey: "https://api.vkeys.cn/v2/music/netease",
   qqVkey: "https://api.vkeys.cn/v2/music/tencent/geturl",
+  bbOfficial: "https://api.bilibili.com/x/web-interface/view",
+  bbOfficialm2: "https://api.bilibili.com/x/player/playurl",
 };
 
 export const imgBaseURL: Record<string, string> = {
@@ -104,4 +113,43 @@ export const MusicFlowConfig = {
   hideScrollbar: false,
   interact: true,
   autoplay: true,
+};
+
+export const proxy = {
+  "/api/bb/**": {
+    proxy: {
+      to: "https://api.bilibili.com/**",
+      headers: {
+        Origin: "https://www.bilibili.com",
+      },
+    },
+    ssr: false,
+  },
+  "/api/wy/**": {
+    proxy: {
+      to: "https://music.163.com/**",
+      headers: {
+        Origin: "https://music.163.com",
+      },
+    },
+    ssr: false,
+  },
+  "/api/txu/**": {
+    proxy: {
+      to: "https://u.y.qq.com/**",
+      headers: {
+        Origin: "https://u.y.qq.com",
+      },
+    },
+    ssr: false,
+  },
+  "/api/txc/**": {
+    proxy: {
+      to: "https://c.y.qq.com/**",
+      headers: {
+        Origin: "https://c.y.qq.com",
+      },
+    },
+    ssr: false,
+  },
 };

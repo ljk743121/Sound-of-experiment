@@ -8,10 +8,10 @@
       <p class="text-gray-600 mb-6">
         到主页查看其他人的投稿吧
       </p>
-      <Button class="mr-2" variant="link" @click="goHome">
+      <Button class="mr-2 text-gray-600" variant="link" @click="goHome">
         返回主页面
       </Button>
-      <Button variant="link" @click="goBack">
+      <Button variant="link" class="text-gray-600" @click="goBack">
         返回上一页
       </Button>
     </div>

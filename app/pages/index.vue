@@ -249,6 +249,7 @@
 
 <script setup lang="ts">
 import type { RouterOutput } from "~~/types";
+import { fetchMusicUrl } from "#shared/plugin";
 import { MusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
 import { useFuse, type UseFuseOptions } from "@vueuse/integrations/useFuse";
 import { DatePicker } from "@ztl-uwu/v-calendar";
@@ -477,11 +478,13 @@ const previousList = ref<string>();
 const previousDate = ref(new Date());
 
 useQuery({
-  queryFn: () => $trpc.search.mixGetUrl.query,
-  queryKey: ["search.mixGetUrl"],
+  queryFn: () => track.value?.data?.songId && track.value?.data?.source
+    ? fetchMusicUrl(track.value.data.songId as string, track.value.data.source as string)
+    : Promise.resolve({ url: "", pay: false }),
+  queryKey: ["fetchMusicUrl"],
   refetchOnWindowFocus: false,
   refetchIntervalInBackground: false,
-  enabled: !!track.value,
+  enabled: !!track.value?.data?.songId && !!track.value?.data?.source,
 });
 
 async function fetchUrl(data: Record<string, unknown>) {
@@ -493,14 +496,10 @@ async function fetchUrl(data: Record<string, unknown>) {
   if (userStore.songCache[id]) {
     return userStore.songCache[id]!;
   }
-  await queryClient.invalidateQueries({ queryKey: ["search.mixGetUrl"] });
+  await queryClient.invalidateQueries({ queryKey: ["fetchMusicUrl"] });
   const song = await queryClient.fetchQuery({
-    queryKey: ["search.mixGetUrl"],
-    queryFn: () =>
-      $trpc.search.mixGetUrl.query({
-        id: data.songId! as string,
-        source: data.source! as string,
-      }),
+    queryKey: ["fetchMusicUrl"],
+    queryFn: () => fetchMusicUrl(data.songId! as string, data.source! as string),
   });
   if (song) {
     if (song.url) {
