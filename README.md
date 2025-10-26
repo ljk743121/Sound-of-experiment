@@ -4,15 +4,18 @@
   </a>
 </p>
 
-<h1 align="center">实验之声广播站点歌系统</h1>
+<h1 align="center">Voice of SZSY</h1>
+<h2 align="center">实验之声广播站点歌系统</h2>
 
 <p align="center">一个基于 Nuxt & Vue 开发的校园点歌系统</p>
 <p align="center">
   <a href="https://nuxt.com"><img src="https://img.shields.io/badge/Built%20With%20Nuxt-18181B?logo=nuxt.js" alt="Nuxt Website"></a>
-  <img src="https://img.shields.io/github/stars/ljk743121/the1068fm">
+  <img src="https://img.shields.io/github/stars/ljk743121/Sound-of-experiment">
 </p>
 
 ## 说明
+
+**更详细文档请参考[Docs](https://voszsy.netlify.app)**
 
 所用技术栈：
 
@@ -27,13 +30,16 @@
 主要功能：
 
 - 用户管理（创建、编辑权限、重置密码等）
+- 注册信息验证
 - 歌曲审核系统
-- 歌曲投稿&排歌
+- 歌曲投稿&自动排歌
+- 管理员手动排歌
 - 歌曲在线播放（无需跳转第三方网站）
 - 自定义音源插件
 - 歌曲数据批量导出
+- 机器人自动获取排歌信息
 - 公告管理
-- 敏感词管理
+- 敏感词管理+AI敏感词过滤
 - 投稿时段设置
 - 暗黑模式支持
 
@@ -49,6 +55,8 @@
 
 ## 用户界面
 
+图片为v2.3.0版本
+
 <p><img width="100%" src="./public/images/0.png" alt="main ui"></p>
 <p><img width="100%" src="./public/images/1.png" alt="admin ui"></p>
 <p><img width="100%" src="./public/images/2.png" alt="submit ui"></p>
@@ -59,6 +67,7 @@
 
 ```bash
 pnpm install
+pnpm run postinstall
 pnpm run init
 ```
 
@@ -70,21 +79,21 @@ pnpm run dev
 
 ## 可使用脚本:
 
-1. `dev`: 启动开发环境
-2. `build`: 构建生产环境
-3. `postinstall`: 项目安装后自动执行（Nuxt准备）
-4. `preview`: 预览生产环境构建
-5. `db:push`: 将架构更改推送到数据库
-6. `db:studio`: 启动Drizzle Studio数据库管理界面
-7. `auth:genKey`: 生成公钥和私钥
-8. `user:admin`: 创建管理员用户
-9. `user:robot`: 创建机器人用户
-10. `lint`: 运行ESLint检查
-11. `lint:fix`: 自动修复ESLint问题
-12. `lint:lint-staged`: 对暂存文件运行ESLint
-13. `lint:format`: 使用Prettier格式化代码
-14. `husky:prepare`: 初始化Husky Git钩子
-15. `init`: 运行项目初始化脚本
+1. `init`: 运行项目初始化脚本
+2. `dev`: 启动开发环境
+3. `build`: 构建生产环境
+4. `postinstall`: 项目安装后自动执行（Nuxt准备）
+5. `preview`: 预览生产环境构建
+6. `db:push`: 将架构更改推送到数据库
+7. `db:studio`: 启动Drizzle Studio数据库管理界面
+8. `auth:genKey`: 生成公钥和私钥
+9. `user:admin`: 创建管理员用户
+10. `user:robot`: 创建机器人用户
+11. `lint`: 运行ESLint检查
+12. `lint:fix`: 自动修复ESLint问题
+13. `lint:lint-staged`: 对暂存文件运行ESLint
+14. `lint:format`: 使用Prettier格式化代码
+15. `husky:prepare`: 初始化Husky Git钩子
 
 ## 自定义音乐源：
 
@@ -92,32 +101,35 @@ pnpm run dev
 
 ### Step 1：创建音乐源插件
 
-在`server/utils/plugins/`目录中创建一个新的TypeScript文件（例如`MyMusicSource.ts`），实现`MusicSourcePlugin`接口：
+在`shared/plugins/`目录中创建一个新的TypeScript文件（例如`MyMusicSource.ts`），实现音乐源插件：
 
 ```typescript
 // ...existing code
 
-export default function MyMusicSourcePlugin(): MusicSourcePlugin {
-  return {
-    name: "mySource", // 源标识符
-    alias: "我的音乐源", // 显示名称
-    async searchSongs(key: string, type?: string): Promise<TSong[]> {
-      // 实现搜索逻辑
-      // 返回符合TSong类型的歌曲数组
-    },
-    async getMusicUrl(id: string): Promise<{ url: string; pay: boolean }> {
-      // 实现获取歌曲URL的逻辑
-      // 歌曲为vip时若要调用vip请求请返回defaultVipSign
-      if (isVip) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: defaultVipSign });
-      }
-    },
-    // 可选：实现获取VIP歌曲URL的逻辑
-    async getVipMusicUrl(id: string): Promise<{ url: string; pay: boolean }> {
-      // 实现获取VIP歌曲URL的逻辑
-    },
-  };
+async function mySearchSongs(key: string): Promise<TSong[]> {
+  // 实现搜索逻辑
+  // 返回符合TSong类型的歌曲数组
 }
+
+async function getMusicUrl(id: string): Promise<{ url: string; pay: boolean }> {
+  // 实现获取歌曲URL的逻辑
+}
+
+async function getMusicUrl2(id: string): Promise<{ url: string; pay: boolean }> {
+  // 实现获取歌曲URL的逻辑
+}
+// ...
+
+export const mysource = createPlugin({
+  name: "your-plugin", // 唯一标识符
+  alias: "我的音乐源", // 显示名称
+  searchSongs: mySearchSongs,
+  getMusicUrl: [
+    { fn: getMusicUrl, priority: 1 },
+    { fn: getMusicUrl2, priority: 0.9 },
+    // ...其他获取URL函数，每个函数的priority值不同，数值越大优先级越高
+  ],
+});
 ```
 
 ### Step 2：注册音乐源插件
@@ -133,9 +145,9 @@ export * from "./MyMusicSource";
 ```typescript
 // ...existing code
 pluginManager
-  .use(plugins.WYMusicSourcePlugin())
+  .use(plugins.netease)
   // ...
-  .use(plugins.MyMusicSourcePlugin()); // 添加你的插件
+  .use(plugins.mysource); // 添加你的插件
 ```
 
 ### 📌 数据格式要求
@@ -203,7 +215,7 @@ _词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZS
 1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm) 本项目基于该项目的[v2.0.1](https://github.com/SMS-COSMO/the1068fm/releases/tag/v2.0.1)版本进行二次开发
 2. [copws/qq-music-api](https://github.com/copws/qq-music-api)
 3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
-4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow)
+4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow) 本项目使用的音乐播放组件[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)基于其二次开放
 
 ## 贡献者
 

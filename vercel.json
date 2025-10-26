@@ -1,0 +1,57 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=300, stale-while-revalidate=59"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "max-age=300"
+        },
+        {
+          "key": "Vercel-CDN-Cache-Control",
+          "value": "max-age=300"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=60, stale-while-revalidate=30"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "max-age=60"
+        },
+        {
+          "key": "Vercel-CDN-Cache-Control",
+          "value": "max-age=60"
+        }
+      ]
+    },
+    {
+      "source": "/images/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=86400, stale-while-revalidate=3600"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "max-age=86400"
+        },
+        {
+          "key": "Vercel-CDN-Cache-Control",
+          "value": "max-age=86400"
+        }
+      ]
+    }
+  ]
+}
