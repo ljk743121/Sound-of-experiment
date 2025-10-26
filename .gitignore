@@ -30,3 +30,4 @@ logs
 .vercel
 .env*.local
 server/utils/localUtils/*.*
+!server/utils/localUtils/example.ts

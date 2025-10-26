@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import { db } from "../db";
 import { users } from "../db/schema";
 import { env } from "../env";
-import validateUser from "./localUtils/getUserDetail";
+import validateUser from "./localUtils/getUserDetail";// please use your own logic in localUtils folder
 
 const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
 const decode = TextDecoder.prototype.decode.bind(new TextDecoder());
