@@ -1,6 +1,7 @@
 import { parseDate } from "@internationalized/date";
 import { TRPCError } from "@trpc/server";
-import { asc, desc, eq, sql } from "drizzle-orm";
+// eslint-disable-next-line unused-imports/no-unused-imports
+import { asc, count, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { arrangements, songs } from "~~/server/db/schema";
@@ -11,7 +12,9 @@ import {
   requirePermission,
   router,
 } from "../trpc";
-import { fitsInTime } from "./time";
+// import { fitsInTime } from "./time";
+
+const order = [asc(songs.position), asc(songs.createdAt)];
 
 async function reviewAll() {
   return (
@@ -33,7 +36,7 @@ export const arrangementsRouter = router({
       },
       with: {
         songs: {
-          orderBy: [asc(songs.position), desc(songs.createdAt)],
+          orderBy: order,
           columns: {
             id: true,
             creator: true,
@@ -117,7 +120,7 @@ export const arrangementsRouter = router({
       },
       with: {
         songs: {
-          orderBy: [asc(songs.position), desc(songs.createdAt)],
+          orderBy: order,
           columns: {
             id: true,
             creator: true,
@@ -147,7 +150,7 @@ export const arrangementsRouter = router({
       },
       with: {
         songs: {
-          orderBy: [asc(songs.position), desc(songs.createdAt)],
+          orderBy: order,
           columns: {
             id: true,
             creator: true,
@@ -180,8 +183,8 @@ export const arrangementsRouter = router({
       if (!(await reviewAll()))
         throw new TRPCError({ code: "FORBIDDEN", message: "请审核全部歌曲" });
 
-      if (await fitsInTime(new Date()))
-        throw new TRPCError({ code: "FORBIDDEN", message: "请在投稿截止后排歌" });
+      // if (await fitsInTime(new Date()))
+      //   throw new TRPCError({ code: "FORBIDDEN", message: "请在投稿截止后排歌" });
 
       const start = parseDate(input.start);
       const end = parseDate(input.end);
@@ -191,7 +194,7 @@ export const arrangementsRouter = router({
       // get unused songs
       const approvedSongs = await db.query.songs.findMany({
         where: eq(songs.state, "approved"),
-        orderBy: sql`RANDOM()`,
+        orderBy: [desc(songs.likeCount), asc(songs.createdAt)],
         columns: {
           id: true,
         },
@@ -206,7 +209,7 @@ export const arrangementsRouter = router({
       ) {
         droppedSongs = await db.query.songs.findMany({
           where: eq(songs.state, "dropped"),
-          orderBy: sql`RANDOM()`,
+          orderBy: [desc(songs.likeCount), asc(songs.createdAt)],
           columns: {
             id: true,
           },
@@ -228,8 +231,23 @@ export const arrangementsRouter = router({
         let songCount = input.songCount === 0 ? Math.ceil(totalLength / dayTimes) : input.songCount;
         for (let date = start; date.compare(end) <= 0; date = date.add({ days: 1 })) {
           const dateString = date.toString();
-          if (songIndex + droppedSongIndex < totalLength)
+          const pre = await tx.query.arrangements.findFirst({
+            where: eq(arrangements.date, dateString),
+            with: {
+              songs: {
+                orderBy: order,
+                columns: {
+                  id: true,
+                  likeCount: true,
+                  createdAt: true,
+                },
+              },
+            },
+          });
+          if (!pre && songIndex + droppedSongIndex < totalLength)
             await tx.insert(arrangements).values({ date: dateString });
+
+          const pre_len = pre?.songs?.length ?? 0;
 
           for (let i = 0; i < songCount; i++) {
             if (songIndex < approvedSongs.length) {
@@ -238,6 +256,7 @@ export const arrangementsRouter = router({
                 .set({
                   arrangementDate: dateString,
                   state: "used",
+                  position: pre_len + 1 + i,
                 })
                 .where(eq(songs.id, approvedSongs[songIndex]!.id));
 
@@ -249,6 +268,7 @@ export const arrangementsRouter = router({
                 .set({
                   arrangementDate: dateString,
                   state: "used",
+                  position: pre_len + 1 + i,
                 })
                 .where(eq(songs.id, droppedSongs[droppedSongIndex]!.id));
 
@@ -320,6 +340,7 @@ export const arrangementsRouter = router({
           .update(songs)
           .set({
             arrangementDate: null,
+            position: null,
             state: "approved",
           })
           .where(eq(songs.id, i.id));

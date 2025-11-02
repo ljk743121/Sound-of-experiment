@@ -8,10 +8,10 @@
           </div>
           <RangeCalendar
             v-model="calendarValue"
-            :is-date-unavailable="isDateUnavailable"
             locale="zh"
             class="p-0"
           />
+          <!-- :is-date-unavailable="isDateUnavailable" -->
           <div
             v-if="calendarValue.start && calendarValue.end"
             class="mt-4 flex items-center justify-between"
@@ -189,11 +189,11 @@ const { data: reviewAll } = useQuery({
   refetchOnWindowFocus: false,
 });
 
-const { data: timeCurrently } = useQuery({
-  queryFn: () => $trpc.time.currently.query(),
-  queryKey: ["time.currently"],
-  refetchIntervalInBackground: false,
-});
+// const { data: timeCurrently } = useQuery({
+//   queryFn: () => $trpc.time.currently.query(),
+//   queryKey: ["time.currently"],
+//   refetchIntervalInBackground: false,
+// });
 
 function downloadCsv(csvContent: string) {
   try {
@@ -287,10 +287,10 @@ const requirementList = computed<
       label: "审核全部歌曲",
       value: reviewAll.value ?? true,
     },
-    {
-      label: "投稿截止",
-      value: !(timeCurrently.value ?? false),
-    },
+    // {
+    //   label: "投稿截止",
+    //   value: !(timeCurrently.value ?? false),
+    // },
   ];
 });
 
@@ -298,9 +298,9 @@ const canArrange = computed(() => requirementList.value.every(x => x.value));
 
 const songCount = ref(0);
 
-function isDateUnavailable(date: DateValue) {
-  return arrangementList.value?.some(x => x.date === date.toString()) ?? false;
-}
+// function isDateUnavailable(date: DateValue) {
+//   return arrangementList.value?.some(x => x.date === date.toString()) ?? false;
+// }
 
 function isDateAvailable(date: DateValue) {
   return !arrangementList.value?.some(x => x.date === date.toString());
