@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { fetchMusicUrl } from "#shared/plugin";
+// import { fetchMusicUrl } from "#shared/plugin";
 import { getImgUrl } from "~~/constants";
 
 const props = defineProps<{
@@ -98,35 +98,35 @@ const props = defineProps<{
   imgId: string | null;
   source: string | null;
 }>();
-// eslint-disable-next-line unused-imports/no-unused-vars
+
 const { $trpc } = useNuxtApp();
 const queryClient = useQueryClient();
 
 const SearchCount = ref(0);
 
-// const { status: songUrlStatus, isFetching: UrlFetching } = useQuery({
-//   queryFn: () =>
-//     $trpc.search.mixGetUrl.query({
-//       id: props.id!,
-//       source: props.source!,
-//     }),
-//   queryKey: ["search.mixGetUrl"],
-//   refetchOnWindowFocus: false,
-//   enabled: computed(
-//     () =>
-//       props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0,
-//   ),
-// });
-
 const { status: songUrlStatus, isFetching: UrlFetching } = useQuery({
-  queryFn: () => fetchMusicUrl(props.id!, props.source!),
-  queryKey: ["fetchMusicUrl"],
+  queryFn: () =>
+    $trpc.search.mixGetUrl.query({
+      id: props.id!,
+      source: props.source!,
+    }),
+  queryKey: ["search.mixGetUrl"],
   refetchOnWindowFocus: false,
   enabled: computed(
     () =>
       props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0,
   ),
 });
+
+// const { status: songUrlStatus, isFetching: UrlFetching } = useQuery({
+//   queryFn: () => fetchMusicUrl(props.id!, props.source!),
+//   queryKey: ["fetchMusicUrl"],
+//   refetchOnWindowFocus: false,
+//   enabled: computed(
+//     () =>
+//       props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0,
+//   ),
+// });
 
 const config = ref(
   useMusicfyPlayer({
@@ -149,10 +149,19 @@ watchEffect(async () => {
   if (props.id === "" || props.source === "") {
     toast.error("歌曲ID或来源为空");
   } else if (props.id !== null && props.source !== null) {
-    await queryClient.invalidateQueries({ queryKey: ["fetchMusicUrl"] }); // reset cache to avoid song and message mismatch
+    // await queryClient.invalidateQueries({ queryKey: ["fetchMusicUrl"] }); // reset cache to avoid song and message mismatch
+    // const data = await queryClient.fetchQuery({
+    //   queryKey: ["fetchMusicUrl"],
+    //   queryFn: () => fetchMusicUrl(props.id!, props.source!),
+    // });
+    await queryClient.invalidateQueries({ queryKey: ["search.mixGetUrl"] }); // reset cache to avoid song and message mismatch
     const data = await queryClient.fetchQuery({
-      queryKey: ["fetchMusicUrl"],
-      queryFn: () => fetchMusicUrl(props.id!, props.source!),
+      queryKey: ["search.mixGetUrl"],
+      queryFn: () =>
+        $trpc.search.mixGetUrl.query({
+          id: props.id!,
+          source: props.source!,
+        }),
     });
 
     if (data.url) {

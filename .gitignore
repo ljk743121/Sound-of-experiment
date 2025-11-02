@@ -31,3 +31,6 @@ logs
 .env*.local
 server/utils/localUtils/*.*
 !server/utils/localUtils/example.ts
+
+# Deprecated Modules
+deprecated
