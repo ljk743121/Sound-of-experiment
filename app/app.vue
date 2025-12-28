@@ -12,9 +12,11 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <Analytics />
 </template>
 
 <script setup lang="ts">
+import { Analytics } from "@vercel/analytics/nuxt";
 import "@ztl-uwu/v-calendar/style.css";
 
 useHead({
