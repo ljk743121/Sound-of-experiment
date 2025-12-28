@@ -83,7 +83,7 @@ export const userRouter = router({
             .values({
               id: input.id,
               name: input.username,
-              // displayName: input.displayName,
+              displayName: input.displayName || "",
               password: hashpwd,
               permissions: ["login"],
             })
@@ -293,6 +293,12 @@ export const userRouter = router({
     .mutation(async ({ ctx, input }) => {
       if (await hasBlockWord(input.alias)) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "昵称包含违禁词" });
+      }
+      const username = await db.query.users.findFirst({
+        where: eq(users.name, input.alias),
+      });
+      if (username) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "用户名已存在" });
       }
       const user = await db.query.users.findFirst({
         where: eq(users.displayName, input.alias),

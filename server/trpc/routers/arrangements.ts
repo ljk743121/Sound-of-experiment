@@ -1,7 +1,7 @@
 import { parseDate } from "@internationalized/date";
 import { TRPCError } from "@trpc/server";
 // eslint-disable-next-line unused-imports/no-unused-imports
-import { asc, count, desc, eq, sql } from "drizzle-orm";
+import { asc, count, desc, eq, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { arrangements, songs } from "~~/server/db/schema";
@@ -113,8 +113,13 @@ export const arrangementsRouter = router({
     }),
 
   listSafe: protectedProcedure.query(async () => {
+    const Ago = new Date();
+    Ago.setDate(Ago.getDate() - 90);
+    const AgoString = Ago.toISOString().split("T")[0];
+
     return await db.query.arrangements.findMany({
       orderBy: desc(arrangements.date),
+      where: gte(arrangements.date, AgoString),
       columns: {
         date: true,
       },
@@ -143,8 +148,13 @@ export const arrangementsRouter = router({
   }),
 
   listGuest: publicProcedure.query(async () => {
+    const Ago = new Date();
+    Ago.setDate(Ago.getDate() - 7);
+    const AgoString = Ago.toISOString().split("T")[0];
+
     return await db.query.arrangements.findMany({
       orderBy: desc(arrangements.date),
+      where: gte(arrangements.date, AgoString),
       columns: {
         date: true,
       },
@@ -180,8 +190,8 @@ export const arrangementsRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      if (!(await reviewAll()))
-        throw new TRPCError({ code: "FORBIDDEN", message: "请审核全部歌曲" });
+      // if (!(await reviewAll()))
+      //   throw new TRPCError({ code: "FORBIDDEN", message: "请审核全部歌曲" });
 
       // if (await fitsInTime(new Date()))
       //   throw new TRPCError({ code: "FORBIDDEN", message: "请在投稿截止后排歌" });

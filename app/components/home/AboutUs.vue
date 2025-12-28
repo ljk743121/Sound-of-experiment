@@ -47,7 +47,7 @@
           <p>
             项目贡献者：
           </p>
-          <NuxtImg src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment" alt="Contributors" />
+          <NuxtImg src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment" alt="Contributors" sizes="full" />
         </section>
 
         <div class="flex items-center justify-between text-xs">

@@ -46,9 +46,9 @@ export default defineNuxtConfig({
 
   colorMode: {
     classSuffix: "",
-    disableTransition: true,
+    // disableTransition: true,
     fallback: "light",
-    storage: "cookie",
+    storage: "localStorage",
   },
 
   icon: {
@@ -94,7 +94,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    "/admin": { redirect: "/admin/general/songs" },
+    "/admin": { redirect: "/admin/general/notifications" },
     "/admin/general": { redirect: "/admin/general/notifications" },
     "/admin/user": { redirect: "/admin/user/watchSongs" },
     // ...proxy,

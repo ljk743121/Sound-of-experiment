@@ -9,10 +9,10 @@
         <div class="grid grid-rows-2 gap-3">
           <Button class="block h-full items-center gap-2" variant="outline">
             <div class="text-xs">
-              本月已收集歌曲
+              两周已收集歌曲
             </div>
             <div class="text-2xl font-bold">
-              {{ songList?.length || songGuestList?.length || 0 }}
+              {{ userStore.loggedIn ? songList?.length || songGuestList?.length || 0 : "?" }}
             </div>
           </Button>
           <TimeAvailabilityDialog>
@@ -126,7 +126,7 @@
           @click.prevent="navigateTo('/auth/login')"
         >
           <Icon name="lucide:circle-user" size="20" />
-          登录
+          登录/注册 <span class="text-muted-foreground">以使用完整功能</span>
         </Button>
         <div class="ml-auto flex gap-2" />
         <DarkModeToggle />
@@ -146,15 +146,13 @@
             <TabsTrigger
               value="notification"
               :disabled="!userStore.loggedIn"
-              @click="hasNewAnnouncement = false"
+              :class="{ 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': hasNewAnnouncement }"
+              @click="() => {
+                hasNewAnnouncement = false;
+                updateLoginTime();
+              }"
             >
               通知
-              <span v-if="hasNewAnnouncement" class="absolute top-2 right-2 flex h-2 w-2">
-                <span
-                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"
-                />
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
-              </span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -163,12 +161,27 @@
             <div>
               <TabsList class="grid w-full grid-cols-2">
                 <TabsTrigger value="songList">
-                  本月歌曲
+                  全部歌曲
                 </TabsTrigger>
                 <TabsTrigger value="myList" :disabled="!userStore.loggedIn">
                   我的歌曲
                 </TabsTrigger>
               </TabsList>
+              <div v-if="userStore.loggedIn" class="text-sm text-center bg-blue-50 text-blue-800 align-middle mx-auto flex rounded-xl border border-blue-200 shadow-sm p-3 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-700">
+                <Icon name="lucide:info" class="mr-2 self-start flex-shrink-0 mt-0.5" />
+                <span class="flex-grow">如果无法播放请点击刷新按钮</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="ml-2 h-6 w-6 rounded-full hover:bg-blue-100 dark:hover:bg-blue-800"
+                  @click="deleteCache()"
+                >
+                  <Icon
+                    name="lucide:refresh-cw"
+                    class="h-4 w-4"
+                  />
+                </Button>
+              </div>
               <div
                 v-if="selectedTab === 'list'"
                 class="relative mt-1 w-full items-center bg-background"
@@ -186,7 +199,7 @@
               </div>
             </div>
             <TabsContent value="songList">
-              <SongCard
+              <LazySongCard
                 v-for="song in filteredList"
                 :key="song.id"
                 :song
@@ -196,7 +209,7 @@
             </TabsContent>
             <TabsContent value="myList">
               <template v-if="userStore.loggedIn">
-                <SongCard
+                <LazySongCard
                   v-for="song in filteredList"
                   :key="song.id"
                   :song
@@ -409,8 +422,6 @@ if (!userStore.loggedIn) {
       if (lastLoginTime < announcementTime) {
         hasNewAnnouncement.value = true;
         toast.warning("有新的公告等待查看");
-        $trpc.user.updateLoginTime.mutate();
-        userStore.lastLoginAt = new Date().toISOString();
       } else {
         userStore.lastLoginAt = new Date().toISOString();
       }
@@ -419,6 +430,11 @@ if (!userStore.loggedIn) {
     await arrangementGuestListSuspense();
     await songGuestListSuspense();
   }
+}
+
+function updateLoginTime() {
+  $trpc.user.updateLoginTime.mutate();
+  userStore.lastLoginAt = new Date().toISOString();
 }
 
 function logout() {
@@ -578,5 +594,11 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
     },
   };
   onPlayAsPlaylist(tracks.value, track.value);
+}
+
+function deleteCache() {
+  userStore.songCache = {};
+  toast.success("已删除缓存");
+  location.reload();
 }
 </script>

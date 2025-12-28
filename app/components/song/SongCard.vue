@@ -51,7 +51,7 @@
           <Icon v-if="!isPlaying" name="lucide:play" />
           <Icon v-else name="lucide:pause" />
         </Button>
-        <span v-if="song.likes && !isArrangement">
+        <span v-if="song.likes">
           <Button
             v-if="song.likes.includes(userStore.id)"
             variant="outline"
@@ -59,7 +59,7 @@
             @click.prevent="disvote(song.id!)"
           >
             <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
-            <Badge variant="destructive">{{ song.likeCount }}</Badge>
+            {{ song.likeCount }}
           </Button>
           <Button
             v-else
@@ -68,7 +68,7 @@
             @click.prevent="vote(song.id!)"
           >
             <Icon name="lucide:heart" class="mr-1" />
-            <Badge v-if="song.likes" variant="destructive">{{ song.likeCount }}</Badge>
+            {{ song.likeCount }}
           </Button>
           <!-- <HomeLikes v-if="song.likes" :idList="song.likes">
             <Button v-if="isMine" variant="ghost" class="text-sm text-muted-foreground" >
@@ -77,12 +77,12 @@
             </Button>
           </HomeLikes> -->
         </span>
-        <span v-if="isArrangement">
+        <!-- <span v-if="isArrangement">
           <Button variant="outline" disabled>
             <Icon name="lucide:heart" class="mr-1" />
             <Badge variant="destructive">{{ song.likeCount }}</Badge>
           </Button>
-        </span>
+        </span> -->
         <template v-if="isMine && song.state && song.state !== 'used'">
           <SongDeleteMySong :song="song" />
         </template>

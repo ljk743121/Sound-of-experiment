@@ -22,7 +22,7 @@ export const permissionNames: { value: TPermission; label: string; icon: string 
 export const musicSources: { value: TMediaSource; label: string }[] = [
   { value: "wy", label: "网易云" },
   { value: "tx", label: "QQ音乐" },
-  { value: "bilibili", label: "Bilibili" },
+  { value: "bilibili", label: "Bilibili(beta,仅可网页预览播放)" },
 ];
 
 export const requestHeaders = {

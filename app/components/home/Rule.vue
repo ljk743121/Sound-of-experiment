@@ -14,10 +14,14 @@
         </DialogHeader>
         <ScrollArea class="max-h-[60vh] pr-2 sm:h-auto" type="auto">
           <NuxtLink to="/faq">
-            <span class="text-blue-500 underline">查看常见问题</span>
+            <p class="text-blue-500 underline">
+              查看常见问题
+            </p>
           </NuxtLink>
           <NuxtLink to="https://voszsy.netlify.app/guide/">
-            <span class="text-muted-foreground underline">查看使用说明</span>
+            <p class="text-muted-foreground underline">
+              查看使用说明
+            </p>
           </NuxtLink>
           <div class="prose">
             <ol>

@@ -63,9 +63,16 @@
           </form>
         </div>
         <div class="mt-4 text-center text-sm">
+          <p class="text-muted-foreground mb-2">
+            如有问题请查看<NuxtLink to="https://voszsy.netlify.app/guide/basic/auth.html" class="font-semibold underline underline-offset-4" target="_blank">
+              注册
+            </NuxtLink>和<NuxtLink to="https://voszsy.netlify.app/guide/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98" class="font-semibold underline underline-offset-4" target="_blank">
+              常见问题
+            </NuxtLink>
+          </p>
           <p class="text-muted-foreground">
             已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
-            <NuxtLink to="/auth/login" class="text-primary">
+            <NuxtLink to="/auth/login" class="font-semibold underline underline-offset-4">
               登录
             </NuxtLink>
           </p>

@@ -159,7 +159,7 @@ export const songRouter = router({
 
   listSafe: protectedProcedure.query(async () => {
     return await db.query.songs.findMany({
-      where: gt(songs.createdAt, new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)), // One month
+      where: gt(songs.createdAt, new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)), // two weeks
       orderBy: desc(songs.createdAt),
       columns: {
         id: true,
@@ -184,7 +184,7 @@ export const songRouter = router({
 
   listGuest: publicProcedure.query(async () => {
     return await db.query.songs.findMany({
-      where: gt(songs.createdAt, new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)),
+      limit: 5,
       orderBy: desc(songs.createdAt),
       columns: {
         id: true,
@@ -194,8 +194,10 @@ export const songRouter = router({
         imgId: true,
         state: true,
         likeCount: true,
+        rejectMessage: true,
         arrangementDate: true,
         createdAt: true,
+        msgPublic: true,
       },
     });
   }),
