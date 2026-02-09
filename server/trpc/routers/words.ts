@@ -44,9 +44,10 @@ export const blockWordsRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
+      const list = await hasBlockWord(input.content);
       return {
-        content: input.content,
-        isBlocked: (await hasBlockWord(input.content)) as boolean,
+        blockedWords: list,
+        isBlocked: list.length > 0,
       };
     }),
 

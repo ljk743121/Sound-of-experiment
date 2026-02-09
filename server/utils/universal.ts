@@ -40,19 +40,16 @@ export async function getUserDetailById(id: string) {
   return detail;
 }
 
-const blockWordsApi = "https://v2.xxapi.cn/api/detect";
+const blockWordsApi = "https://uapis.cn/api/v1/text/profanitycheck";
 async function detectBlockWord(content: string) {
   consola.info("Using blockWordsApi");
   interface BlockWord {
-    code: number;
-    msg: string;
-    data: {
-      is_prohibited: boolean;
-    };
+    status: string;
+    forbidden_words: string[];
   }
   const res = await $fetch<BlockWord>(blockWordsApi, {
-    method: "GET",
-    params: {
+    method: "POST",
+    body: {
       text: content,
     },
     parseResponse(responseText) {
@@ -63,29 +60,34 @@ async function detectBlockWord(content: string) {
       }
     },
   });
-  if (res.code !== 200)
-    return true;
-  return res.data.is_prohibited;
+  return res.forbidden_words ?? [];
 }
 
 export async function hasBlockWord(content: string) {
   const words = content.match(/\S+/g) || [];
+  const blockWordsList: string[] = [];
 
   if (words.length > 0) {
     const blockWords = await db.query.blockWords.findMany();
     const blockWordSet = new Set(blockWords.map(bw => bw.word));
-    const hasBlockWord = words.some((word) => {
+    for (const word of words) {
       if (blockWordSet.has(word)) {
-        return true;
+        blockWordsList.push(word);
+      } else {
+        for (const bw of blockWordSet) {
+          if (word.includes(bw)) {
+            blockWordsList.push(bw);
+          }
+        }
       }
-      return Array.from(blockWordSet).some(bw => word.includes(bw));
-    });
-    if (!hasBlockWord && (await getConfig("blockWordsApi")) === "true") {
-      return await detectBlockWord(content);
+    }
+    if (blockWordsList.length === 0 && (await getConfig("blockWordsApi")) === "true") {
+      const externalBlockWords = await detectBlockWord(content);
+      return [...blockWordsList, ...externalBlockWords];
     } else {
-      return hasBlockWord;
+      return blockWordsList;
     }
   } else {
-    return false;
+    return blockWordsList;
   }
 }

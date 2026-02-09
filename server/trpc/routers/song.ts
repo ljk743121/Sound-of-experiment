@@ -56,9 +56,10 @@ export const songRouter = router({
         });
       }
 
-      const content = `${input.name} ${input.creator} ${input.message || ""} ${input.msgPublic || ""}`;
-      if (await hasBlockWord(content)) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "投稿失败，含有违禁词" });
+      const content = `${input.message || ""} ${input.msgPublic || ""}`;
+      const blockWords = await hasBlockWord(content);
+      if (blockWords.length > 0) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: `投稿失败，含有违禁词"${blockWords.join(",")}"` });
       }
 
       let isRealName = false;

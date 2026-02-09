@@ -14,7 +14,7 @@
         测试
       </Button>
       <div class="ml-2 text-muted-foreground text-sm min-w-fit">
-        测试词：{{ isBlockedWord.content }}
+        违禁词：{{ isBlockedWord.blockedWords }}
       </div>
       <div class="items-center mt-1">
         <Icon v-if="isBlockedWord.isBlocked" name="lucide:alert-circle" class="text-red-500" />
@@ -60,7 +60,7 @@ const { data } = useQuery({
 const newWord = ref("");
 const testWord = ref("");
 const isBlockedWord = ref({
-  content: "",
+  blockedWords: [] as string[],
   isBlocked: false,
 });
 
