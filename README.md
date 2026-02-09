@@ -71,6 +71,15 @@ pnpm run postinstall
 pnpm run init
 ```
 
+`pnpm run init`会初始化项目环境，包括：
+
+- 更新数据库schema
+- 检测和配置环境变量
+- 配置会话密码(NUXT_SESSION_PASSWORD)
+- 生成公钥和私钥
+- 配置config数据表
+- 检测认证api是否存在
+
 再启动开发服务器：
 
 ```bash
@@ -216,6 +225,8 @@ _词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZS
 2. [copws/qq-music-api](https://github.com/copws/qq-music-api)
 3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
 4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow) 本项目使用的音乐播放组件[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)基于其二次开放
+5. [api.vkeys.cn](https://api.vkeys.cn) 本项目使用的第三方音乐源接口
+6. [api.qijieya.cn](https://api.qijieya.cn) 本项目使用的第三方音乐源接口
 
 ## 贡献者
 

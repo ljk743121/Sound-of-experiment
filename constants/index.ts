@@ -22,7 +22,7 @@ export const permissionNames: { value: TPermission; label: string; icon: string 
 export const musicSources: { value: TMediaSource; label: string }[] = [
   { value: "wy", label: "网易云" },
   { value: "tx", label: "QQ音乐" },
-  { value: "bilibili", label: "Bilibili(beta,仅可网页预览播放)" },
+  { value: "bilibili", label: "Bilibili视频" },
 ];
 
 export const requestHeaders = {
@@ -115,41 +115,41 @@ export const MusicFlowConfig = {
   autoplay: true,
 };
 
-export const proxy = {
-  "/api/bb/**": {
-    proxy: {
-      to: "https://api.bilibili.com/**",
-      headers: {
-        Origin: "https://www.bilibili.com",
-      },
-    },
-    ssr: false,
-  },
-  "/api/wy/**": {
-    proxy: {
-      to: "https://music.163.com/**",
-      headers: {
-        Origin: "https://music.163.com",
-      },
-    },
-    ssr: false,
-  },
-  "/api/txu/**": {
-    proxy: {
-      to: "https://u.y.qq.com/**",
-      headers: {
-        Origin: "https://u.y.qq.com",
-      },
-    },
-    ssr: false,
-  },
-  "/api/txc/**": {
-    proxy: {
-      to: "https://c.y.qq.com/**",
-      headers: {
-        Origin: "https://c.y.qq.com",
-      },
-    },
-    ssr: false,
-  },
-};
+// export const proxy = {
+//   "/api/bb/**": {
+//     proxy: {
+//       to: "https://api.bilibili.com/**",
+//       headers: {
+//         Origin: "https://www.bilibili.com",
+//       },
+//     },
+//     ssr: false,
+//   },
+//   "/api/wy/**": {
+//     proxy: {
+//       to: "https://music.163.com/**",
+//       headers: {
+//         Origin: "https://music.163.com",
+//       },
+//     },
+//     ssr: false,
+//   },
+//   "/api/txu/**": {
+//     proxy: {
+//       to: "https://u.y.qq.com/**",
+//       headers: {
+//         Origin: "https://u.y.qq.com",
+//       },
+//     },
+//     ssr: false,
+//   },
+//   "/api/txc/**": {
+//     proxy: {
+//       to: "https://c.y.qq.com/**",
+//       headers: {
+//         Origin: "https://c.y.qq.com",
+//       },
+//     },
+//     ssr: false,
+//   },
+// };

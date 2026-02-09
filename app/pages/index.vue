@@ -285,6 +285,14 @@ const selectedDate = ref(new Date());
 const isDark = computed(() => useColorMode().preference === "dark");
 const hasNewAnnouncement = ref(false);
 
+if (userStore.loggedIn) {
+  try {
+    await $trpc.user.tokenValidity.query();
+  } catch {
+    userStore.logout();
+  }
+}
+
 const { data: songList, suspense: songListSuspense } = useQuery({
   queryFn: () => $trpc.song.listSafe.query(),
   queryKey: ["song.listSafe"],
@@ -388,48 +396,35 @@ const calendarAttr = computed(() => {
   return res;
 });
 
-if (!userStore.loggedIn) {
-  // navigateTo('/auth/login');
+if (userStore.loggedIn) {
+  try {
+    await songListSuspense();
+    await canSubmitSuspense();
+    await mySongListSuspense();
+    await arrangementListSuspense();
+    await remainSubmitSongsSuspense();
+  } catch {
+    navigateTo("/auth/login");
+  }
+  await announcementListSuspense();
+  if (
+    announcementList.value
+    && announcementList.value.length > 0
+    && userStore.lastLoginAt
+    && announcementList.value[0]
+  ) {
+    const lastLoginTime = new Date(userStore.lastLoginAt).getTime();
+    const announcementTime = announcementList.value[0].createdAt.getTime();
+    if (lastLoginTime < announcementTime) {
+      hasNewAnnouncement.value = true;
+      toast.warning("有新的公告等待查看");
+    } else {
+      userStore.lastLoginAt = new Date().toISOString();
+    }
+  }
+} else {
   await arrangementGuestListSuspense();
   await songGuestListSuspense();
-} else {
-  try {
-    await $trpc.user.tokenValidity.query();
-  } catch {
-    // navigateTo('/auth/login');
-    userStore.loggedIn = false;
-    userStore.accessToken = "";
-  }
-  if (userStore.loggedIn) {
-    try {
-      await songListSuspense();
-      await canSubmitSuspense();
-      await mySongListSuspense();
-      await arrangementListSuspense();
-      await remainSubmitSongsSuspense();
-    } catch {
-      navigateTo("/auth/login");
-    }
-    await announcementListSuspense();
-    if (
-      announcementList.value
-      && announcementList.value.length > 0
-      && userStore.lastLoginAt
-      && announcementList.value[0]
-    ) {
-      const lastLoginTime = new Date(userStore.lastLoginAt).getTime();
-      const announcementTime = announcementList.value[0].createdAt.getTime();
-      if (lastLoginTime < announcementTime) {
-        hasNewAnnouncement.value = true;
-        toast.warning("有新的公告等待查看");
-      } else {
-        userStore.lastLoginAt = new Date().toISOString();
-      }
-    }
-  } else {
-    await arrangementGuestListSuspense();
-    await songGuestListSuspense();
-  }
 }
 
 function updateLoginTime() {

@@ -306,9 +306,42 @@ export const arrangementsRouter = router({
       });
     }),
 
-  today: protectedProcedure.use(requirePermission(["robot"])).query(async () => {
+  getArrangement: protectedProcedure.use(requirePermission(["robot"]))
+    .input(z.object({
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
+    }))
+    .query(async ({ input }) => {
+      return await db.query.arrangements.findFirst({
+        where: eq(arrangements.date, input.date),
+        columns: {
+          date: true,
+        },
+        with: {
+          songs: {
+            orderBy: [asc(songs.position), desc(songs.createdAt)],
+            columns: {
+              id: true,
+              creator: true,
+              name: true,
+              songId: true,
+              source: true,
+              imgId: true,
+              message: true,
+              msgPublic: true,
+              rejectMessage: true,
+              duration: true,
+              createdAt: true,
+              position: true,
+              likeCount: true,
+              ownerDisplayName: true,
+              isRealName: true,
+            },
+          },
+        },
+      });
+    }),
+  today: publicProcedure.query(async () => {
     const today = new Date().toISOString().split("T")[0];
-
     const arrangement = await db.query.arrangements.findFirst({
       where: eq(arrangements.date, today),
       columns: {
@@ -323,7 +356,10 @@ export const arrangementsRouter = router({
             songId: true,
             source: true,
             imgId: true,
+            duration: true,
+            ownerDisplayName: true,
             message: true,
+            position: true,
           },
         },
       },
@@ -335,7 +371,7 @@ export const arrangementsRouter = router({
     .use(requirePermission(["arrange", "deleteArrangement"]))
     .input(
       z.object({
-        date: z.string(),
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
       }),
     )
     .mutation(async ({ input }) => {

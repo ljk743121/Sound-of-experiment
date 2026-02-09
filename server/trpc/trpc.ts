@@ -28,7 +28,6 @@ export const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "用户未登录" });
   else if (ctx.user === "ERR_JWT_EXPIRED")
     throw new TRPCError({ code: "UNAUTHORIZED", message: "登录已过期" });
-
   return next({
     ctx: {
       user: ctx.user,
@@ -108,9 +107,5 @@ export const loggedProcedure = t.procedure.use(async (opts) => {
 });
 
 export const publicProcedure = loggedProcedure;
-export const protectedProcedure = publicProcedure
-  .use(enforceUserIsAuthed)
-  .use(requirePermission(["login"]));
-export const adminProcedure = publicProcedure
-  .use(enforceUserIsAuthed)
-  .use(requirePermission(["login", "admin"]));
+export const protectedProcedure = publicProcedure.use(requirePermission(["login"]));
+export const adminProcedure = publicProcedure.use(requirePermission(["login", "admin"]));
