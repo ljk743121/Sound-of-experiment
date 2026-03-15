@@ -45,6 +45,19 @@
 
         <section>
           <p>
+            致谢：
+            <NuxtLink
+              to="https://qijieya.cn/"
+              class="font-semibold underline underline-offset-4"
+            >
+              <span>锦木祈杰</span>
+            </NuxtLink>
+            提供的二级域名
+          </p>
+        </section>
+
+        <section>
+          <p>
             项目贡献者：
           </p>
           <NuxtImg src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment" alt="Contributors" sizes="full" />
