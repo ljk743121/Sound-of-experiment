@@ -134,6 +134,22 @@
     </section>
 
     <section class="md:overflow-auto md:px-4">
+      <!-- 添加滚动通知条 -->
+      <Alert v-if="announcementList && announcementList.length > 0" class="overflow-hidden py-0">
+        <AlertDescription class="overflow-hidden h-12 my-auto flex items-center justify-center">
+          <div class="whitespace-nowrap animate-marquee">
+            <span class="mr-8 font-bold text-foreground">
+              {{ (announcementList?.[0]?.createdAt?.toLocaleString() ?? '') }}:
+            </span>
+            {{ (announcementList?.[0]?.markdown ?? '') }}
+            <span class="mr-8" />
+            <span class="mr-8 font-bold text-foreground">
+              {{ (announcementList?.[0]?.createdAt?.toLocaleString() ?? '') }}:
+            </span>
+            {{ (announcementList?.[0]?.markdown ?? '') }}
+          </div>
+        </AlertDescription>
+      </Alert>
       <Tabs v-model="selectedTab" default-value="arrangement">
         <div class="-mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
           <TabsList class="grid w-full grid-cols-3">
@@ -167,6 +183,7 @@
                   我的歌曲
                 </TabsTrigger>
               </TabsList>
+
               <div v-if="userStore.loggedIn" class="text-sm text-center bg-blue-50 text-blue-800 align-middle mx-auto flex rounded-xl border border-blue-200 shadow-sm p-3 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-700">
                 <Icon name="lucide:info" class="mr-2 self-start flex-shrink-0 mt-0.5" />
                 <span class="flex-grow">如果无法播放请点击刷新按钮</span>
@@ -248,7 +265,12 @@
           <div v-if="isAnnouncementListPending">
             <Icon name="lucide:loader-2" size="20" class="animate-spin" />
           </div>
-          <HomeAnnouncement v-else :announcement-list="announcementList!" />
+          <HomeAnnouncement
+            v-else
+            :announcement-list="userStore.announcementCache && userStore.announcementCache.length > 0
+              ? userStore.announcementCache
+              : announcementList!"
+          />
         </TabsContent>
       </Tabs>
       <div class="h-16" />
@@ -363,6 +385,14 @@ const { data: announcementList, suspense: announcementListSuspense, isPending: i
   enabled: userStore.loggedIn,
 });
 
+const { data: announcementHash, suspense: announcementHashSuspense } = useQuery({
+  queryFn: () => $trpc.announcement.getHash.query(),
+  queryKey: ["announcement.getHash"],
+  refetchIntervalInBackground: false,
+  refetchOnWindowFocus: false,
+  enabled: userStore.loggedIn,
+});
+
 function getDateString(date: Date) {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 }
@@ -406,20 +436,20 @@ if (userStore.loggedIn) {
   } catch {
     navigateTo("/auth/login");
   }
+
+  await announcementHashSuspense();
   await announcementListSuspense();
-  if (
-    announcementList.value
-    && announcementList.value.length > 0
-    && userStore.lastLoginAt
-    && announcementList.value[0]
-  ) {
-    const lastLoginTime = new Date(userStore.lastLoginAt).getTime();
-    const announcementTime = announcementList.value[0].createdAt.getTime();
-    if (lastLoginTime < announcementTime) {
-      hasNewAnnouncement.value = true;
-      toast.warning("有新的公告等待查看");
-    } else {
-      userStore.lastLoginAt = new Date().toISOString();
+
+  if (announcementHash.value && userStore.announcementHash !== announcementHash.value.hash) {
+    // 哈希值不同，说明有新通知，使用新获取的通知
+    userStore.cacheAnnouncements(announcementList.value || [], announcementHash.value.hash);
+    hasNewAnnouncement.value = true;
+    toast.warning("有新的公告等待查看");
+  } else {
+    // 哈希值相同，使用缓存的通知
+    if (userStore.announcementCache && userStore.announcementCache.length > 0) {
+      // 如果缓存存在但当前获取的数据没有变化，则直接使用缓存
+      // 实际上这里会自动使用缓存，因为我们已经设置了refetchOnWindowFocus为false
     }
   }
 } else {
@@ -597,3 +627,17 @@ function deleteCache() {
   location.reload();
 }
 </script>
+
+<style scoped>
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+</style>

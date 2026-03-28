@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -79,4 +80,25 @@ export const announcementRouter = router({
         })
         .where(eq(announcement.id, input.id));
     }),
+
+  getHash: protectedProcedure.query(async () => {
+    const latestAnnouncements = await db.query.announcement.findMany({
+      where: eq(announcement.visible, "all"),
+      orderBy: desc(announcement.createdAt),
+      columns: {
+        createdAt: true,
+        id: true,
+      },
+    });
+
+    if (!latestAnnouncements) {
+      return { hash: "" };
+    }
+
+    const combinedString = latestAnnouncements.map(ann =>
+      `${ann.id}-${ann.createdAt.toISOString()}`,
+    ).join("|");
+    const hash = createHash("sha256").update(combinedString).digest("hex");
+    return { hash };
+  }),
 });

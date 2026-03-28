@@ -16,7 +16,7 @@
           <CardContent>
             <div
               class="prose-xl prose-blue prose-pre:bg-zinc-300 prose-pre:text-gray-800 m-1 p-3 text-sm"
-              v-html="$mdRenderer.render(item.markdown)"
+              v-html="$mdRenderer.render(item.markdown || '')"
             />
           </CardContent>
         </Card>

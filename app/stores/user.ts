@@ -13,6 +13,8 @@ export const useUserStore = defineStore(
     const remainSubmitSongs = ref(0);
     const lastLoginAt = ref("");
     const songCache = ref<Record<string, string>>({});
+    const announcementCache = ref<RouterOutput["announcement"]["listSafe"]>([]);
+    const announcementHash = ref<string>("");
 
     const login = (data: RouterOutput["user"]["login"]) => {
       loggedIn.value = true;
@@ -35,10 +37,17 @@ export const useUserStore = defineStore(
       permissions.value = [];
       lastLoginAt.value = new Date(0).toISOString();
       songCache.value = {};
+      announcementCache.value = [];
+      announcementHash.value = "";
     };
 
     const cacheSong = (id: string, url: string) => {
       songCache.value[id] = url;
+    };
+
+    const cacheAnnouncements = (announcements: RouterOutput["announcement"]["listSafe"], hash: string) => {
+      announcementCache.value = announcements;
+      announcementHash.value = hash;
     };
 
     return {
@@ -51,19 +60,22 @@ export const useUserStore = defineStore(
       permissions,
       lastLoginAt,
       songCache,
+      announcementCache,
+      announcementHash,
       login,
       logout,
       cacheSong,
+      cacheAnnouncements,
     };
   },
   {
     persist: [
       {
-        pick: ["loggedIn", "accessToken", "permissions", "lastLoginAt", "id", "name", "displayName", "remainSubmitSongs"],
+        pick: ["loggedIn", "accessToken", "permissions", "lastLoginAt", "id", "name", "displayName", "remainSubmitSongs", "announcementHash"],
         storage: piniaPluginPersistedstate.cookies(),
       },
       {
-        pick: ["songCache"],
+        pick: ["songCache", "announcementCache"],
         storage: piniaPluginPersistedstate.localStorage(),
       },
     ],
