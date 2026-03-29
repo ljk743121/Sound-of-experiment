@@ -5,11 +5,8 @@
       <div class="flex flex-row">
         <Avatar class="relative mr-4 size-12 overflow-hidden rounded">
           <NuxtImg
-            v-if="song.imgId && song.source"
-            :src="getImgUrl(song.imgId, song.source)"
-            class="object-cover"
-            :alt="song.name"
-            loading="lazy"
+            v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)" class="object-cover"
+            :alt="song.name" loading="lazy"
           />
           <Icon name="lucide:music" size="24" />
         </Avatar>
@@ -50,6 +47,14 @@
         >
           <Icon v-if="!isPlaying" name="lucide:play" />
           <Icon v-else name="lucide:pause" />
+        </Button>
+        <Button
+          v-if="song.songId && song.source"
+          variant="outline"
+          size="icon"
+          @click.stop="resetSongCache(song.songId, song.source, `${song.name} - ${song.creator}`)"
+        >
+          <Icon name="lucide:refresh-cw" class="h-4 w-4" />
         </Button>
         <span v-if="song.likes">
           <Button
@@ -136,11 +141,8 @@
           <DialogHeader>
             <DialogTitle>
               <NuxtImg
-                v-if="song.imgId && song.source"
-                :src="getImgUrl(song.imgId, song.source)"
-                class="mb-2 object-cover"
-                :alt="song.name"
-                loading="lazy"
+                v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)"
+                class="mb-2 object-cover" :alt="song.name" loading="lazy"
               />
               {{ song.name }}
             </DialogTitle>
@@ -257,10 +259,7 @@
       <div class="flex gap-1">
         <template v-if="song.state !== 'used' && song.state !== 'dropped'">
           <Button
-            v-if="song.state !== 'approved' && song.id"
-            variant="outline"
-            :disable="approvePending"
-            size="sm"
+            v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="sm"
             @click="approve({ id: song.id })"
           >
             <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -268,9 +267,7 @@
           </Button>
           <template v-if="song.state !== 'rejected' && song.id">
             <Button
-              variant="outline"
-              :disable="rejectPending"
-              size="sm"
+              variant="outline" :disable="rejectPending" size="sm"
               @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })"
             >
               <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
@@ -373,5 +370,12 @@ function handleAvatarClick(e: Event) {
   if (song.songId && song.source && song.songId.length > 0) {
     emit("songExport", song);
   }
+}
+
+function resetSongCache(songId: string, source: string, name: string) {
+  const cacheKey = `${songId}-${source}`;
+  delete userStore.songCache[cacheKey];
+  toast.success(`已重置${name}缓存`);
+  queryClient.invalidateQueries({ queryKey: ["search.mixGetUrl"] });
 }
 </script>

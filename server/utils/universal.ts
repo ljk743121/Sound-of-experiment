@@ -3,16 +3,42 @@ import { consola } from "consola";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { configs, users } from "../db/schema";
+import { redis } from "./redis";
+
+const CONFIG_CACHE_KEY = "configs:all";
+const CONFIG_PREFIX = "config:";
 
 export async function getConfig(key: string) {
+  const cacheKey = `${CONFIG_PREFIX}${key}`;
+  const cached = await redis.get(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
   const value = await db.query.configs.findFirst({
     where: eq(configs.key, key),
   });
+
+  if (value?.value) {
+    await redis.set(cacheKey, value.value, { EX: 86400 });
+  }
+
   return value?.value;
 }
 
 export async function getAllConfigs() {
+  const cached = await redis.get(CONFIG_CACHE_KEY);
+
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
   const values = await db.query.configs.findMany();
+
+  const configMap = Object.fromEntries(values.map(v => [v.key, v.value]));
+  await redis.set(CONFIG_CACHE_KEY, JSON.stringify(configMap), { EX: 86400 });
+
   return values;
 }
 
@@ -27,6 +53,13 @@ export async function updateConfig(key: string, value: string) {
       value: value.toString(),
     }).where(eq(configs.key, config.key));
   }
+
+  const cacheKey = `${CONFIG_PREFIX}${key}`;
+  await redis.set(cacheKey, value.toString(), { EX: 86400 });
+
+  const allConfigs = await db.query.configs.findMany();
+  const configMap = Object.fromEntries(allConfigs.map(v => [v.key, v.value]));
+  await redis.set(CONFIG_CACHE_KEY, JSON.stringify(configMap), { EX: 86400 });
 }
 
 export async function getUserDetailById(id: string) {

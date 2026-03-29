@@ -1,10 +1,23 @@
 import type { TSongState } from "~~/types";
+import { consola } from "consola";
 import { count } from "drizzle-orm";
 import { db } from "~~/server/db";
 import { songs, users } from "~~/server/db/schema";
+import { redis } from "~~/server/utils/redis";
 import { adminProcedure, protectedProcedure, router } from "../trpc";
 
 async function getSongMap() {
+  const cacheKey = "songMap";
+  const cached = await redis.get(cacheKey);
+
+  if (cached) {
+    const cachedData = JSON.parse(cached);
+    const map = new Map<string, { [key in TSongState]: number }>(
+      cachedData.map as [string, { [key in TSongState]: number }][],
+    );
+    return { songs: cachedData.songs, map };
+  }
+
   const songs = await db.query.songs.findMany({
     columns: {
       createdAt: true,
@@ -19,6 +32,14 @@ async function getSongMap() {
     val[song.state]++;
     map.set(date, val);
   }
+
+  await redis.set(
+    cacheKey,
+    JSON.stringify({ songs, map: Array.from(map.entries()) }),
+    { EX: 86400 },
+  );
+
+  consola.info(`${new Date().toLocaleString()} Redis 缓存写入: ${cacheKey}`);
 
   return { songs, map };
 }
@@ -79,7 +100,7 @@ export const statsRouter = router({
     return Array.from(map, ([date, count]) => ({
       date,
       count: count.approved + count.used + count.dropped + count.pending + count.rejected,
-    })).toSorted((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    })).toSorted((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 9);
   }),
 
   singer: protectedProcedure.query(async () => {
@@ -107,7 +128,7 @@ export const statsRouter = router({
 
     return Array.from(map, ([name, count]) => ({ name, count })).toSorted(
       (a, b) => b.count - a.count,
-    );
+    ).slice(0, 9);
   }),
 
   like: protectedProcedure.query(async () => {
@@ -135,6 +156,6 @@ export const statsRouter = router({
     }
     return Array.from(map, ([name, data]) => ({ name, ...data })).toSorted(
       (a, b) => b.count - a.count,
-    );
+    ).slice(0, 9);
   }),
 });

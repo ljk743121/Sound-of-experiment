@@ -95,6 +95,7 @@ export const songRouter = router({
           lastSubmitAt: now,
         })
         .where(eq(users.id, ctx.user.id));
+      redis.del(`listMine:${ctx.user.id}`);
     }),
   deleteMine: protectedProcedure
     .input(
@@ -113,6 +114,7 @@ export const songRouter = router({
       if (song.state === "used")
         throw new TRPCError({ code: "BAD_REQUEST", message: "该歌曲已被使用" });
       await db.delete(songs).where(eq(songs.id, input.id));
+      redis.del(`listMine:${ctx.user.id}`);
     }),
   delete: adminProcedure
     .input(
@@ -204,10 +206,17 @@ export const songRouter = router({
   }),
 
   listMine: protectedProcedure.query(async ({ ctx }) => {
-    return await db.query.songs.findMany({
+    const cacheKey = `listMine:${ctx.user.id}`;
+    const cachedList = await redis.get(cacheKey);
+    if (cachedList) {
+      return JSON.parse(cachedList);
+    }
+    const list = await db.query.songs.findMany({
       orderBy: desc(songs.createdAt),
       where: eq(songs.ownerId, ctx.user.id),
     });
+    await redis.set(cacheKey, JSON.stringify(list), { EX: 86400 });
+    return list;
   }),
 
   canSubmit: protectedProcedure.query(async ({ ctx }) => {
@@ -260,6 +269,9 @@ export const songRouter = router({
         likeCount: song.likeCount + 1,
       })
       .where(eq(songs.id, id));
+    if (song.ownerId === ctx.user.id) {
+      redis.del(`listMine:${ctx.user.id}`);
+    }
   }),
 
   disvote: protectedProcedure.input(z.number()).mutation(async ({ input: id, ctx }) => {
@@ -277,6 +289,9 @@ export const songRouter = router({
         likeCount: song.likeCount - 1,
       })
       .where(eq(songs.id, id));
+    if (song.ownerId === ctx.user.id) {
+      redis.del(`listMine:${ctx.user.id}`);
+    }
   }),
 
   idToName: protectedProcedure.input(z.array(z.string())).query(async ({ input }) => {

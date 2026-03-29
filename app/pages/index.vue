@@ -186,18 +186,7 @@
 
               <div v-if="userStore.loggedIn" class="text-sm text-center bg-blue-50 text-blue-800 align-middle mx-auto flex rounded-xl border border-blue-200 shadow-sm p-3 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-700">
                 <Icon name="lucide:info" class="mr-2 self-start flex-shrink-0 mt-0.5" />
-                <span class="flex-grow">如果无法播放请点击刷新按钮</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="ml-2 h-6 w-6 rounded-full hover:bg-blue-100 dark:hover:bg-blue-800"
-                  @click="deleteCache()"
-                >
-                  <Icon
-                    name="lucide:refresh-cw"
-                    class="h-4 w-4"
-                  />
-                </Button>
+                <span class="flex-grow">如果无法播放请使用歌曲卡片上的刷新按钮</span>
               </div>
               <div
                 v-if="selectedTab === 'list'"
@@ -401,13 +390,13 @@ const arrangementListSongs = computed(() => {
   if (userStore.loggedIn) {
     if (arrangementList.value) {
       return (
-        arrangementList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs || []
+        arrangementList.value?.find((e: { date: string }) => e.date === getDateString(selectedDate.value))?.songs || []
       );
     }
     return [];
   } else {
     return (
-      arrangementGuestList.value?.find(e => e.date === getDateString(selectedDate.value))?.songs
+      arrangementGuestList.value?.find((e: { date: string }) => e.date === getDateString(selectedDate.value))?.songs
       || []
     );
   }
@@ -492,17 +481,17 @@ const fuse = computed(() => {
   if (!userStore.loggedIn) {
     return songGuestList.value === undefined
       ? useFuse<TGuestLists[0]>(searchPrompt, [], fuseGuestOptions)
-      : useFuse<TGuestLists[0]>(searchPrompt, songGuestList, fuseGuestOptions);
+      : useFuse<TGuestLists[0]>(searchPrompt, songGuestList.value, fuseGuestOptions);
   }
   if (listMode.value === "songList") {
     return songList.value === undefined
       ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
-      : useFuse<TLists[0]>(searchPrompt, songList, fuseOptions);
+      : useFuse<TLists[0]>(searchPrompt, songList.value, fuseOptions);
   }
   if (listMode.value === "myList") {
     return mySongList.value === undefined
       ? useFuse<TLists[0]>(searchPrompt, [], fuseOptions)
-      : useFuse<TLists[0]>(searchPrompt, mySongList, fuseOptions);
+      : useFuse<TLists[0]>(searchPrompt, mySongList.value, fuseOptions);
   }
   return useFuse<TLists[0]>(searchPrompt, [], fuseOptions);
 });
@@ -619,12 +608,6 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
     },
   };
   onPlayAsPlaylist(tracks.value, track.value);
-}
-
-function deleteCache() {
-  userStore.songCache = {};
-  toast.success("已删除缓存");
-  location.reload();
 }
 </script>
 

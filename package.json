@@ -88,6 +88,7 @@
     "pg": "^8.13.1",
     "pinia": "^3.0.0",
     "pinia-plugin-persistedstate": "^4.2.0",
+    "redis": "^5.11.0",
     "reka-ui": "^2.5.0",
     "shadcn-nuxt": "^2.2.0",
     "superjson": "^2.2.2",

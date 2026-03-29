@@ -1,10 +1,12 @@
 import { parseDate } from "@internationalized/date";
 import { TRPCError } from "@trpc/server";
+import { consola } from "consola";
 // eslint-disable-next-line unused-imports/no-unused-imports
 import { asc, count, desc, eq, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { arrangements, songs } from "~~/server/db/schema";
+import { redis } from "~~/server/utils/redis";
 import {
   adminProcedure,
   protectedProcedure,
@@ -15,6 +17,12 @@ import {
 // import { fitsInTime } from "./time";
 
 const order = [asc(songs.position), asc(songs.createdAt)];
+
+async function invalidateArrangementCache() {
+  await redis.del("arrangement:listSafe");
+  await redis.del("arrangement:listGuest");
+  consola.info(`Redis 缓存失效：arrangement:listSafe, arrangement:listGuest`);
+}
 
 async function reviewAll() {
   return (
@@ -110,14 +118,21 @@ export const arrangementsRouter = router({
           }
         }
       });
+      await invalidateArrangementCache();
     }),
 
   listSafe: protectedProcedure.query(async () => {
+    const cached = await redis.get("arrangement:listSafe");
+    if (cached) {
+      consola.info(`${new Date().toLocaleString()} Redis 缓存命中：arrangement:listSafe`);
+      return JSON.parse(cached);
+    }
+
     const Ago = new Date();
     Ago.setDate(Ago.getDate() - 90);
     const AgoString = Ago.toISOString().split("T")[0];
 
-    return await db.query.arrangements.findMany({
+    const arrangementsData = await db.query.arrangements.findMany({
       orderBy: desc(arrangements.date),
       where: gte(arrangements.date, AgoString),
       columns: {
@@ -145,14 +160,25 @@ export const arrangementsRouter = router({
         },
       },
     });
+
+    await redis.set("arrangement:listSafe", JSON.stringify(arrangementsData), { EX: 86400 });
+    consola.info(`${new Date().toLocaleString()} Redis 缓存写入：arrangement:listSafe`);
+
+    return arrangementsData;
   }),
 
   listGuest: publicProcedure.query(async () => {
+    const cached = await redis.get("arrangement:listGuest");
+    if (cached) {
+      consola.info(`${new Date().toLocaleString()} Redis 缓存命中：arrangement:listGuest`);
+      return JSON.parse(cached);
+    }
+
     const Ago = new Date();
     Ago.setDate(Ago.getDate() - 7);
     const AgoString = Ago.toISOString().split("T")[0];
 
-    return await db.query.arrangements.findMany({
+    const arrangementsData = await db.query.arrangements.findMany({
       orderBy: desc(arrangements.date),
       where: gte(arrangements.date, AgoString),
       columns: {
@@ -174,6 +200,11 @@ export const arrangementsRouter = router({
         },
       },
     });
+
+    await redis.set("arrangement:listGuest", JSON.stringify(arrangementsData), { EX: 86400 });
+    consola.info(`${new Date().toLocaleString()} Redis 缓存写入：arrangement:listGuest`);
+
+    return arrangementsData;
   }),
 
   reviewAll: adminProcedure.use(requirePermission(["arrange"])).query(async () => {
@@ -304,6 +335,7 @@ export const arrangementsRouter = router({
           songIndex++;
         }
       });
+      await invalidateArrangementCache();
     }),
 
   getArrangement: protectedProcedure.use(requirePermission(["robot"]))
@@ -392,5 +424,6 @@ export const arrangementsRouter = router({
           .where(eq(songs.id, i.id));
       }
       await db.delete(arrangements).where(eq(arrangements.date, input.date));
+      await invalidateArrangementCache();
     }),
 });
