@@ -26,6 +26,7 @@
 - PostgreSQL
 - Tailwind CSS
 - shadcn-vue
+- Redis
 
 主要功能：
 
@@ -221,6 +222,8 @@ _词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZS
 
 ## 致谢
 
+感谢[锦木祈杰](https://qijieya.cn/)为本项目提供的[二级域名](https://voszsy.penacony.cn)
+
 1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm) 本项目基于该项目的[v2.0.1](https://github.com/SMS-COSMO/the1068fm/releases/tag/v2.0.1)版本进行二次开发
 2. [copws/qq-music-api](https://github.com/copws/qq-music-api)
 3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
@@ -229,6 +232,8 @@ _词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZS
 6. [api.qijieya.cn](https://api.qijieya.cn) 本项目使用的第三方音乐源接口
 
 ## 贡献者
+
+若有意愿贡献代码，欢迎提交 Pull Request 到本项目的 GitHub 仓库。
 
 <a href="https://github.com/ljk743121/Sound-of-experiment/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment" />
