@@ -1,7 +1,10 @@
 import { consola } from "consola";
 import { createClient } from "redis";
+import { env } from "../env";
 
-const redis = createClient();
+const redis = createClient({
+  url: env.REDIS_URL,
+});
 redis.on("error", (err) => {
   consola.error("Redis 连接错误:", err);
 });

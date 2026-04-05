@@ -29,6 +29,7 @@ export default defineNuxtConfig({
     "@vee-validate/nuxt",
     "@nuxtjs/color-mode",
     "nuxt-musicfyplayer",
+    "@vercel/speed-insights",
   ],
 
   piniaPluginPersistedstate: {

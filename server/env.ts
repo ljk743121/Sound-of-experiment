@@ -18,6 +18,7 @@ const envSchema = z.object({
   ENC_KID: z.string(),
   CF_TOKEN: z.string().optional(),
   REDIS_URL: z.string().url(),
+  USER_API_CONFIG: z.string().optional(),
 });
 
 const envParse = envSchema.safeParse(process.env);

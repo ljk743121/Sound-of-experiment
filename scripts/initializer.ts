@@ -184,42 +184,6 @@ async function main() {
     console.log("提示: 请确保数据库连接正常且表已创建");
   }
 
-  // 5. 检测getUserDetail.ts是否存在，若不存在则修改auth.ts引用为example.ts
-  console.log("\n5. 检测getUserDetail.ts...");
-  const getUserDetailPath = path.resolve("server/utils/localUtils/getUserDetail.ts");
-  const authTsPath = path.resolve("server/utils/auth.ts");
-
-  try {
-    const getUserDetailExists = fs.existsSync(getUserDetailPath);
-
-    if (!getUserDetailExists) {
-      console.log("- getUserDetail.ts 不存在，修改 auth.ts 引用为 example.ts");
-
-      try {
-        let authContent = await readFile(authTsPath, "utf8");
-
-        // 查找并替换静态导入路径
-        const importRegex = /import\s+validateUser\s+from\s+["']\.\/localUtils\/getUserDetail["']/g;
-        if (importRegex.test(authContent)) {
-          authContent = authContent.replace(
-            importRegex,
-            `import validateUser from "./localUtils/example"`,
-          );
-          await writeFile(authTsPath, authContent, "utf8");
-          console.log("- 已成功修改 auth.ts");
-        } else {
-          console.log("- auth.ts 中未找到 getUserDetail 的静态导入，跳过修改");
-        }
-      } catch (error) {
-        console.error("- 修改 auth.ts 失败:", error);
-      }
-    } else {
-      console.log("- getUserDetail.ts 已存在，无需修改 auth.ts");
-    }
-  } catch (error) {
-    console.error("错误: 检测或修改 auth.ts 失败", error);
-  }
-
   console.log("\n===== 项目初始化完成 =====");
   process.exit(0);
 }

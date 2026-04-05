@@ -100,7 +100,7 @@ export const statsRouter = router({
     return Array.from(map, ([date, count]) => ({
       date,
       count: count.approved + count.used + count.dropped + count.pending + count.rejected,
-    })).toSorted((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 9);
+    })).toSorted((b, a) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 9);
   }),
 
   singer: protectedProcedure.query(async () => {
