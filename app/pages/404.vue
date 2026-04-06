@@ -19,8 +19,24 @@
 </template>
 
 <script setup lang="ts">
+useSeoMeta({
+  title: "页面未找到 - Voice of SZSY 点歌系统",
+  description: "您访问的页面不存在，请返回首页或上一页。",
+  robots: "noindex, nofollow",
+});
+
 useHead({
   title: "页面未找到",
+  meta: [
+    {
+      name: "robots",
+      content: "noindex, nofollow",
+    },
+  ],
+});
+
+definePageMeta({
+  layout: false,
 });
 
 function goHome() {

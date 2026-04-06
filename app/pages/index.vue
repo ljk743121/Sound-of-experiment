@@ -279,11 +279,46 @@ import { DatePicker } from "@ztl-uwu/v-calendar";
 import { getImgUrl, MusicFlowConfig } from "~~/constants";
 // import { fetchMusicUrl } from "~~/deprecate/shared/plugin";
 
+useSeoMeta({
+  title: "首页 - Voice of SZSY 点歌系统",
+  description: "Voice of SZSY 点歌系统首页 - 浏览排歌歌单、查看全部歌曲、管理个人投稿。开源校园广播站管理系统，支持在线试听和投稿。",
+  keywords: "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,在线试听,歌曲投稿",
+  ogTitle: "首页 - Voice of SZSY 点歌系统",
+  ogDescription: "浏览排歌歌单、查看全部歌曲、管理个人投稿。开源校园广播站管理系统。",
+  ogUrl: "https://voszsy.penacony.cn",
+  twitterTitle: "首页 - Voice of SZSY 点歌系统",
+  twitterDescription: "浏览排歌歌单、查看全部歌曲、管理个人投稿。开源校园广播站管理系统。",
+});
+
 useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: "https://voszsy.penacony.cn",
+    },
+  ],
   meta: [
     {
       name: "referrer",
       content: "no-referrer",
+    },
+  ],
+  script: [
+    {
+      type: "application/ld+json",
+      innerHTML: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Voice of SZSY 点歌系统首页",
+        "description": "开源校园广播站管理系统，支持歌曲在线试听、在线投稿、智能审核、一键排歌和歌单导出",
+        "url": "https://voszsy.penacony.cn",
+        "mainEntity": {
+          "@type": "WebApplication",
+          "name": "Voice of SZSY 点歌系统",
+          "applicationCategory": "EducationApplication",
+          "operatingSystem": "Any",
+        },
+      }),
     },
   ],
 });

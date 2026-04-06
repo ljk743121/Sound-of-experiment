@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /_nuxt/
+Disallow: /__nuxt_error
+Disallow: /profile
 
-Sitemap: https://voszsy.ddns.net/sitemap.xml
+# 搜索引擎爬虫控制
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://voszsy.penacony.cn/sitemap.xml

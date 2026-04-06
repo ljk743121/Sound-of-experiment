@@ -66,8 +66,24 @@ import { pwRegex } from "~~/constants";
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
+useSeoMeta({
+  title: "用户登录 - Voice of SZSY 点歌系统",
+  description: "登录 Voice of SZSY 点歌系统",
+  keywords: "登录,用户登录,点歌系统登录,校园广播登录",
+  ogTitle: "用户登录 - Voice of SZSY 点歌系统",
+  ogDescription: "登录 Voice of SZSY 点歌系统",
+  ogUrl: "https://voszsy.penacony.cn/auth/login",
+  robots: "noindex, follow",
+});
+
 useHead({
   title: "登录 - Voice of SZSY",
+  link: [
+    {
+      rel: "canonical",
+      href: "https://voszsy.penacony.cn/auth/login",
+    },
+  ],
   meta: [
     { name: "description", content: "Voice of SZSY 登录" },
     { name: "keywords", content: "点歌系统,登录,用户登录,广播站系统" },

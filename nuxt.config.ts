@@ -8,7 +8,28 @@ export default defineNuxtConfig({
         lang: "zh-CN",
       },
       charset: "utf-8",
-      viewport: "width=device-width, initial-scale=1",
+      viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+      templateParams: {
+        separator: " | ",
+      },
+      meta: [
+        { name: "robots", content: "index, follow" },
+        { name: "author", content: "Ljk743121" },
+        { name: "theme-color", content: "#3b82f6" },
+        { property: "og:site_name", content: "Voice of SZSY 点歌系统" },
+        { property: "og:type", content: "website" },
+        { property: "og:locale", content: "zh_CN" },
+        { property: "og:url", content: "https://voszsy.penacony.cn/" },
+        { property: "og:image", content: "/images/syzs.jpg" },
+        { name: "format-detection", content: "telephone=no" },
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+        { name: "apple-mobile-web-app-title", content: "Voice of SZSY" },
+      ],
+      link: [
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      ],
     },
   },
 
@@ -92,6 +113,27 @@ export default defineNuxtConfig({
         target: "esnext",
       },
     },
+    prerender: {
+      crawlLinks: true,
+      routes: ["/", "/faq", "/submit", "/sitemap.xml"],
+    },
+    compressPublicAssets: {
+      gzip: true,
+      brotli: true,
+    },
+  },
+
+  image: {
+    quality: 80,
+    format: ["webp", "jpg", "png"],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
+    },
   },
 
   routeRules: {
@@ -109,4 +151,13 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2024-10-03",
+
+  experimental: {
+    payloadExtraction: true,
+    renderJsonPayloads: true,
+  },
+
+  features: {
+    inlineStyles: true,
+  },
 });

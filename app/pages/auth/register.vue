@@ -95,11 +95,23 @@ import { pwRegex } from "~~/constants";
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
+useSeoMeta({
+  title: "账号注册 - Voice of SZSY 点歌系统",
+  description: "注册 Voice of SZSY 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。",
+  keywords: "注册,账号注册,用户注册,点歌系统注册,校园广播注册",
+  ogTitle: "账号注册 - Voice of SZSY 点歌系统",
+  ogDescription: "注册 Voice of SZSY 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。",
+  ogUrl: "https://voszsy.penacony.cn/auth/register",
+  robots: "noindex, follow",
+});
+
 useHead({
   title: "账号注册",
-  meta: [
-    { name: "description", content: "Voice of SZSY 注册页面" },
-    { name: "keywords", content: "点歌,注册,用户注册,广播站系统" },
+  link: [
+    {
+      rel: "canonical",
+      href: "https://voszsy.penacony.cn/auth/register",
+    },
   ],
 });
 
