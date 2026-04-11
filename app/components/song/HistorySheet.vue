@@ -1,7 +1,7 @@
 <template>
   <Sheet>
     <SheetTrigger as-child>
-      <Button variant="outline" size="xs" class="font-mono">
+      <Button variant="outline" size="sm" class="font-mono">
         {{ songs.length }}
       </Button>
     </SheetTrigger>
@@ -23,9 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 
 defineProps<{
-  songs: RouterOutput['user']['listSongs'][0]['songs'];
+  songs: RouterOutput["user"]["listSongs"][0]["songs"];
 }>();
 </script>

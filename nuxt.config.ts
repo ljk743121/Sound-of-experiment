@@ -1,51 +1,64 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from "@tailwindcss/vite";
+
 export default defineNuxtConfig({
-  app:{
-    head:{
-      htmlAttrs:{
-        lang: 'zh-CN',
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: "zh-CN",
       },
-      charset: 'utf-8',
-      viewport: 'width=device-width, initial-scale=1',
+      charset: "utf-8",
+      viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+      templateParams: {
+        separator: " | ",
+      },
       meta: [
-        { name: 'description', content: 'Voice of SZSY 点歌系统,Made by Ljk743121。开源校园广播站管理系统,支持歌曲在线试听、在线投稿、智能审核、一键排歌和歌单导出' },
-        { name: 'keywords', content: '深圳实验,校园点歌系统,广播站,管理系统,点歌平台,开源广播系统,教育科技,Nuxt3,Vue3,Voice of SZSY,voszsy,Github项目,开源项目' },
-        { name: 'theme-color', content: '#007bff' },
-        { name: 'mobile-web-app-capable', content: 'yes' },
-        { name: 'apple-mobile-web-app-title', content: 'Voice of SZSY' },
-        { name: 'author', content: 'Ljk743121 and contributors' },
-        { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
+        { name: "robots", content: "index, follow" },
+        { name: "author", content: "Ljk743121" },
+        { name: "theme-color", content: "#3b82f6" },
+        { property: "og:site_name", content: "Voice of SZSY 点歌系统" },
+        { property: "og:type", content: "website" },
+        { property: "og:locale", content: "zh_CN" },
+        { property: "og:url", content: "https://voszsy.penacony.cn/" },
+        { property: "og:image", content: "/images/syzs.jpg" },
+        { name: "format-detection", content: "telephone=no" },
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+        { name: "apple-mobile-web-app-title", content: "Voice of SZSY" },
       ],
       link: [
-        { rel:'icon', type:'image/x-icon', href:'/favicon.ico'},
-        { rel: 'canonical', href: 'https://voszsy.ddns.net/' },
-        { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicon.ico' },
-      ]
-    }
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      ],
+    },
   },
 
-  devtools: { enabled: true },
+  devtools: { enabled: false },
+
+  css: ["@ljk743121/vue-music-flow/dist/vue-music-flow.css", "~/assets/css/tailwind.css"],
+  vite: {
+    plugins: [tailwindcss()],
+  },
 
   modules: [
-    '@pinia/nuxt',
-    'pinia-plugin-persistedstate/nuxt',
-    '@vueuse/nuxt',
-    '@nuxt/image',
-    '@nuxt/icon',
-    '@nuxtjs/tailwindcss',
-    'shadcn-nuxt',
-    '@vee-validate/nuxt',
-    '@nuxtjs/color-mode',
-    'radix-vue/nuxt',
-    'nuxt-musicfyplayer',
+    "@pinia/nuxt",
+    "pinia-plugin-persistedstate/nuxt",
+    "@vueuse/nuxt",
+    "@nuxt/image",
+    "@nuxt/icon",
+    "shadcn-nuxt",
+    "@vee-validate/nuxt",
+    "@nuxtjs/color-mode",
+    "nuxt-musicfyplayer",
+    "@vercel/speed-insights",
   ],
 
   piniaPluginPersistedstate: {
-    storage: 'cookies',
+    storage: "cookies",
     cookieOptions: {
-      sameSite: 'lax',
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
-      secure: process.env.DB_ENV === 'production',
+      secure: process.env.DB_ENV === "production",
     },
   },
 
@@ -54,10 +67,10 @@ export default defineNuxtConfig({
   },
 
   colorMode: {
-    classSuffix: '',
-    disableTransition: true,
-    fallback: 'light',
-    storage: 'cookie',
+    classSuffix: "",
+    // disableTransition: true,
+    fallback: "light",
+    storage: "localStorage",
   },
 
   icon: {
@@ -68,42 +81,83 @@ export default defineNuxtConfig({
   },
 
   imports: {
-    dirs: ['types', 'constants'],
+    dirs: ["types", "constants"],
     presets: [
       {
-        from: '@tanstack/vue-query',
-        imports: ['useMutation', 'useQuery', 'useQueryClient', 'skipToken'],
+        from: "@tanstack/vue-query",
+        imports: ["useMutation", "useQuery", "useQueryClient", "skipToken"],
       },
       {
-        from: 'vue-sonner',
-        imports: ['toast'],
+        from: "vue-sonner",
+        imports: ["toast"],
+      },
+      {
+        from: "@ljk743121/vue-music-flow",
+        imports: ["useMusicFlow"],
       },
     ],
   },
 
   shadcn: {
-    prefix: '',
-    componentDir: './app/components/ui',
+    prefix: "",
+    componentDir: "./app/components/ui",
   },
 
   build: {
-    transpile: ['trpc-nuxt'],
+    transpile: ["trpc-nuxt", "@ljk743121/vue-music-flow"],
   },
 
   nitro: {
     esbuild: {
       options: {
-        target: 'esnext',
+        target: "esnext",
       },
+    },
+    prerender: {
+      crawlLinks: true,
+      routes: ["/", "/faq", "/submit", "/sitemap.xml"],
+    },
+    compressPublicAssets: {
+      gzip: true,
+      brotli: true,
     },
   },
 
-  runtimeConfig: {
-    //private
-    public: {
-      //public
-    }
+  image: {
+    quality: 80,
+    format: ["webp", "jpg", "png"],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
+    },
   },
 
-  compatibilityDate: '2024-10-03',
+  routeRules: {
+    "/admin": { redirect: "/admin/general/notifications" },
+    "/admin/general": { redirect: "/admin/general/notifications" },
+    "/admin/user": { redirect: "/admin/user/watchSongs" },
+    // ...proxy,
+  },
+
+  runtimeConfig: {
+    // private
+    public: {
+      // public
+    },
+  },
+
+  compatibilityDate: "2024-10-03",
+
+  experimental: {
+    payloadExtraction: true,
+    renderJsonPayloads: true,
+  },
+
+  features: {
+    inlineStyles: true,
+  },
 });

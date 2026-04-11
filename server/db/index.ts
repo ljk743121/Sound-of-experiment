@@ -1,14 +1,14 @@
-import { neonConfig, Pool } from '@neondatabase/serverless';
-import { drizzle as neon_dz } from 'drizzle-orm/neon-serverless';
-import { drizzle as pg_dz } from 'drizzle-orm/node-postgres';
-import ws from 'ws';
-import { env } from '../env';
-import * as schema from './schema';
+import { neonConfig, Pool } from "@neondatabase/serverless";
+import { drizzle as neon_dz } from "drizzle-orm/neon-serverless";
+import { drizzle as pg_dz } from "drizzle-orm/node-postgres";
+import ws from "ws";
+import { env } from "../env";
+import * as schema from "./schema";
 
-import 'dotenv/config';
+import "dotenv/config";
 
 function getDB() {
-  if (env.DB_ENV === 'production') {
+  if (env.DB_ENV === "production") {
     neonConfig.webSocketConstructor = ws;
     const pool = new Pool({
       connectionString: env.DATABASE_URL,
@@ -19,7 +19,7 @@ function getDB() {
       client: pool,
       schema,
     });
-  } else if (env.DB_ENV === 'development') {
+  } else if (env.DB_ENV === "development") {
     return pg_dz({
       connection: {
         connectionString: env.DATABASE_URL_DEV,
@@ -28,7 +28,7 @@ function getDB() {
       schema,
     });
   } else {
-    throw new Error('DB_ENV is not set');
+    throw new Error("DB_ENV is not set");
   }
 }
 

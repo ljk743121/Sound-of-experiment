@@ -1,8 +1,6 @@
 <template>
   <CardHeader>
-    <CardTitle>
-      创建开放时间
-    </CardTitle>
+    <CardTitle> 创建开放时间 </CardTitle>
   </CardHeader>
   <CardContent>
     <form class="flex flex-col gap-4" @submit="onSubmit">
@@ -22,7 +20,7 @@
             每周重复
           </FormLabel>
           <FormControl>
-            <Switch :checked="value" @update:checked="handleChange" />
+            <Switch :model-value="value" @update:model-value="handleChange" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -36,9 +34,15 @@
             </FormLabel>
             <DatePicker
               borderless
-              :model-value="value" mode="dateTime" color="gray" locale="zh" trim-weeks
+              :model-value="value"
+              mode="dateTime"
+              color="gray"
+              locale="zh"
+              trim-weeks
               title-position="left"
-              is-required is24hr class="rounded-lg border !bg-background shadow-sm"
+              is-required
+              is24hr
+              class="rounded-lg border bg-background! shadow-xs"
               expanded
               :is-dark="isDark"
               @update:model-value="handleChange"
@@ -53,9 +57,15 @@
             </FormLabel>
             <DatePicker
               borderless
-              :model-value="value" mode="dateTime" color="gray" locale="zh" trim-weeks
+              :model-value="value"
+              mode="dateTime"
+              color="gray"
+              locale="zh"
+              trim-weeks
               title-position="left"
-              is-required is24hr class="rounded-lg border !bg-background shadow-sm"
+              is-required
+              is24hr
+              class="rounded-lg border bg-background! shadow-xs"
               expanded
               :is-dark="isDark"
               @update:model-value="handleChange"
@@ -73,8 +83,16 @@
             <FormControl>
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
-                :model-value="value" mode="time" color="gray" locale="zh" hide-time-header
-                is-required is24hr style="border: none !important" class="!bg-background" @update:model-value="handleChange"
+                :model-value="value"
+                mode="time"
+                color="gray"
+                locale="zh"
+                hide-time-header
+                is-required
+                is24hr
+                style="border: none !important"
+                class="bg-background!"
+                @update:model-value="handleChange"
               />
             </FormControl>
             <FormMessage />
@@ -89,8 +107,15 @@
             <FormControl>
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
-                :model-value="value" mode="time" color="gray" locale="zh" hide-time-header
-                is-required is24hr style="border: none !important" class="!bg-background"
+                :model-value="value"
+                mode="time"
+                color="gray"
+                locale="zh"
+                hide-time-header
+                is-required
+                is24hr
+                style="border: none !important"
+                class="bg-background!"
                 @update:model-value="handleChange"
               />
             </FormControl>
@@ -110,17 +135,19 @@
 </template>
 
 <script setup lang="ts">
-import { DatePicker } from '@ztl-uwu/v-calendar';
-import * as z from 'zod';
+import { DatePicker } from "@ztl-uwu/v-calendar";
+import * as z from "zod";
 
 const { $trpc } = useNuxtApp();
 
-const formSchema = toTypedSchema(z.object({
-  name: z.string({ required_error: '名称长度至少为1' }).max(50, '名称长度最大为50'),
-  repeats: z.boolean(),
-  startAt: z.date(),
-  endAt: z.date(),
-}));
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string({ required_error: "名称长度至少为1" }).max(50, "名称长度最大为50"),
+    repeats: z.boolean(),
+    startAt: z.date(),
+    endAt: z.date(),
+  }),
+);
 
 const { handleSubmit, resetForm, values } = useForm({
   validationSchema: formSchema,
@@ -131,15 +158,15 @@ const { handleSubmit, resetForm, values } = useForm({
   },
 });
 
-const isDark = computed(() => useColorMode().preference === 'dark');
+const isDark = computed(() => useColorMode().preference === "dark");
 
 const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.time.create.mutate,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['time.list'] });
-    queryClient.invalidateQueries({ queryKey: ['time.currently'] });
-    toast.success('创建成功');
+    queryClient.invalidateQueries({ queryKey: ["time.list"] });
+    queryClient.invalidateQueries({ queryKey: ["time.currently"] });
+    toast.success("创建成功");
     resetForm();
   },
   onError: err => useErrorHandler(err),

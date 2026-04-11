@@ -1,10 +1,13 @@
 <template>
-  <div v-if="UrlFetching" class="flex h-[calc(100svh-10rem)] w-full flex-col items-center justify-center">
+  <div
+    v-if="UrlFetching"
+    class="flex h-[calc(100svh-10rem)] w-full flex-col items-center justify-center"
+  >
     正在获取歌曲链接
     <Icon name="lucide:loader-circle" class="animate-spin" size="35" />
   </div>
   <!-- information of success or error -->
-  <div v-else class="flex flex-col gap-4 rounded-lg border p-5 shadow-sm ">
+  <div v-else class="flex flex-col gap-4 rounded-lg border p-5 shadow-xs">
     <div class="flex items-center gap-3 border-b pb-3">
       <Icon name="lucide:music-4" class="text-primary" size="20" />
       <h3 class="text-xl font-semibold">
@@ -22,15 +25,15 @@
             {{ props.name }}
           </h4>
           <Badge v-if="isVip" variant="destructive">
-              VIP
-            </Badge>
+            VIP
+          </Badge>
         </div>
 
         <div>
           <p class="mb-1 text-sm">
             艺术家
           </p>
-          <p class="text-lg font-medium ">
+          <p class="text-lg font-medium">
             {{ props.artists }}
           </p>
         </div>
@@ -45,40 +48,47 @@
         </div>
 
         <div class="flex items-center gap-2 pt-2">
-          <span v-if="props.id === null"
-            class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300">
+          <span
+            v-if="props.id === null"
+            class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300"
+          >
             <Icon name="lucide:x-circle" class="mr-1" size="14" />
             无播放链接
           </span>
-          <span v-else-if="songUrlStatus === 'success'"
-            class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+          <span
+            v-else-if="songUrlStatus === 'success'"
+            class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300"
+          >
             <Icon name="lucide:check-circle" class="mr-1" size="14" />
             可播放预览
           </span>
-          <span v-else-if="songUrlStatus === 'error'"
-            class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300">
+          <span
+            v-else-if="songUrlStatus === 'error'"
+            class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300"
+          >
             <Icon name="lucide:x-circle" class="mr-1" size="14" />
             获取播放链接失败
           </span>
-
         </div>
       </div>
     </div>
   </div>
-  <div v-if="props.id !== null && props.source !== null && !UrlFetching && songUrlStatus === 'success'">
+  <div
+    v-if="props.id !== null && props.source !== null && !UrlFetching && songUrlStatus === 'success'"
+  >
     <!-- use SearchCount to force re-rendering -->
-    <MusicfyPlayer v-if="config.audioSrc !== 'https://example.com/audio.mp3'" :config="config" :key="SearchCount"
-      width="100%" />
+    <MusicfyPlayer
+      v-if="config.audioSrc !== 'https://example.com/audio.mp3'"
+      :key="SearchCount"
+      :config="config"
+      width="100%"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { getImgUrl } from '~~/constants';
-
-const { $trpc } = useNuxtApp();
-const queryClient = useQueryClient();
-
-const SearchCount = ref(0);
+// import { fetchMusicUrl } from "#shared/plugin";
+import { getImgUrl } from "~~/constants";
 
 const props = defineProps<{
   id: string | null;
@@ -89,43 +99,69 @@ const props = defineProps<{
   source: string | null;
 }>();
 
+const { $trpc } = useNuxtApp();
+const queryClient = useQueryClient();
+
+const SearchCount = ref(0);
+
 const { status: songUrlStatus, isFetching: UrlFetching } = useQuery({
-  queryFn: () => $trpc.search.mixGetUrl.query({
-    id: props.id!,
-    source: props.source!,
-  }),
-  queryKey: ['search.mixGetUrl'],
+  queryFn: () =>
+    $trpc.search.mixGetUrl.query({
+      id: props.id!,
+      source: props.source!,
+    }),
+  queryKey: ["search.mixGetUrl"],
   refetchOnWindowFocus: false,
-  enabled: computed(() => (props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0)),
+  enabled: computed(
+    () =>
+      props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0,
+  ),
 });
 
-const config = ref(useMusicfyPlayer({
-  audio: {
-    provider: 'local',
-    preload: 'none',
-    src: 'https://example.com/audio.mp3',
-  },
-  image: {
-    src: 'https://example.com/image.png',
-  },
-  color: {
-    detect: true,
-  },
-}));
+// const { status: songUrlStatus, isFetching: UrlFetching } = useQuery({
+//   queryFn: () => fetchMusicUrl(props.id!, props.source!),
+//   queryKey: ["fetchMusicUrl"],
+//   refetchOnWindowFocus: false,
+//   enabled: computed(
+//     () =>
+//       props.source !== null && props.id !== null && props.id.length > 0 && props.source.length > 0,
+//   ),
+// });
+
+const config = ref(
+  useMusicfyPlayer({
+    audio: {
+      provider: "local",
+      preload: "none",
+      src: "https://example.com/audio.mp3",
+    },
+    image: {
+      src: "https://example.com/image.png",
+    },
+    color: {
+      detect: true,
+    },
+  }),
+);
 const isVip = ref(false);
 
 watchEffect(async () => {
-  if (props.id === '' || props.source === ''){
-    toast.error('歌曲ID或来源为空')
-    
-  }else if (props.id !== null && props.source !== null) {
-    await queryClient.invalidateQueries({ queryKey: ['search.mixGetUrl'] });// reset cache to avoid song and message mismatch
+  if (props.id === "" || props.source === "") {
+    toast.error("歌曲ID或来源为空");
+  } else if (props.id !== null && props.source !== null) {
+    // await queryClient.invalidateQueries({ queryKey: ["fetchMusicUrl"] }); // reset cache to avoid song and message mismatch
+    // const data = await queryClient.fetchQuery({
+    //   queryKey: ["fetchMusicUrl"],
+    //   queryFn: () => fetchMusicUrl(props.id!, props.source!),
+    // });
+    await queryClient.invalidateQueries({ queryKey: ["search.mixGetUrl"] }); // reset cache to avoid song and message mismatch
     const data = await queryClient.fetchQuery({
-      queryKey: ['search.mixGetUrl'],
-      queryFn: () => $trpc.search.mixGetUrl.query({
-        id: props.id!,
-        source: props.source!,
-      }),
+      queryKey: ["search.mixGetUrl"],
+      queryFn: () =>
+        $trpc.search.mixGetUrl.query({
+          id: props.id!,
+          source: props.source!,
+        }),
     });
 
     if (data.url) {
@@ -136,5 +172,4 @@ watchEffect(async () => {
     }
   }
 });
-
 </script>

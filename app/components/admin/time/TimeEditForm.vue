@@ -1,8 +1,6 @@
 <template>
   <CardHeader>
-    <CardTitle>
-      修改开放时间
-    </CardTitle>
+    <CardTitle> 修改开放时间 </CardTitle>
   </CardHeader>
   <CardContent>
     <form class="flex flex-col gap-4" @submit="onSubmit">
@@ -20,7 +18,7 @@
         <FormItem>
           <FormLabel>启用</FormLabel>
           <FormControl class="block">
-            <Switch :checked="value" @update:checked="handleChange" />
+            <Switch :model-value="value" @update:model-value="handleChange" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -32,7 +30,7 @@
             每周重复
           </FormLabel>
           <FormControl>
-            <Switch :checked="value" @update:checked="handleChange" />
+            <Switch :model-value="value" @update:model-value="handleChange" />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -46,9 +44,15 @@
             </FormLabel>
             <DatePicker
               borderless
-              :model-value="value" mode="dateTime" color="gray" locale="zh" trim-weeks
+              :model-value="value"
+              mode="dateTime"
+              color="gray"
+              locale="zh"
+              trim-weeks
               title-position="left"
-              is-required is24hr class="rounded-lg border !bg-background shadow-sm"
+              is-required
+              is24hr
+              class="rounded-lg border bg-background! shadow-xs"
               :is-dark="isDark"
               expanded
               @update:model-value="handleChange"
@@ -63,9 +67,15 @@
             </FormLabel>
             <DatePicker
               borderless
-              :model-value="value" mode="dateTime" color="gray" locale="zh" trim-weeks
+              :model-value="value"
+              mode="dateTime"
+              color="gray"
+              locale="zh"
+              trim-weeks
               title-position="left"
-              is-required is24hr class="rounded-lg border !bg-background shadow-sm"
+              is-required
+              is24hr
+              class="rounded-lg border bg-background! shadow-xs"
               :is-dark="isDark"
               expanded
               @update:model-value="handleChange"
@@ -83,8 +93,15 @@
             <FormControl>
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
-                :model-value="value" mode="time" color="gray" locale="zh" hide-time-header
-                is-required is24hr style="border: none !important" @update:model-value="handleChange"
+                :model-value="value"
+                mode="time"
+                color="gray"
+                locale="zh"
+                hide-time-header
+                is-required
+                is24hr
+                style="border: none !important"
+                @update:model-value="handleChange"
               />
             </FormControl>
             <FormMessage />
@@ -99,8 +116,15 @@
             <FormControl>
               <AdminTimeDayPicker :handle-change="handleChange" :value="value" />
               <DatePicker
-                :model-value="value" mode="time" color="gray" locale="zh" hide-time-header
-                is-required is24hr style="border: none !important" @update:model-value="handleChange"
+                :model-value="value"
+                mode="time"
+                color="gray"
+                locale="zh"
+                hide-time-header
+                is-required
+                is24hr
+                style="border: none !important"
+                @update:model-value="handleChange"
               />
             </FormControl>
             <FormMessage />
@@ -122,23 +146,25 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
-import { DatePicker } from '@ztl-uwu/v-calendar';
-import * as z from 'zod';
+import type { RouterOutput } from "~~/types";
+import { DatePicker } from "@ztl-uwu/v-calendar";
+import * as z from "zod";
 
 const { time } = defineProps<{
-  time: RouterOutput['time']['list'][0];
+  time: RouterOutput["time"]["list"][0];
 }>();
 
 const { $trpc } = useNuxtApp();
 
-const formSchema = toTypedSchema(z.object({
-  name: z.string({ required_error: '名称长度至少为1' }).max(50, '名称长度最大为50'),
-  repeats: z.boolean(),
-  startAt: z.date(),
-  endAt: z.date(),
-  isActive: z.boolean(),
-}));
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string({ required_error: "名称长度至少为1" }).max(50, "名称长度最大为50"),
+    repeats: z.boolean(),
+    startAt: z.date(),
+    endAt: z.date(),
+    isActive: z.boolean(),
+  }),
+);
 
 const { handleSubmit, values } = useForm({
   validationSchema: formSchema,
@@ -147,15 +173,15 @@ const { handleSubmit, values } = useForm({
   },
 });
 
-const isDark = computed(() => useColorMode().preference === 'dark');
+const isDark = computed(() => useColorMode().preference === "dark");
 
 const queryClient = useQueryClient();
 const { mutate: modify, isPending } = useMutation({
   mutationFn: $trpc.time.modify.mutate,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['time.list'] });
-    queryClient.invalidateQueries({ queryKey: ['time.currently'] });
-    toast.success('修改成功');
+    queryClient.invalidateQueries({ queryKey: ["time.list"] });
+    queryClient.invalidateQueries({ queryKey: ["time.currently"] });
+    toast.success("修改成功");
   },
   onError: err => useErrorHandler(err),
 });
@@ -163,9 +189,9 @@ const { mutate: modify, isPending } = useMutation({
 const { mutate: remove } = useMutation({
   mutationFn: $trpc.time.remove.mutate,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['time.list'] });
-    queryClient.invalidateQueries({ queryKey: ['time.currently'] });
-    toast.success('删除成功');
+    queryClient.invalidateQueries({ queryKey: ["time.list"] });
+    queryClient.invalidateQueries({ queryKey: ["time.currently"] });
+    toast.success("删除成功");
   },
   onError: err => useErrorHandler(err),
 });

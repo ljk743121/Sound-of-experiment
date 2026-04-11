@@ -1,14 +1,14 @@
-import type { TPermission, TIdentity, TSongState } from '~~/types';
-import { relations } from 'drizzle-orm';
-import { boolean, integer, json, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import type { TIdentity, TPermission, TSongState } from "~~/types";
+import { relations } from "drizzle-orm";
+import { boolean, integer, json, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-export const users = pgTable('users', {
+export const users = pgTable("users", {
   id: text().primaryKey(),
   name: text().notNull(),
   displayName: text(),
   password: text().notNull(),
-  permissions: json().notNull().$type<TPermission[]>().default(['login']),
-  identity: text().notNull().$type<TIdentity>().default('student'),
+  permissions: json().notNull().$type<TPermission[]>().default(["login"]),
+  identity: text().notNull().$type<TIdentity>().default("student"),
   remainSubmitSongs: integer().notNull().default(2),
   maxSubmitSongs: integer().notNull().default(2),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -16,12 +16,12 @@ export const users = pgTable('users', {
   lastSubmitAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
-export const arrangements = pgTable('arrangements', {
+export const arrangements = pgTable("arrangements", {
   date: text().primaryKey(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
-export const songs = pgTable('songs', {
+export const songs = pgTable("songs", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
   creator: text().notNull(),
@@ -29,19 +29,24 @@ export const songs = pgTable('songs', {
   source: text(),
   imgId: text(),
   duration: integer(),
-  ownerId: text().references(() => users.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
+  ownerId: text().references(() => users.id, { onUpdate: "cascade", onDelete: "cascade" }),
   isRealName: boolean().default(false),
   ownerDisplayName: text(),
-  arrangementDate: text().references(() => arrangements.date, { onUpdate: 'cascade', onDelete: 'set null' }),
-  state: text().$type<TSongState>().notNull().default('pending'),
+  arrangementDate: text().references(() => arrangements.date, {
+    onUpdate: "cascade",
+    onDelete: "set null",
+  }),
+  state: text().$type<TSongState>().notNull().default("pending"),
   likes: json().notNull().$type<string[]>().default([]),
+  likeCount: integer().notNull().default(0),
   rejectMessage: text(),
   message: text(),
   msgPublic: text(),
+  position: integer(), // 添加position字段用于排序
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
-export const times = pgTable('times', {
+export const times = pgTable("times", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
   startAt: timestamp({ withTimezone: true }).notNull(),
@@ -70,17 +75,22 @@ export const songsRelations = relations(songs, ({ one }) => ({
   }),
 }));
 
-export const blockWords = pgTable('block-words', {
+export const blockWords = pgTable("block-words", {
   word: text().primaryKey(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 
-export const announcement = pgTable('announcement', {
+export const announcement = pgTable("announcement", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   markdown: text().notNull(),
   creatorId: text().notNull(),
   creatorName: text().notNull(),
-  visible: text().notNull().default('all'),
-  type: text().notNull().default('notification'),
+  visible: text().notNull().default("all"),
+  type: text().notNull().default("notification"),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+export const configs = pgTable("configs", {
+  key: text().primaryKey(),
+  value: text().notNull(),
 });

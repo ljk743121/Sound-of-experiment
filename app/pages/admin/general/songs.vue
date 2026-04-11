@@ -43,9 +43,7 @@
     </div>
     <Card class="mt-8 h-max">
       <CardHeader>
-        <CardTitle>
-          投稿统计
-        </CardTitle>
+        <CardTitle> 投稿统计 </CardTitle>
       </CardHeader>
       <CardContent>
         <BarChart
@@ -62,23 +60,21 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'admin',
+  layout: "admin",
 });
 
 const { $trpc } = useNuxtApp();
 
-try{
+try {
   await $trpc.user.adminValidity.query();
-}catch{
-  navigateTo('/')
+} catch {
+  navigateTo("/");
 }
 
 const { data } = useQuery({
   queryFn: () => $trpc.stats.dashboard.query(),
-  queryKey: ['stats.dashboard'],
+  queryKey: ["stats.dashboard"],
   refetchOnWindowFocus: false,
   refetchIntervalInBackground: false,
 });
-
-
 </script>

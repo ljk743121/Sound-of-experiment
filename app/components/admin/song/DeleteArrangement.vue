@@ -1,7 +1,7 @@
 <template>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="destructive" :disabled="isPending" size="xs">
+      <Button variant="destructive" :disabled="isPending" size="sm">
         <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
         <Icon name="lucide:trash" />
       </Button>
@@ -12,7 +12,9 @@
         <DialogTitle>删除排期</DialogTitle>
         <DialogDescription>
           确认要删除<span text="text-muted-foreground">{{ date }}</span>排期吗？
-          <p class="text-destructive">删除排期不会删除该排期中的歌曲</p>
+          <p class="text-destructive">
+            删除排期不会删除该排期中的歌曲
+          </p>
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
@@ -31,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-
 const { date } = defineProps<{
   date: string;
 }>();
@@ -44,8 +45,8 @@ const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.arrangements.delete.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['arrangements.list'] });
-    toast.success('删除成功');
+    await queryClient.invalidateQueries({ queryKey: ["arrangements.list"] });
+    toast.success("删除成功");
     isOpen.value = false;
   },
   onError: err => useErrorHandler(err),

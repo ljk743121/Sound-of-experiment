@@ -1,5 +1,7 @@
 <template>
-  <div class="flex h-svh w-full justify-center lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
+  <div
+    class="flex h-svh w-full justify-center lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]"
+  >
     <div class="flex items-center justify-center py-12">
       <div class="mx-auto grid w-[350px] gap-6">
         <div class="grid gap-2 text-center">
@@ -55,32 +57,55 @@
 </template>
 
 <script setup lang="ts">
-import { LogosSoe } from '#components';
-import { vAutoAnimate } from '@formkit/auto-animate/vue';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
-import * as z from 'zod';
-import { pwRegex } from '~~/constants';
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
+import * as z from "zod";
+import { pwRegex } from "~~/constants";
 
+const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
+useSeoMeta({
+  title: "用户登录 - Voice of SZSY 点歌系统",
+  description: "登录 Voice of SZSY 点歌系统",
+  keywords: "登录,用户登录,点歌系统登录,校园广播登录",
+  ogTitle: "用户登录 - Voice of SZSY 点歌系统",
+  ogDescription: "登录 Voice of SZSY 点歌系统",
+  ogUrl: "https://voszsy.penacony.cn/auth/login",
+  robots: "noindex, follow",
+});
+
 useHead({
-  title: '登录 - Voice of SZSY',
+  title: "登录 - Voice of SZSY",
+  link: [
+    {
+      rel: "canonical",
+      href: "https://voszsy.penacony.cn/auth/login",
+    },
+  ],
   meta: [
-    { name: 'description', content: 'Voice of SZSY 登录' },
-    { name: 'keywords', content: '点歌系统,登录,用户登录,广播站系统' },
+    { name: "description", content: "Voice of SZSY 登录" },
+    { name: "keywords", content: "点歌系统,登录,用户登录,广播站系统" },
   ],
 });
 
+if (userStore.loggedIn)
+  navigateTo("/");
 try {
   await $trpc.user.tokenValidity.query();
-  navigateTo('/');
+  navigateTo("/");
 } catch {}
 
 const formSchema = toTypedSchema(
   z.object({
-    id: z.string().length(7, '校园卡号为7位数字').regex(/\d+/, '输入必须为数字').trim(),
-    password: z.string().min(6, '最少为6个字符').max(16, '最多为16个字符').regex(pwRegex, '密码需包括至少1个字母,1个数字').trim(),
+    id: z.string().length(7, "校园卡号为7位数字").regex(/\d+/, "输入必须为数字").trim(),
+    password: z
+      .string()
+      .min(6, "最少为6个字符")
+      .max(16, "最多为16个字符")
+      .regex(pwRegex, "密码需包括至少1个字母,1个数字")
+      .trim(),
   }),
 );
 
@@ -92,8 +117,8 @@ const { mutate: login, isPending } = useMutation({
   mutationFn: $trpc.user.login.mutate,
   onSuccess: (res) => {
     useUserStore().login(res);
-    toast.success('登录成功');
-    navigateTo('/');
+    toast.success("登录成功");
+    navigateTo("/");
   },
   onError: err => useErrorHandler(err),
 });

@@ -5,9 +5,15 @@
         <div class="sticky top-0 flex h-16 items-center border-b bg-background px-4">
           <Icon name="lucide:list-music" size="17" class="mr-2" />
           <span class="text-sm font-semibold">待审核歌曲</span>
-          <Button variant="secondary" class="ml-auto" @click.prevent="acceptAll" :disabled="acceptAllPending || !songList || songList.length === 0">
+          <Button
+            variant="secondary"
+            class="ml-auto"
+            :disabled="acceptAllPending || !songList || songList.length === 0"
+            @click.prevent="acceptAll"
+          >
             <Icon name="lucide:check-circle" size="17" class="mr-2" />
             通过全部歌曲
+            <Icon v-if="acceptAllPending" name="lucide:loader-circle" class="ml-2 animate-spin" />
           </Button>
         </div>
         <TransitionGroup name="list" tag="ul" class="flex flex-col gap-3 p-4">
@@ -32,25 +38,34 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 
 definePageMeta({
-  layout: 'admin',
+  layout: "admin",
+});
+
+useHead({
+  meta: [
+    {
+      name: "referrer",
+      content: "no-referrer",
+    },
+  ],
 });
 
 const { $trpc } = useNuxtApp();
 const queryClient = useQueryClient();
-const layout = useCookie<number[]>('review-resizable:layout', {
+const layout = useCookie<number[]>("review-resizable:layout", {
   default: () => [35, 65],
 });
 
 const { data: songList } = useQuery({
   queryFn: () => $trpc.song.listReview.query(),
-  queryKey: ['song.listReview'],
+  queryKey: ["song.listReview"],
   refetchOnWindowFocus: false,
 });
 
-const selectedSong = ref<RouterOutput['song']['listReview'][0] | undefined>(songList.value?.[0]);
+const selectedSong = ref<RouterOutput["song"]["listReview"][0] | undefined>(songList.value?.[0]);
 watch(songList, () => {
   selectedSong.value = songList.value?.[0];
 });
@@ -58,10 +73,9 @@ watch(songList, () => {
 const { mutate: acceptAll, isPending: acceptAllPending } = useMutation({
   mutationFn: $trpc.song.review.acceptAll.mutate,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['song.listReview'] });
-    toast.success('已通过所有歌曲');
+    queryClient.invalidateQueries({ queryKey: ["song.listReview"] });
+    toast.success("已通过所有歌曲");
   },
   onError: err => useErrorHandler(err),
 });
-
 </script>

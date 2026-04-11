@@ -29,3 +29,6 @@ logs
 
 .vercel
 .env*.local
+
+# Deprecated Modules
+deprecated

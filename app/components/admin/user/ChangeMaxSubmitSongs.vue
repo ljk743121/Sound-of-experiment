@@ -1,10 +1,10 @@
 <template>
-  <span class="text-muted-foreground mr-2 my-auto">
+  <span class="my-auto mr-2 text-muted-foreground">
     {{ maxSongs }}
   </span>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="outline" size="xs">
+      <Button variant="outline" size="sm">
         <Icon name="lucide:square-pen" />
       </Button>
     </DialogTrigger>
@@ -12,13 +12,18 @@
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>修改每周最大提交次数</DialogTitle>
-        <DialogDescription>
-          更改用户的每周最大提交次数。
-        </DialogDescription>
+        <DialogDescription> 更改用户的每周最大提交次数。 </DialogDescription>
       </DialogHeader>
       <div class="grid w-full max-w-sm items-center gap-1.5">
         <Label for="maxTimes">最大提交次数</Label>
-        <Input id="maxTimes" v-model="editMaxSongs" type="number" placeholder="Times" min="0" max="10" />
+        <Input
+          id="maxTimes"
+          v-model="editMaxSongs"
+          type="number"
+          placeholder="Times"
+          min="0"
+          max="10"
+        />
       </div>
 
       <DialogFooter>
@@ -57,8 +62,8 @@ const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.user.editMaxSongs.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user.listSongs'] });
-    toast.success('修改成功');
+    await queryClient.invalidateQueries({ queryKey: ["user.listSongs"] });
+    toast.success("修改成功");
     editMaxSongs.value = maxSongs;
     isOpen.value = false;
   },

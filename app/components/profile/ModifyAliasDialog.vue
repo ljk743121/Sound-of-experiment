@@ -29,28 +29,34 @@
 </template>
 
 <script setup lang="ts">
-import { vAutoAnimate } from '@formkit/auto-animate/vue';
-import { useForm } from 'vee-validate';
-import z from 'zod';
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
+import { useForm } from "vee-validate";
+import z from "zod";
 
 const userStore = useUserStore();
 
 const { $trpc } = useNuxtApp();
 
-const formSchema = toTypedSchema(z.object({
-  alias: z.string({ required_error: '请输入昵称' }).trim().min(1, '用户昵称长度应至少为1').max(32, '用户密码长度应至多为32'),
-}));
+const formSchema = toTypedSchema(
+  z.object({
+    alias: z
+      .string({ required_error: "请输入昵称" })
+      .trim()
+      .min(1, "用户昵称长度应至少为1")
+      .max(32, "用户密码长度应至多为32"),
+  }),
+);
 
 const { handleSubmit } = useForm({
   validationSchema: formSchema,
 });
 
-const alias = ref('');
+const alias = ref("");
 
 const { mutate: modifyAlias, isPending } = useMutation({
   mutationFn: $trpc.user.modifyAlias.mutate,
   onSuccess: () => {
-    toast.success('修改成功');
+    toast.success("修改成功");
     userStore.displayName = alias.value;
   },
   onError: err => useErrorHandler(err),

@@ -13,8 +13,12 @@
         <DialogTitle>删除歌曲</DialogTitle>
         <DialogDescription>
           确认要删除此歌曲吗？
-          <p class="text-muted-foreground">歌曲名称：{{ song.name }}</p>
-          <p class="text-muted-foreground">歌曲作者：{{ song.creator }}</p>
+          <p class="text-muted-foreground">
+            歌曲名称：{{ song.name }}
+          </p>
+          <p class="text-muted-foreground">
+            歌曲作者：{{ song.creator }}
+          </p>
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
@@ -33,10 +37,10 @@
 </template>
 
 <script setup lang="ts">
-import type { RouterOutput } from '~~/types';
+import type { RouterOutput } from "~~/types";
 
 const { song } = defineProps<{
-  song: Partial<RouterOutput['song']['listMine'][0]>
+  song: Partial<RouterOutput["song"]["listMine"][0]>;
 }>();
 
 const { $trpc } = useNuxtApp();
@@ -47,9 +51,9 @@ const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.song.deleteMine.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['song.listMine'] });
-    await queryClient.invalidateQueries({ queryKey: ['song.listSafe'] });
-    toast.success('删除成功');
+    await queryClient.invalidateQueries({ queryKey: ["song.listMine"] });
+    await queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
+    toast.success("删除成功");
     isOpen.value = false;
   },
   onError: err => useErrorHandler(err),

@@ -60,7 +60,10 @@
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </NuxtLink>
-             <NuxtLink v-if="userStore.permissions.includes('announcement')" to="/admin/announcement">
+            <NuxtLink
+              v-if="userStore.permissions.includes('announcement')"
+              to="/admin/announcement"
+            >
               <SidebarMenuItem>
                 <SidebarMenuButton>
                   <Icon name="lucide:bell" />
@@ -86,57 +89,58 @@
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <SidebarMenuButton
-                    size="lg"
-                    class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                  >
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <SidebarMenuButton
+                  size="lg"
+                  class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar class="rounded-lg">
+                    <Icon name="lucide:circle-user" size="20" />
+                  </Avatar>
+                  <div class="grid flex-1 text-left text-sm leading-tight">
+                    <span class="truncate font-semibold">{{ userStore.name }}</span>
+                    <span v-if="userStore.displayName" class="truncate text-xs">昵称：{{ userStore.displayName }}</span>
+                    <span class="truncate text-xs">{{ userStore.id }}</span>
+                  </div>
+                  <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                class="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                side="bottom"
+                :side-offset="4"
+              >
+                <DropdownMenuLabel class="p-0 font-normal">
+                  <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar class="rounded-lg">
                       <Icon name="lucide:circle-user" size="20" />
                     </Avatar>
                     <div class="grid flex-1 text-left text-sm leading-tight">
                       <span class="truncate font-semibold">{{ userStore.name }}</span>
-                      <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
+                      <span v-if="userStore.displayName" class="truncate text-xs">昵称：{{ userStore.displayName }}</span>
                       <span class="truncate text-xs">{{ userStore.id }}</span>
                     </div>
-                    <Icon name="lucide:chevrons-up-down" class="ml-auto size-4" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom"
-                  :side-offset="4"
-                >
-                  <DropdownMenuLabel class="p-0 font-normal">
-                    <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                      <Avatar class="rounded-lg">
-                        <Icon name="lucide:circle-user" size="20" />
-                      </Avatar>
-                      <div class="grid flex-1 text-left text-sm leading-tight">
-                        <span class="truncate font-semibold">{{ userStore.name }}</span>
-                        <span class="truncate text-xs" v-if="userStore.displayName">昵称：{{ userStore.displayName }}</span>
-                        <span class="truncate text-xs">{{ userStore.id }}</span>
-                      </div>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem @click="navigateTo('/profile')">
-                    <Icon name="lucide:user-check" />
-                    个人资料
-                  </DropdownMenuItem>
-                  <DropdownMenuItem @click="logout">
-                    <Icon name="lucide:log-out" />
-                    登出
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem @click="navigateTo('/profile')">
+                  <Icon name="lucide:user-check" />
+                  个人资料
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="logout">
+                  <Icon name="lucide:log-out" />
+                  登出
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset>
       <header
-        class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+        class="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
       >
         <div class="flex w-full items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
@@ -147,7 +151,9 @@
                 <BreadcrumbItem>
                   <BreadcrumbLink
                     :href="index === 0 ? undefined : breadcrumb.href"
-                    :class="{ 'text-foreground': index === breadcrumbs.length - 1 }"
+                    :class="{
+                      'text-foreground': index === breadcrumbs.length - 1,
+                    }"
                   >
                     {{ breadcrumb.title }}
                   </BreadcrumbLink>
@@ -167,19 +173,19 @@
 </template>
 
 <script setup lang="ts">
-import { LogosSoelogo } from '#components';
-import { breadCrumb } from '~~/constants';
+import { LogosSoelogo } from "#components";
+import { breadCrumb } from "~~/constants";
 
 const userStore = useUserStore();
 
-if (!userStore.permissions.includes('admin')){
-  navigateTo('/');
+if (!userStore.permissions.includes("admin")) {
+  navigateTo("/");
 }
 
 function logout() {
   userStore.logout();
-  toast.success('登出成功');
-  navigateTo('/auth/login');
+  toast.success("登出成功");
+  navigateTo("/auth/login");
 }
 
 interface Item {
@@ -191,13 +197,13 @@ const route = useRoute();
 
 function generateBreadcrumb(url: string): Item[] {
   const breadcrumbItems: Item[] = [];
-  const segments = url.split('/').filter(segment => segment !== ''); // Remove empty segments
+  const segments = url.split("/").filter(segment => segment !== ""); // Remove empty segments
 
   // Construct breadcrumb for each segment
-  let href = '';
+  let href = "";
   for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i]!.replace('.html', '');
-    const segmentName = breadCrumb[segment] ?? '';
+    const segment = segments[i]!.replace(".html", "");
+    const segmentName = breadCrumb[segment] ?? "";
     href += `/${segment}`;
     breadcrumbItems.push({ title: segmentName, href });
   }

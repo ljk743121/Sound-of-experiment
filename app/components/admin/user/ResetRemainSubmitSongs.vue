@@ -1,10 +1,10 @@
 <template>
-  <span class="text-muted-foreground mr-2 my-auto">
+  <span class="my-auto mr-2 text-muted-foreground">
     {{ remainSongs }}
   </span>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="outline" size="xs">
+      <Button variant="outline" size="sm">
         <Icon name="lucide:refresh-cw" />
       </Button>
     </DialogTrigger>
@@ -47,8 +47,8 @@ const queryClient = useQueryClient();
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.user.resetRemainSongs.mutate,
   onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user.listSongs'] });
-    toast.success('重置成功');
+    await queryClient.invalidateQueries({ queryKey: ["user.listSongs"] });
+    toast.success("重置成功");
     isOpen.value = false;
   },
   onError: err => useErrorHandler(err),

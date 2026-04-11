@@ -6,9 +6,7 @@
     <DialogContent>
       <DialogHeader>
         <DialogTitle>修改密码</DialogTitle>
-        <DialogDescription>
-          至少一个数字一个字母
-        </DialogDescription>
+        <DialogDescription> 至少一个数字一个字母 </DialogDescription>
       </DialogHeader>
       <form @submit.prevent="onSubmit">
         <FormField v-slot="{ componentField }" name="oldPassword">
@@ -41,23 +39,28 @@
 </template>
 
 <script setup lang="ts">
-import { vAutoAnimate } from '@formkit/auto-animate/vue';
-import { useForm } from 'vee-validate';
-import z from 'zod';
-import { pwRegex } from '~~/constants';
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
+import { useForm } from "vee-validate";
+import z from "zod";
+import { pwRegex } from "~~/constants";
 
 const userStore = useUserStore();
 
 const { $trpc } = useNuxtApp();
 
-const formSchema = toTypedSchema(z.object({
-  oldPassword: z.string({ required_error: '请输入密码' }).min(6, '用户密码长度应至少为6').max(16, '用户密码长度应至多为16'),
-  newPassword: z
-    .string({ required_error: '请输入密码' })
-    .min(6, '用户密码长度应至少为6')
-    .max(16, '用户密码长度应至多为16')
-    .regex(pwRegex, '密码必须包含字母、数字'),
-}));
+const formSchema = toTypedSchema(
+  z.object({
+    oldPassword: z
+      .string({ required_error: "请输入密码" })
+      .min(6, "用户密码长度应至少为6")
+      .max(16, "用户密码长度应至多为16"),
+    newPassword: z
+      .string({ required_error: "请输入密码" })
+      .min(6, "用户密码长度应至少为6")
+      .max(16, "用户密码长度应至多为16")
+      .regex(pwRegex, "密码必须包含字母、数字"),
+  }),
+);
 
 const { handleSubmit } = useForm({
   validationSchema: formSchema,
@@ -66,9 +69,9 @@ const { handleSubmit } = useForm({
 const { mutate: modifyPassword, isPending } = useMutation({
   mutationFn: $trpc.user.modifyPassword.mutate,
   onSuccess: () => {
-    toast.success('修改成功');
+    toast.success("修改成功");
     userStore.logout();
-    navigateTo('/auth/login');
+    navigateTo("/auth/login");
   },
   onError: err => useErrorHandler(err),
 });

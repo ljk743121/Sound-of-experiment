@@ -3,7 +3,6 @@ import type { RouterOutput, TMediaSource } from "~~/types"
 import { searchBaseURL } from '~~/constants';
 import { TRPCClientError } from "@trpc/client";
 
-
 const {
   searchSource,
   searchKey,
@@ -141,7 +140,7 @@ watch(() => [searchKey, searchType, searchSource], () => {
   if (searchKey&&searchType&&searchSource){
     clear();
     refresh();
-  } 
+  }
 })
 
 </script> -->

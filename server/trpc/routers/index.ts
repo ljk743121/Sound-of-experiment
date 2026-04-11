@@ -1,13 +1,13 @@
-import { router } from '../trpc';
-import { arrangementsRouter } from './arrangements';
-import { searchRouter } from './search';
-import { songRouter } from './song';
-import { statsRouter } from './stats';
-import { timeRouter } from './time';
-import { userRouter } from './user';
-import { blockWordsRouter } from './words';
-import { configRouter } from './config';
-import { announcementRouter } from './announcement';
+import { router } from "../trpc";
+import { announcementRouter } from "./announcement";
+import { arrangementsRouter } from "./arrangements";
+import { configRouter } from "./config";
+import { searchRouter } from "./search";
+import { songRouter } from "./song";
+import { statsRouter } from "./stats";
+import { timeRouter } from "./time";
+import { userRouter } from "./user";
+import { blockWordsRouter } from "./words";
 
 export const appRouter = router({
   user: userRouter,
@@ -18,7 +18,7 @@ export const appRouter = router({
   blockWords: blockWordsRouter,
   search: searchRouter,
   config: configRouter,
-  announcement : announcementRouter,
+  announcement: announcementRouter,
 });
 
 export type AppRouter = typeof appRouter;
