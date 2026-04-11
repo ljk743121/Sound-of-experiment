@@ -20,7 +20,7 @@ export default defineNuxtConfig({
         { property: "og:type", content: "website" },
         { property: "og:locale", content: "zh_CN" },
         { property: "og:url", content: "https://voszsy.penacony.cn/" },
-        { property: "og:image", content: "/images/syzs.jpg" },
+        { property: "og:image", content: "https://voszsy.penacony.cn/images/syzs.jpg" },
         { name: "format-detection", content: "telephone=no" },
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -112,10 +112,6 @@ export default defineNuxtConfig({
       options: {
         target: "esnext",
       },
-    },
-    prerender: {
-      crawlLinks: true,
-      routes: ["/", "/faq", "/submit", "/sitemap.xml"],
     },
     compressPublicAssets: {
       gzip: true,
