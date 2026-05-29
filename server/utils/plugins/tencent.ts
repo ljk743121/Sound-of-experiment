@@ -5,33 +5,61 @@ import { defaultVipSign, mediaBaseURL, searchBaseURL } from "~~/constants";
 import { createPlugin } from "../plugin";
 
 async function officialSearch(key: string) {
-  const searchBase = searchBaseURL.qqSearch;
+  const searchBase = "https://u.y.qq.com/cgi-bin/musicu.fcg";
 
   interface TSearchDataItem {
-    albummid: string;
-    albumname: string;
+    album: {
+      mid: string;
+      name: string;
+    };
     singer: { name: string }[];
-    songmid: string;
-    songname: string;
+    mid: string;
+    name: string;
     interval: number; // second
   }
 
   interface TSearchResponse {
     code: number;
-    data: {
-      song: {
-        list: TSearchDataItem[];
+    req: {
+      data: {
+        body: {
+          song: {
+            list: TSearchDataItem[];
+          };
+        };
       };
     };
   }
 
-  const res = await $fetch<TSearchResponse>(searchBase, {
-    method: "GET",
-    params: {
-      w: key,
-      n: 10,
-      format: "json",
+  const bodyData = {
+    comm: { ct: "19", cv: "1859", uin: "0" },
+    req: {
+      method: "DoSearchForQQMusicDesktop",
+      module: "music.search.SearchCgiService",
+      param: {
+        grp: 1,
+        num_per_page: 10,
+        page_num: 1,
+        query: key,
+        search_type: 0,
+      },
     },
+  };
+
+  const res = await $fetch<TSearchResponse>(searchBase, {
+    method: "POST",
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language":
+        "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+      "Content-Type": "application/json;charset=utf-8",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-origin",
+    },
+    body: bodyData,
     parseResponse(responseText) {
       try {
         return JSON.parse(responseText);
@@ -41,16 +69,16 @@ async function officialSearch(key: string) {
     },
   });
 
-  const songList = res.data.song.list.map(item => ({
-    id: item.songmid,
-    name: item.songname,
+  const songList = res.req.data.body.song.list.map(item => ({
+    id: item.mid,
+    name: item.name,
     artists: item.singer
       .map(artist => artist.name)
       .join(", ")
       .trim(),
-    album: item.albumname,
+    album: item.album.name,
     source: "tx" as TMediaSource,
-    imgId: item.albummid,
+    imgId: item.album.mid,
     duration: item.interval,
   }));
   return songList;
