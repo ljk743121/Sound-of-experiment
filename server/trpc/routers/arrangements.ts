@@ -6,7 +6,7 @@ import { asc, count, desc, eq, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { arrangements, songs } from "~~/server/db/schema";
-import { redis } from "~~/server/utils/redis";
+import { cacheGet, cacheSet } from "~~/server/utils/redis";
 import {
   adminProcedure,
   protectedProcedure,
@@ -19,8 +19,8 @@ import {
 const order = [asc(songs.position), asc(songs.createdAt)];
 
 async function invalidateArrangementCache() {
-  await redis.del("arrangement:listSafe");
-  await redis.del("arrangement:listGuest");
+  await cacheDel("arrangement:listSafe");
+  await cacheDel("arrangement:listGuest");
   consola.info(`Redis 缓存失效：arrangement:listSafe, arrangement:listGuest`);
 }
 
@@ -122,7 +122,7 @@ export const arrangementsRouter = router({
     }),
 
   listSafe: protectedProcedure.query(async () => {
-    const cached = await redis.get("arrangement:listSafe");
+    const cached = await cacheGet("arrangement:listSafe");
     if (cached) {
       consola.info(`${new Date().toLocaleString()} Redis 缓存命中：arrangement:listSafe`);
       return JSON.parse(cached);
@@ -161,14 +161,14 @@ export const arrangementsRouter = router({
       },
     });
 
-    await redis.set("arrangement:listSafe", JSON.stringify(arrangementsData), { EX: 86400 });
+    await cacheSet("arrangement:listSafe", JSON.stringify(arrangementsData), { EX: 86400 });
     consola.info(`${new Date().toLocaleString()} Redis 缓存写入：arrangement:listSafe`);
 
     return arrangementsData;
   }),
 
   listGuest: publicProcedure.query(async () => {
-    const cached = await redis.get("arrangement:listGuest");
+    const cached = await cacheGet("arrangement:listGuest");
     if (cached) {
       consola.info(`${new Date().toLocaleString()} Redis 缓存命中：arrangement:listGuest`);
       return JSON.parse(cached);
@@ -201,7 +201,7 @@ export const arrangementsRouter = router({
       },
     });
 
-    await redis.set("arrangement:listGuest", JSON.stringify(arrangementsData), { EX: 86400 });
+    await cacheSet("arrangement:listGuest", JSON.stringify(arrangementsData), { EX: 86400 });
     consola.info(`${new Date().toLocaleString()} Redis 缓存写入：arrangement:listGuest`);
 
     return arrangementsData;

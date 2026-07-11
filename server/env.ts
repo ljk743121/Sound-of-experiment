@@ -17,7 +17,7 @@ const envSchema = z.object({
   SIGN_KID: z.string(),
   ENC_KID: z.string(),
   CF_TOKEN: z.string().optional(),
-  REDIS_URL: z.string().url(),
+  REDIS_URL: z.string().url().optional(),
   USER_API_CONFIG: z.string().optional(),
 });
 

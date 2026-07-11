@@ -1,9 +1,10 @@
 import type { TMediaSource, TSubmitType } from "~~/types";
 import { TRPCError } from "@trpc/server";
-import { desc, eq, gt } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { songs, users } from "~~/server/db/schema";
+import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
 import { hasBlockWord } from "~~/server/utils/universal";
 import {
   adminProcedure,
@@ -95,7 +96,7 @@ export const songRouter = router({
           lastSubmitAt: now,
         })
         .where(eq(users.id, ctx.user.id));
-      redis.del(`listMine:${ctx.user.id}`);
+      await cacheDel(`listMine:${ctx.user.id}`);
     }),
   deleteMine: protectedProcedure
     .input(
@@ -114,7 +115,7 @@ export const songRouter = router({
       if (song.state === "used")
         throw new TRPCError({ code: "BAD_REQUEST", message: "该歌曲已被使用" });
       await db.delete(songs).where(eq(songs.id, input.id));
-      redis.del(`listMine:${ctx.user.id}`);
+      await cacheDel(`listMine:${ctx.user.id}`);
     }),
   delete: adminProcedure
     .input(
@@ -161,8 +162,15 @@ export const songRouter = router({
   }),
 
   listSafe: protectedProcedure.query(async () => {
+    const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);// two weeks
     return await db.query.songs.findMany({
-      where: gt(songs.createdAt, new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)), // two weeks
+      where: or(
+        inArray(songs.state, ["pending", "approved", "dropped"]),
+        and(
+          inArray(songs.state, ["used", "rejected"]),
+          gt(songs.createdAt, twoWeeksAgo),
+        ),
+      ),
       orderBy: desc(songs.createdAt),
       columns: {
         id: true,
@@ -207,7 +215,7 @@ export const songRouter = router({
 
   listMine: protectedProcedure.query(async ({ ctx }) => {
     const cacheKey = `listMine:${ctx.user.id}`;
-    const cachedList = await redis.get(cacheKey);
+    const cachedList = await cacheGet(cacheKey);
     if (cachedList) {
       return JSON.parse(cachedList);
     }
@@ -215,7 +223,7 @@ export const songRouter = router({
       orderBy: desc(songs.createdAt),
       where: eq(songs.ownerId, ctx.user.id),
     });
-    await redis.set(cacheKey, JSON.stringify(list), { EX: 86400 });
+    await cacheSet(cacheKey, JSON.stringify(list), { EX: 86400 });
     return list;
   }),
 
@@ -270,7 +278,7 @@ export const songRouter = router({
       })
       .where(eq(songs.id, id));
     if (song.ownerId === ctx.user.id) {
-      redis.del(`listMine:${ctx.user.id}`);
+      await cacheDel(`listMine:${ctx.user.id}`);
     }
   }),
 
@@ -290,7 +298,7 @@ export const songRouter = router({
       })
       .where(eq(songs.id, id));
     if (song.ownerId === ctx.user.id) {
-      redis.del(`listMine:${ctx.user.id}`);
+      await cacheDel(`listMine:${ctx.user.id}`);
     }
   }),
 

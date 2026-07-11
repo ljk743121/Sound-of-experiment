@@ -2,12 +2,13 @@ import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
 import { times } from "~~/server/db/schema";
+import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
 import { adminProcedure, publicProcedure, requirePermission, router } from "../trpc";
 
 const cacheKey = "time:listSafe";
 
 async function getTime() {
-  const cachedList = await redis.get(cacheKey);
+  const cachedList = await cacheGet(cacheKey);
   if (cachedList) {
     if (cachedList) {
       return JSON.parse(cachedList);
@@ -22,7 +23,7 @@ async function getTime() {
       repeats: true,
     },
   });
-  await redis.set(cacheKey, JSON.stringify(list), { EX: 604800 });
+  await cacheSet(cacheKey, JSON.stringify(list), { EX: 604800 });
   return list;
 }
 
@@ -84,7 +85,7 @@ export const timeRouter = router({
     .use(requirePermission(["time"]))
     .mutation(async ({ input }) => {
       const id = (await db.insert(times).values(input).returning({ id: times.id }))?.[0]?.id;
-      redis.del(cacheKey);
+      await cacheDel(cacheKey);
       return id;
     }),
 
@@ -93,7 +94,7 @@ export const timeRouter = router({
     .use(requirePermission(["time"]))
     .mutation(async ({ input }) => {
       await db.delete(times).where(eq(times.id, input));
-      redis.del(cacheKey);
+      await cacheDel(cacheKey);
     }),
 
   currently: publicProcedure.query(async () => {
@@ -125,7 +126,7 @@ export const timeRouter = router({
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
       await db.update(times).set(data).where(eq(times.id, id));
-      redis.del(cacheKey);
+      await cacheDel(cacheKey);
     }),
 
   modifyActive: adminProcedure
@@ -138,6 +139,6 @@ export const timeRouter = router({
     .use(requirePermission(["time"]))
     .mutation(async ({ input }) => {
       await db.update(times).set({ isActive: input.isActive }).where(eq(times.id, input.id));
-      redis.del(cacheKey);
+      await cacheDel(cacheKey);
     }),
 });

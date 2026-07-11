@@ -9,15 +9,15 @@
         <div class="grid grid-rows-2 gap-3">
           <Button class="block h-full items-center gap-2" variant="outline">
             <div class="text-xs">
-              两周已收集歌曲
+              歌曲
             </div>
             <div class="text-2xl font-bold">
               {{ userStore.loggedIn ? songList?.length || songGuestList?.length || 0 : "?" }}
             </div>
           </Button>
-          <TimeAvailabilityDialog>
+          <LazyTimeAvailabilityDialog>
             <TimeAvailability is-card />
-          </TimeAvailabilityDialog>
+          </LazyTimeAvailabilityDialog>
         </div>
         <Button
           class="size-full text-xl font-bold"
@@ -135,7 +135,7 @@
 
     <section class="md:overflow-auto md:px-4">
       <!-- 添加滚动通知条 -->
-      <Alert v-if="announcementList && announcementList.length > 0" class="overflow-hidden py-0">
+      <LazyAlert v-if="announcementList && announcementList.length > 0" class="overflow-hidden py-0">
         <AlertDescription class="overflow-hidden h-12 my-auto flex items-center justify-center">
           <div class="whitespace-nowrap animate-marquee">
             <span class="mr-8 font-bold text-foreground">
@@ -149,7 +149,7 @@
             {{ (announcementList?.[0]?.markdown ?? '') }}
           </div>
         </AlertDescription>
-      </Alert>
+      </LazyAlert>
       <Tabs v-model="selectedTab" default-value="arrangement">
         <div class="-mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
           <TabsList class="grid w-full grid-cols-3">
@@ -254,7 +254,7 @@
           <div v-if="isAnnouncementListPending">
             <Icon name="lucide:loader-2" size="20" class="animate-spin" />
           </div>
-          <HomeAnnouncement
+          <LazyHomeAnnouncement
             v-else
             :announcement-list="userStore.announcementCache && userStore.announcementCache.length > 0
               ? userStore.announcementCache

@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { consola } from "consola";
 import { z } from "zod";
 import { pluginManager } from "~~/server/utils/plugin";
-import { redis } from "~~/server/utils/redis";
+import { cacheGet, cacheSet } from "~~/server/utils/redis";
 import { protectedProcedure, router } from "../trpc";
 
 export const searchRouter = router({
@@ -37,7 +37,7 @@ export const searchRouter = router({
         throw new TRPCError({ code: "BAD_REQUEST", message: "缺少参数" });
 
       const cacheKey = `musicUrl:${input.source}:${input.id}`;
-      const cached = await redis.get(cacheKey);
+      const cached = await cacheGet(cacheKey);
 
       if (cached) {
         consola.info(`Redis 缓存命中: ${cacheKey}`);
@@ -58,7 +58,7 @@ export const searchRouter = router({
               throw new TRPCError({ code: "BAD_REQUEST", message: "音乐链接为空" });
             }
           });
-          await redis.set(cacheKey, JSON.stringify(songInfo), { EX: 3600 });
+          await cacheSet(cacheKey, JSON.stringify(songInfo), { EX: 3600 });
           consola.info(`Redis 缓存写入: ${cacheKey}`);
           return songInfo;
         } catch (e: any) {
