@@ -18,7 +18,7 @@
         </div>
         <TransitionGroup name="list" tag="ul" class="flex flex-col gap-3 p-4">
           <li v-for="song in songList" :key="song.id">
-            <SongCard
+            <LazySongCard
               type="review"
               :song
               :selected="selectedSong?.id === song.id"
@@ -31,7 +31,7 @@
     <ResizableHandle id="review-resizable-resize-1" with-handle />
     <ResizablePanel id="review-resizable-panel-2" :default-size="layout[1]">
       <ScrollArea class="h-[calc(100svh-4rem)]">
-        <AdminSongReview v-if="selectedSong" :song="selectedSong!" />
+        <LazyAdminSongReview v-if="selectedSong" :song="selectedSong!" />
       </ScrollArea>
     </ResizablePanel>
   </ResizablePanelGroup>

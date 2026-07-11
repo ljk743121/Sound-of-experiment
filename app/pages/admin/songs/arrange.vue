@@ -109,7 +109,7 @@
             </div>
             <ul class="flex flex-col gap-3 p-4">
               <li v-for="song in day.songs" :key="song.id">
-                <SongCard :song="song" is-arrangement type="review" />
+                <LazySongCard :song="song" is-arrangement type="review" />
               </li>
             </ul>
           </CarouselItem>
@@ -123,7 +123,7 @@
             <Button variant="outline" class="max-w-min" @click="onThumbClick(index)">
               {{ day.date }}
             </Button>
-            <AdminSongDeleteArrangement
+            <LazyAdminSongDeleteArrangement
               v-if="userStore.permissions.includes('deleteArrangement')"
               :date="day.date"
             />

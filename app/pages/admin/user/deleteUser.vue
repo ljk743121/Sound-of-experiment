@@ -8,7 +8,7 @@
         @update:model-value="table.getColumn('id')?.setFilterValue($event)"
       />
     </div>
-    <div class="rounded-md border">
+    <div class="min-w-[500px] rounded-md border">
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

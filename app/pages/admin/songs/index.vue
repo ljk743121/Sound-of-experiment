@@ -13,7 +13,7 @@
 
           <TransitionGroup name="list" tag="ul" class="flex flex-col gap-3 p-4">
             <li v-for="song in songList?.filter(x => x.state === panel.value)" :key="song.id">
-              <SongCard :song type="songs" />
+              <LazySongCard :song type="songs" />
             </li>
           </TransitionGroup>
         </ScrollArea>
@@ -42,7 +42,7 @@
           class="flex flex-col gap-3 p-4"
         >
           <li v-for="song in songList?.filter(x => x.state === 'used')" :key="song.id">
-            <SongCard :song type="songs" />
+            <LazySongCard :song type="songs" />
           </li>
         </TransitionGroup>
         <TransitionGroup
@@ -52,7 +52,7 @@
           class="flex flex-col gap-3 p-4"
         >
           <li v-for="song in songList?.filter(x => x.state === 'dropped')" :key="song.id">
-            <SongCard :song type="songs" />
+            <LazySongCard :song type="songs" />
           </li>
         </TransitionGroup>
       </ScrollArea>

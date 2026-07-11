@@ -47,18 +47,18 @@
           </div>
           <div class="mt-4 grid gap-2">
             可用操作：
-            <ProfileModifyPasswordDialog>
+            <LazyProfileModifyPasswordDialog>
               <Button>
                 <Icon name="lucide:lock" />
                 修改密码
               </Button>
-            </ProfileModifyPasswordDialog>
-            <ProfileModifyAliasDialog>
+            </LazyProfileModifyPasswordDialog>
+            <LazyProfileModifyAliasDialog>
               <Button>
                 <Icon name="lucide:user" />
                 修改昵称
               </Button>
-            </ProfileModifyAliasDialog>
+            </LazyProfileModifyAliasDialog>
           </div>
         </div>
       </CardContent>

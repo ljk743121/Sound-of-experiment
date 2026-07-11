@@ -41,7 +41,7 @@
           <ScrollArea class="h-[calc(100svh-4rem)]">
             <VueDraggable v-model="editableApprovedSongs" group="song" :sort="false" @end="onDragEnd">
               <div v-for="song in editableApprovedSongs" :key="song.id" class="p-2 mb-2">
-                <SongCard :song is-arrangement type="review" />
+                <LazySongCard :song is-arrangement type="review" />
               </div>
             </VueDraggable>
           </ScrollArea>
@@ -54,7 +54,7 @@
           </div>
           <VueDraggable v-model="day.songs" group="song" @end="onDragEnd">
             <div v-for="song in day.songs" :key="song.id" class="p-2 mb-2">
-              <SongCard :song is-arrangement type="review" />
+              <LazySongCard :song is-arrangement type="review" />
             </div>
           </VueDraggable>
         </ScrollArea>
@@ -160,9 +160,7 @@ function checkForChanges(): boolean {
 
   // each day's order
   for (const currentDay of editableArrangementList.value) {
-    const originalDay = arrangementList.value.find(
-      day => day.date === currentDay.date,
-    );
+    const originalDay = arrangementList.value.find(day => day.date === currentDay.date);
     if (!originalDay) {
       return true;
     }
@@ -194,9 +192,7 @@ function calculateChanges() {
   }
 
   for (const day of editableArrangementList.value) {
-    const originalDay = arrangementList.value.find(
-      d => d.date === day.date,
-    );
+    const originalDay = arrangementList.value.find(d => d.date === day.date);
 
     if (originalDay) {
       const currentOrder = day.songs.map(song => song.id);
