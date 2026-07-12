@@ -1,88 +1,182 @@
 import type { TMediaSource } from "~~/types";
+import { Buffer } from "node:buffer";
+import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
 // import { consola } from "consola";
 import { defaultVipSign, mediaBaseURL, searchBaseURL } from "~~/constants";
 import { createPlugin } from "../plugin";
 
-async function officialSearch(key: string) {
-  const searchBase = "https://u.y.qq.com/cgi-bin/musicu.fcg";
+// the below code is adapted from https://github.com/lyswhut/lx-music-desktop/commit/ba62ae27af9f337adc8fbdbd48221ea1617360c4
+// assisted by Kimi-K2.7-Coder
+// start
+const PART_1_INDEXES = [23, 14, 6, 36, 16, 40, 7, 19];
+const PART_2_INDEXES = [16, 1, 32, 12, 19, 27, 8, 5];
+const SCRAMBLE_VALUES = [89, 39, 179, 150, 218, 82, 58, 252, 177, 52, 186, 123, 120, 64, 242, 133, 143, 161, 121, 179];
+
+function hashSHA1(data: string) {
+  return crypto.createHash("sha1").update(data).digest("hex");
+}
+
+function pickHashByIdx(hash: string, indexes: number[]) {
+  return indexes.map(idx => hash[idx]).join("");
+}
+
+function base64Encode(data: number[]) {
+  return Buffer.from(data)
+    .toString("base64")
+    .replace(/[\\/+=]/g, "");
+}
+
+async function zzcSign(text: string) {
+  const hash = hashSHA1(text);
+  const part1 = pickHashByIdx(hash, PART_1_INDEXES);
+  const part2 = pickHashByIdx(hash, PART_2_INDEXES);
+  const part3 = SCRAMBLE_VALUES.map((value, i) => value ^ Number.parseInt(hash.slice(i * 2, i * 2 + 2), 16));
+  const b64Part = base64Encode(part3).replace(/[\\/+=]/g, "");
+  return `zzc${part1}${b64Part}${part2}`.toLowerCase();
+}
+
+async function signRequest<T, B extends object = object>(data: B): Promise<T> {
+  const sign = await zzcSign(JSON.stringify(data));
+  const res = await $fetch(`https://u.y.qq.com/cgi-bin/musics.fcg?sign=${sign}`, {
+    method: "POST",
+    headers: {
+      "User-Agent": "QQMusic 14090508(android 12)",
+    },
+    body: data,
+    parseResponse(responseText) {
+      try {
+        return JSON.parse(responseText) as T;
+      } catch {
+        return responseText as T;
+      }
+    },
+  });
+  return res as T;
+}
+
+interface ISongSearchResult {
+  id: string;
+  name: string;
+  artists: string;
+  album: string;
+  source: TMediaSource;
+  imgId: string;
+  duration: number;
+}
+
+async function officialSearch(key: string, retryNum = 0): Promise<ISongSearchResult[]> {
+  if (retryNum > 5)
+    throw new TRPCError({ code: "BAD_REQUEST", message: "搜索失败" });
+
+  const bodyData = {
+    comm: {
+      ct: "11",
+      cv: "14090508",
+      v: "14090508",
+      tmeAppID: "qqmusic",
+      phonetype: "EBG-AN10",
+      deviceScore: "553.47",
+      devicelevel: "50",
+      newdevicelevel: "20",
+      rom: "HuaWei/EMOTION/EmotionUI_14.2.0",
+      os_ver: "12",
+      OpenUDID: "0",
+      OpenUDID2: "0",
+      QIMEI36: "0",
+      udid: "0",
+      chid: "0",
+      aid: "0",
+      oaid: "0",
+      taid: "0",
+      tid: "0",
+      wid: "0",
+      uid: "0",
+      sid: "0",
+      modeSwitch: "6",
+      teenMode: "0",
+      ui_mode: "2",
+      nettype: "1020",
+      v4ip: "",
+    },
+    req: {
+      module: "music.search.SearchCgiService",
+      method: "DoSearchForQQMusicMobile",
+      param: {
+        search_type: 0,
+        searchid: Math.random().toString().slice(2),
+        query: key,
+        page_num: 1,
+        num_per_page: 15,
+        highlight: 0,
+        nqc_flag: 0,
+        multi_zhida: 0,
+        cat: 2,
+        grp: 1,
+        sin: 0,
+        sem: 0,
+      },
+    },
+  };
 
   interface TSearchDataItem {
-    album: {
-      mid: string;
-      name: string;
+    file?: {
+      media_mid?: string;
     };
-    singer: { name: string }[];
-    mid: string;
-    name: string;
-    interval: number; // second
+    title?: string;
+    id?: string;
+    mid?: string;
+    album?: {
+      name?: string;
+      mid?: string;
+    };
+    singer?: { name?: string; mid?: string }[];
+    interval?: number;
   }
 
   interface TSearchResponse {
     code: number;
     req: {
-      data: {
-        body: {
-          song: {
-            list: TSearchDataItem[];
-          };
+      code: number;
+      data?: {
+        body?: {
+          item_song?: TSearchDataItem[];
+        };
+        meta?: {
+          estimate_sum?: number;
         };
       };
     };
   }
 
-  const bodyData = {
-    comm: { ct: "19", cv: "1859", uin: "0" },
-    req: {
-      method: "DoSearchForQQMusicDesktop",
-      module: "music.search.SearchCgiService",
-      param: {
-        grp: 1,
-        num_per_page: 10,
-        page_num: 1,
-        query: key,
-        search_type: 0,
-      },
-    },
-  };
+  const body = await signRequest<TSearchResponse>(bodyData);
 
-  const res = await $fetch<TSearchResponse>(searchBase, {
-    method: "POST",
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
-      "Accept": "application/json, text/plain, */*",
-      "Accept-Language":
-        "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
-      "Content-Type": "application/json;charset=utf-8",
-      "Sec-Fetch-Dest": "empty",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Site": "same-origin",
-    },
-    body: bodyData,
-    parseResponse(responseText) {
-      try {
-        return JSON.parse(responseText);
-      } catch {
-        return responseText;
-      }
-    },
-  });
+  if (!body || body.code !== 0 || body.req.code !== 0 || !body.req.data?.body?.item_song) {
+    return officialSearch(key, retryNum + 1);
+  }
 
-  const songList = res.req.data.body.song.list.map(item => ({
-    id: item.mid,
-    name: item.name,
-    artists: item.singer
-      .map(artist => artist.name)
-      .join(", ")
-      .trim(),
-    album: item.album.name,
-    source: "tx" as TMediaSource,
-    imgId: item.album.mid,
-    duration: item.interval,
-  }));
+  const songList = body.req.data.body.item_song
+    .filter(item => item.file?.media_mid)
+    .map((item) => {
+      const albumMid = item.album?.mid ?? "";
+      const singerMid = item.singer?.[0]?.mid ?? "";
+      return {
+        id: item.mid ?? "",
+        name: item.title ?? "",
+        artists: item.singer
+          ?.map(artist => artist.name)
+          .join(", ")
+          .trim() ?? "",
+        album: item.album?.name ?? "",
+        source: "tx" as TMediaSource,
+        imgId: albumMid || singerMid,
+        duration: item.interval ?? 0,
+      };
+    });
+
   return songList;
 }
+// end
 
 async function officialFetch(mid: string) {
   const serverBaseURL = mediaBaseURL.qqOfficial;

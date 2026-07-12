@@ -49,7 +49,7 @@ async function officialSearch(key: string) {
       s: key,
       type: 1,
       offset: 0,
-      limit: 10,
+      limit: 15,
       total: true,
     },
     parseResponse(responseText) {
