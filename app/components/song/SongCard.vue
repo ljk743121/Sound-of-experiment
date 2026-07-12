@@ -1,284 +1,297 @@
 <template>
-  <Card v-if="type === 'public'">
-    <!-- class="hover:cursor-pointer" @click="isOpen = true" -->
-    <CardHeader>
-      <div class="flex flex-row">
-        <Avatar class="relative mr-4 size-12 overflow-hidden rounded">
+  <!-- Public song card -->
+  <Card v-if="type === 'public'" class="group transition-shadow hover:shadow-md">
+    <CardHeader class="pb-0">
+      <div class="flex gap-3 md:gap-4">
+        <!-- Cover -->
+        <Avatar class="relative shrink-0 size-12 overflow-hidden rounded-md md:size-14 lg:size-16">
           <NuxtImg
-            v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)" class="object-cover"
-            :alt="song.name" loading="lazy"
+            v-if="imgUrl"
+            :src="imgUrl"
+            :alt="song.name"
+            class="h-full w-full object-cover"
+            loading="lazy"
           />
-          <Icon name="lucide:music" size="24" />
+          <Icon v-else name="lucide:music" size="20" class="m-auto" />
         </Avatar>
-        <div>
-          <CardTitle>
-            {{ song.name }}
-          </CardTitle>
-          <CardDescription>
-            歌手:{{ song.creator }}
-            <p class="mt-1">
-              <Badge variant="outline">
-                {{ getMusicSourceName(song.source as TMediaSource) }}
-              </Badge>
-              <Badge variant="secondary">
-                {{ song.isRealName ? "实名" : "匿名" }}
-              </Badge>
-              <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
-            </p>
-          </CardDescription>
+
+        <!-- Info -->
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <CardTitle class="line-clamp-1 text-base md:text-lg">
+                {{ song.name }}
+              </CardTitle>
+              <CardDescription class="mt-0.5 line-clamp-1 text-xs md:text-sm">
+                歌手：{{ song.creator }}
+              </CardDescription>
+            </div>
+            <span v-if="timeAgo" class="shrink-0 text-xs text-muted-foreground">
+              {{ timeAgo }}
+            </span>
+          </div>
+
+          <div class="mt-2 flex flex-wrap items-center gap-1.5">
+            <Badge variant="outline" class="text-xs">
+              {{ sourceName }}
+            </Badge>
+            <Badge variant="secondary" class="text-xs">
+              {{ realNameLabel }}
+            </Badge>
+            <span
+              v-if="song.ownerDisplayName"
+              class="max-w-[120px] truncate text-xs text-muted-foreground md:max-w-[180px] lg:max-w-[240px]"
+            >
+              提交者：{{ song.ownerDisplayName }}
+            </span>
+          </div>
+
+          <SongState v-if="!isArrangement" :song class="mt-2" />
+
+          <p
+            v-if="song.msgPublic"
+            class="mt-2 line-clamp-2 text-xs text-muted-foreground"
+          >
+            留言：{{ song.msgPublic }}
+          </p>
         </div>
-        <div class="grow" />
-        <span v-if="song.createdAt" class="text-xs text-muted-foreground">
-          {{ useTimeAgo(song.createdAt) }}
-        </span>
       </div>
-      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
-        留言: {{ song.msgPublic }}
-      </p>
-      <SongState v-if="!isArrangement" :song />
     </CardHeader>
-    <ClientOnly>
-      <DialogTemplate>
-        <Button
-          :disabled="!(song.songId && song.source && song.songId.length > 0)"
-          variant="outline"
-          size="icon"
-          @click.stop="handleAvatarClick"
-        >
-          <Icon v-if="!isPlaying" name="lucide:play" />
-          <Icon v-else name="lucide:pause" />
-        </Button>
-        <Button
-          v-if="song.songId && song.source"
-          variant="outline"
-          size="icon"
-          @click.stop="resetSongCache(song.songId, song.source, `${song.name} - ${song.creator}`)"
-        >
-          <Icon name="lucide:refresh-cw" class="h-4 w-4" />
-        </Button>
-        <span v-if="song.likes">
-          <Button
-            v-if="song.likes.includes(userStore.id)"
-            variant="outline"
-            :disabled="isDisVoting"
-            @click.prevent="disvote(song.id!)"
-          >
-            <Icon name="lucide:heart" class="mr-1 fill-red-500 text-red-500" />
-            {{ song.likeCount }}
-          </Button>
-          <Button
-            v-else
-            variant="outline"
-            :disabled="isVoting || !userStore.loggedIn"
-            @click.prevent="vote(song.id!)"
-          >
-            <Icon name="lucide:heart" class="mr-1" />
-            {{ song.likeCount }}
-          </Button>
-          <!-- <HomeLikes v-if="song.likes" :idList="song.likes">
-            <Button v-if="isMine" variant="ghost" class="text-sm text-muted-foreground" >
-              <Icon name="lucide:info" class="mr-2" />
-              点赞详情
+
+    <CardContent class="flex flex-wrap items-center gap-2 pt-0">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <Button
+              variant="outline"
+              size="icon"
+              :disabled="!canPlay"
+              :aria-label="isPlaying ? '暂停' : '播放'"
+              @click.stop="handleAvatarClick"
+            >
+              <Icon :name="isPlaying ? 'lucide:pause' : 'lucide:play'" class="size-4" />
             </Button>
-          </HomeLikes> -->
-        </span>
-        <!-- <span v-if="isArrangement">
-          <Button variant="outline" disabled>
-            <Icon name="lucide:heart" class="mr-1" />
-            <Badge variant="destructive">{{ song.likeCount }}</Badge>
-          </Button>
-        </span> -->
-        <template v-if="isMine && song.state && song.state !== 'used'">
-          <SongDeleteMySong :song="song" />
-        </template>
-      </DialogTemplate>
-    </ClientOnly>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{{ isPlaying ? '暂停' : '播放' }}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <Button
+              v-if="canPlay"
+              variant="outline"
+              size="icon"
+              aria-label="重置缓存"
+              @click.stop="resetSongCache(song.songId!, song.source!, `${song.name} - ${song.creator}`)"
+            >
+              <Icon name="lucide:refresh-cw" class="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>重置缓存</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <Button
+        v-if="song.likes"
+        variant="outline"
+        class="h-9 gap-1 px-2"
+        :disabled="isVoting || isDisVoting || !userStore.loggedIn"
+        @click.prevent="toggleVote"
+      >
+        <Icon
+          name="lucide:heart"
+          class="size-4 transition-colors"
+          :class="isLiked ? 'fill-red-500 text-red-500' : ''"
+        />
+        <span class="min-w-[1ch] text-sm">{{ song.likeCount ?? 0 }}</span>
+      </Button>
+
+      <SongDeleteMySong
+        v-if="isMine && song.state && song.state !== 'used'"
+        :song="song"
+      />
+
+      <Button
+        variant="outline"
+        class="ml-auto h-9"
+        @click.stop="isOpen = true"
+      >
+        <Icon name="lucide:info" class="mr-1 size-4" />
+        详情
+      </Button>
+    </CardContent>
 
     <ClientOnly>
       <UseTemplate>
         <ul class="grid gap-3">
-          <li v-if="song.duration" class="flex justify-between">
+          <li v-if="song.duration" class="flex justify-between gap-4">
             <span class="min-w-20 text-sm text-muted-foreground">时长</span>
             <span class="font-mono">{{ formatDuration(song.duration) }}</span>
           </li>
-          <li class="flex justify-between">
+          <li class="flex justify-between gap-4">
             <span class="min-w-20 text-sm text-muted-foreground">审核状态</span>
             <SongState :song hide-reason />
           </li>
-          <li v-if="song.rejectMessage" class="flex justify-between">
-            <span class="min-w-20 text-sm text-muted-foreground">拒绝理由</span>
-            <span>{{ song.rejectMessage }}</span>
+          <li v-if="song.rejectMessage" class="flex flex-col gap-1">
+            <span class="text-sm text-muted-foreground">拒绝理由</span>
+            <span class="text-sm">{{ song.rejectMessage }}</span>
           </li>
-          <li v-if="song.arrangementDate" class="flex justify-between">
+          <li v-if="song.arrangementDate" class="flex justify-between gap-4">
             <span class="min-w-20 text-sm text-muted-foreground">播放时间</span>
             <span class="font-mono">{{ song.arrangementDate }}</span>
           </li>
-          <li v-if="song.msgPublic" class="flex justify-between">
-            <span class="min-w-20 text-sm text-muted-foreground">留言</span>
-            <span>{{ song.msgPublic }}</span>
+          <li v-if="song.msgPublic" class="flex flex-col gap-1">
+            <span class="text-sm text-muted-foreground">留言</span>
+            <span class="text-sm">{{ song.msgPublic }}</span>
           </li>
-          <li v-if="song.message" class="flex justify-between">
-            <span class="min-w-20 text-sm text-muted-foreground">私密留言</span>
-            <span>{{ song.message }}</span>
+          <li v-if="song.message" class="flex flex-col gap-1">
+            <span class="text-sm text-muted-foreground">私密留言</span>
+            <span class="text-sm">{{ song.message }}</span>
           </li>
-          <li v-if="song.createdAt" class="flex justify-between">
+          <li v-if="song.createdAt" class="flex justify-between gap-4">
             <span class="min-w-20 text-sm text-muted-foreground">投稿时间</span>
-            <span class="font-mono">{{ song.createdAt?.toLocaleString("zh-CN") }}</span>
+            <span class="font-mono">{{ song.createdAt.toLocaleString('zh-CN') }}</span>
           </li>
         </ul>
       </UseTemplate>
+
       <Dialog v-model:open="isOpen">
-        <div class="flex justify-end">
-          <SongDialog />
-          <DialogTrigger as-child>
-            <Button variant="outline" @click.stop="isOpen = true">
-              <Icon name="lucide:info" class="mr-1" />
-              详情
-            </Button>
-          </DialogTrigger>
-        </div>
-        <DialogContent class="sm:max-w-[425px]">
+        <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
               <NuxtImg
-                v-if="song.imgId && song.source" :src="getImgUrl(song.imgId, song.source)"
-                class="mb-2 object-cover" :alt="song.name" loading="lazy"
+                v-if="imgUrl"
+                :src="imgUrl"
+                :alt="song.name"
+                class="mb-3 aspect-square w-full max-h-[25vh] md:max-h-[30vh] rounded-lg object-cover"
+                loading="lazy"
               />
               {{ song.name }}
             </DialogTitle>
             <DialogDescription>
-              歌手:{{ song.creator }}
-              <p class="mt-2">
+              歌手：{{ song.creator }}
+              <div class="mt-2 flex flex-wrap items-center gap-1.5">
                 <Badge variant="outline">
-                  {{ getMusicSourceName(song.source as TMediaSource) }}
+                  {{ sourceName }}
                 </Badge>
                 <Badge variant="secondary">
-                  {{ song.isRealName ? "实名" : "匿名" }}
+                  {{ realNameLabel }}
                 </Badge>
-                <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
-              </p>
+                <span v-if="song.ownerDisplayName" class="text-xs text-muted-foreground">
+                  提交者：{{ song.ownerDisplayName }}
+                </span>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <SongDrawer />
         </DialogContent>
       </Dialog>
-
-      <!-- <Drawer v-else v-model:open="isOpen">
-        <div class="flex justify-end">
-          <SongDialog />
-          <DrawerTrigger as-child>
-            <Button variant="outline" @click.stop="isOpen = true">
-              <Icon name="lucide:info" class="mr-1" />
-              详情
-            </Button>
-          </DrawerTrigger>
-        </div>
-        <DrawerContent>
-          <DrawerHeader class="text-left">
-            <DrawerTitle>
-              <NuxtImg
-                v-if="song.imgId && song.source"
-                :src="getImgUrl(song.imgId, song.source)"
-                class="mb-2 object-cover"
-                :alt="song.name"
-                loading="lazy"
-              />
-              {{ song.name }}
-            </DrawerTitle>
-            <DrawerDescription>
-              歌手:{{ song.creator }}
-              <p>
-                <Badge variant="outline">
-                  {{ song.isRealName ? "实名" : "匿名" }}
-                </Badge>
-                <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
-              </p>
-            </DrawerDescription>
-          </DrawerHeader>
-          <SongDrawer class="px-4" />
-          <DrawerFooter class="pt-2" />
-        </DrawerContent>
-      </Drawer> -->
     </ClientOnly>
   </Card>
+
+  <!-- Review card -->
   <div
     v-else-if="type === 'review'"
     class="h-auto w-full cursor-pointer rounded-lg border p-4 shadow-xs transition-colors hover:bg-muted"
     :class="{ 'bg-muted': selected }"
   >
-    <CardTitle>
-      {{ song.name }}
-    </CardTitle>
-    <CardDescription>
-      歌手:{{ song.creator }}
-      <p class="mt-1 text-foreground">
-        <Badge variant="outline">
-          {{ getMusicSourceName(song.source as TMediaSource) }}
-        </Badge>
-        <Badge v-if="song.duration" variant="secondary">
-          {{ formatDuration(song.duration) }}
-        </Badge>
-        <Badge v-if="song.message" variant="destructive">
-          有留言
-        </Badge>
-      </p>
-    </CardDescription>
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <CardTitle class="line-clamp-1 text-base md:text-lg">
+          {{ song.name }}
+        </CardTitle>
+        <CardDescription class="mt-0.5 line-clamp-1 text-xs md:text-sm">
+          歌手：{{ song.creator }}
+        </CardDescription>
+      </div>
+      <span v-if="song.duration" class="shrink-0 text-xs font-mono text-muted-foreground">
+        {{ formatDuration(song.duration) }}
+      </span>
+    </div>
+    <div class="mt-2 flex flex-wrap items-center gap-1.5">
+      <Badge variant="outline" class="text-xs">
+        {{ sourceName }}
+      </Badge>
+      <Badge v-if="song.message" variant="destructive" class="text-xs">
+        有留言
+      </Badge>
+    </div>
   </div>
-  <Card v-else-if="type === 'songs'">
-    <CardHeader>
-      <div class="flex flex-row">
-        <div>
-          <CardTitle>
-            {{ song.name }}
-          </CardTitle>
-          <CardDescription>
-            歌手:{{ song.creator }}
-            <p>
-              <Badge variant="outline">
-                {{ getMusicSourceName(song.source as TMediaSource) }}
-              </Badge>
-              <Badge variant="outline">
-                {{ song.isRealName ? "实名" : "匿名" }}
-              </Badge>
-              <span v-if="song.ownerDisplayName">提交者:{{ song.ownerDisplayName }}</span>
-            </p>
-          </CardDescription>
-        </div>
-        <div class="grow" />
-        <span v-if="song.createdAt" class="text-xs text-muted-foreground">
-          {{ useTimeAgo(song.createdAt) }}
-        </span>
-      </div>
-      <p v-if="song.message" class="text-xs text-muted-foreground">
-        私密留言: {{ song.message }}
-      </p>
-      <p v-if="song.msgPublic" class="text-xs text-muted-foreground">
-        公开留言: {{ song.msgPublic }}
-      </p>
 
-      <div class="flex gap-1">
-        <template v-if="song.state !== 'used' && song.state !== 'dropped'">
-          <Button
-            v-if="song.state !== 'approved' && song.id" variant="outline" :disable="approvePending" size="sm"
-            @click="approve({ id: song.id })"
-          >
-            <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
-            <Icon name="lucide:check" />
-          </Button>
-          <template v-if="song.state !== 'rejected' && song.id">
-            <Button
-              variant="outline" :disable="rejectPending" size="sm"
-              @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })"
-            >
-              <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
-              <Icon name="lucide:x" />
-            </Button>
-            <Input v-model="rejectMessage" placeholder="拒绝理由" class="h-7 rounded-sm text-xs" />
-          </template>
-        </template>
-        <AdminSongDeleteSong v-if="userStore.permissions.includes('deleteSong')" :song="song" />
+  <!-- Admin songs card -->
+  <Card v-else-if="type === 'songs'">
+    <CardHeader class="pb-0">
+      <div class="min-w-0">
+        <CardTitle class="line-clamp-1 text-base md:text-lg">
+          {{ song.name }}
+        </CardTitle>
+        <CardDescription class="mt-0.5 line-clamp-1 text-xs md:text-sm">
+          歌手：{{ song.creator }}
+        </CardDescription>
+        <div class="mt-2 flex flex-wrap items-center gap-1.5">
+          <Badge variant="outline" class="text-xs">
+            {{ sourceName }}
+          </Badge>
+          <Badge v-if="song.duration" variant="secondary" class="text-xs">
+            {{ formatDuration(song.duration) }}
+          </Badge>
+          <Badge v-if="song.message" variant="destructive" class="text-xs">
+            有留言
+          </Badge>
+        </div>
       </div>
+
+      <p v-if="song.message" class="mt-2 line-clamp-2 text-xs text-muted-foreground">
+        私密留言：{{ song.message }}
+      </p>
+      <p v-if="song.msgPublic" class="mt-2 line-clamp-2 text-xs text-muted-foreground">
+        公开留言：{{ song.msgPublic }}
+      </p>
     </CardHeader>
+
+    <CardContent class="flex flex-col gap-2 pt-0 sm:flex-row sm:flex-wrap sm:items-center">
+      <template v-if="song.state !== 'used' && song.state !== 'dropped'">
+        <Button
+          v-if="song.state !== 'approved' && song.id"
+          variant="outline"
+          size="sm"
+          class="h-9 w-full sm:w-auto"
+          :disabled="approvePending"
+          @click="approve({ id: song.id })"
+        >
+          <Icon v-if="approvePending" name="lucide:loader-circle" class="mr-2 animate-spin" />
+          <Icon v-else name="lucide:check" class="mr-1" />
+          通过
+        </Button>
+
+        <template v-if="song.state !== 'rejected' && song.id">
+          <Button
+            variant="outline"
+            size="sm"
+            class="h-9 w-full sm:w-auto"
+            :disabled="rejectPending"
+            @click="reject({ id: song.id, rejectMessage: rejectMessage.trim() })"
+          >
+            <Icon v-if="rejectPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
+            <Icon v-else name="lucide:x" class="mr-1" />
+            拒绝
+          </Button>
+          <Input
+            v-model="rejectMessage"
+            placeholder="拒绝理由"
+            class="h-9 flex-1 rounded-sm text-xs sm:min-w-[160px]"
+          />
+        </template>
+      </template>
+
+      <AdminSongDeleteSong v-if="userStore.permissions.includes('deleteSong')" :song="song" />
+    </CardContent>
   </Card>
 </template>
 
@@ -292,6 +305,7 @@ const {
   selected = false,
   isArrangement = false,
   isMine = false,
+  isPlaying = false,
 } = defineProps<{
   type?: "public" | "review" | "songs";
   selected?: boolean;
@@ -302,19 +316,32 @@ const {
 }>();
 
 const emit = defineEmits<{
-  (e: "songExport", songInformation: typeof song): void;
+  (e: "songExport", songInformation: Partial<RouterOutput["song"]["listMine"][0]>): void;
 }>();
 
 const isOpen = ref(false);
 
-// const isDesktop = useMediaQuery("(min-width: 768px)");
 const [UseTemplate, SongDrawer] = createReusableTemplate();
-const [DialogTemplate, SongDialog] = createReusableTemplate();
-
 const { $trpc } = useNuxtApp();
 const userStore = useUserStore();
-
 const queryClient = useQueryClient();
+
+// Derived state
+const imgUrl = computed(() =>
+  song.imgId && song.source ? getImgUrl(song.imgId, song.source) : undefined,
+);
+
+const sourceName = computed(() => getMusicSourceName(song.source as TMediaSource));
+
+const realNameLabel = computed(() => (song.isRealName ? "实名" : "匿名"));
+
+const timeAgo = computed(() => (song.createdAt ? useTimeAgo(song.createdAt) : undefined));
+
+const canPlay = computed(() => Boolean(song.songId && song.source && song.songId.length > 0));
+
+const isLiked = computed(() => song.likes?.includes(userStore.id) ?? false);
+
+// Review mutations
 const { mutate: approve, isPending: approvePending } = useMutation({
   mutationFn: $trpc.song.review.approve.mutate,
   onSuccess: () => {
@@ -333,6 +360,41 @@ const { mutate: reject, isPending: rejectPending } = useMutation({
 
 const rejectMessage = ref("");
 
+// Vote mutations
+const { mutate: vote, isPending: isVoting } = useMutation({
+  mutationFn: $trpc.song.vote.mutate,
+  onSuccess: () => {
+    toast.success("点赞成功");
+    invalidateSongQueries();
+  },
+  onError: err => useErrorHandler(err),
+});
+
+const { mutate: disvote, isPending: isDisVoting } = useMutation({
+  mutationFn: $trpc.song.disvote.mutate,
+  onSuccess: () => {
+    toast.success("取消点赞成功");
+    invalidateSongQueries();
+  },
+  onError: err => useErrorHandler(err),
+});
+
+function invalidateSongQueries() {
+  queryClient.invalidateQueries({ queryKey: ["song.listMine"] });
+  queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
+  queryClient.invalidateQueries({ queryKey: ["arrangement.listSafe"] });
+}
+
+function toggleVote() {
+  if (!song.id)
+    return;
+  if (isLiked.value) {
+    disvote(song.id);
+  } else {
+    vote(song.id);
+  }
+}
+
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0)
     return "00:00:00";
@@ -343,31 +405,9 @@ function formatDuration(seconds: number): string {
   return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
 }
 
-const { mutate: vote, isPending: isVoting } = useMutation({
-  mutationFn: $trpc.song.vote.mutate,
-  onSuccess: () => {
-    toast.success("点赞成功");
-    queryClient.invalidateQueries({ queryKey: ["song.listMine"] });
-    queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
-    queryClient.invalidateQueries({ queryKey: ["arrangement.listSafe"] });
-  },
-  onError: err => useErrorHandler(err),
-});
-
-const { mutate: disvote, isPending: isDisVoting } = useMutation({
-  mutationFn: $trpc.song.disvote.mutate,
-  onSuccess: () => {
-    toast.success("取消点赞成功");
-    queryClient.invalidateQueries({ queryKey: ["song.listMine"] });
-    queryClient.invalidateQueries({ queryKey: ["song.listSafe"] });
-    queryClient.invalidateQueries({ queryKey: ["arrangement.listSafe"] });
-  },
-  onError: err => useErrorHandler(err),
-});
-
 function handleAvatarClick(e: Event) {
   e.stopPropagation();
-  if (song.songId && song.source && song.songId.length > 0) {
+  if (canPlay.value) {
     emit("songExport", song);
   }
 }

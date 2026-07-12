@@ -1,9 +1,9 @@
 <template>
   <main
-    class="container mx-auto grid h-screen max-w-screen-xl grid-cols-1 gap-4 p-5 md:grid-cols-2 md:gap-8 md:p-10"
+    class="container mx-auto flex h-dvh max-w-screen-xl flex-col gap-4 overflow-hidden p-5 md:grid md:h-screen md:grid-cols-2 md:grid-rows-[1fr_auto] md:gap-8 md:p-10"
   >
-    <section class="flex flex-col gap-3 md:self-center">
-      <LogosSoe class="w-full" />
+    <section class="flex shrink-0 flex-col gap-3 overflow-x-hidden md:h-full md:overflow-y-auto">
+      <LogosSoe class="mx-auto h-20 w-auto object-contain md:h-28" />
 
       <div class="grid grid-cols-2 gap-3">
         <div class="grid grid-rows-2 gap-3">
@@ -11,7 +11,7 @@
             <div class="text-xs">
               歌曲
             </div>
-            <div class="text-2xl font-bold">
+            <div class="text-xl font-bold md:text-2xl">
               {{ userStore.loggedIn ? songList?.length || songGuestList?.length || 0 : "?" }}
             </div>
           </Button>
@@ -20,14 +20,14 @@
           </LazyTimeAvailabilityDialog>
         </div>
         <Button
-          class="size-full text-xl font-bold"
+          class="size-full text-lg font-bold md:text-xl"
           :disabled="!canSubmit"
           variant="secondary"
           @click.prevent="navigateTo('/submit')"
         >
           <div class="flex flex-col items-center">
             <span>
-              <Icon name="lucide:music-4" size="26" class="mr-2" />
+              <Icon name="lucide:music-4" class="mr-2 size-5 md:size-6" />
               投稿
             </span>
             <span v-if="userStore.loggedIn" class="text-sm font-normal">(剩余次数:{{ remainSubmitSongs?.valueOf() || 0 }})</span>
@@ -61,7 +61,7 @@
         </HomeAboutUs>
       </div>
 
-      <div class="mt-4 flex items-center gap-4">
+      <div class="mt-2 flex items-center gap-4 md:mt-4">
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button v-if="userStore.loggedIn" variant="ghost" class="min-w-max">
@@ -125,7 +125,7 @@
           class="w-max"
           @click.prevent="navigateTo('/auth/login')"
         >
-          <Icon name="lucide:circle-user" size="20" />
+          <Icon name="lucide:circle-user" class="size-5" />
           登录/注册 <span class="text-muted-foreground">以使用完整功能</span>
         </Button>
         <div class="ml-auto flex gap-2" />
@@ -133,7 +133,7 @@
       </div>
     </section>
 
-    <section class="md:overflow-auto md:px-4">
+    <section class="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden md:h-full md:px-4">
       <!-- 添加滚动通知条 -->
       <LazyAlert v-if="announcementList && announcementList.length > 0" class="overflow-hidden py-0">
         <AlertDescription class="overflow-hidden h-12 my-auto flex items-center justify-center">
@@ -150,8 +150,8 @@
           </div>
         </AlertDescription>
       </LazyAlert>
-      <Tabs v-model="selectedTab" default-value="arrangement">
-        <div class="-mx-5 bg-background px-5 pt-4 lg:m-0 lg:p-0">
+      <Tabs v-model="selectedTab" default-value="arrangement" class="flex flex-col">
+        <div class="-mx-5 bg-background px-5 pt-4 md:mx-0 md:px-0">
           <TabsList class="grid w-full grid-cols-3">
             <TabsTrigger value="arrangement">
               排歌歌单
@@ -172,8 +172,8 @@
             </TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="list" class="space-y-3">
-          <Tabs v-model="listMode" default-value="songList">
+        <TabsContent value="list" class="flex flex-col space-y-3">
+          <Tabs v-model="listMode" default-value="songList" class="flex flex-col">
             <div>
               <TabsList class="grid w-full grid-cols-2">
                 <TabsTrigger value="songList">
@@ -262,12 +262,12 @@
           />
         </TabsContent>
       </Tabs>
-      <div class="h-16" />
+    </section>
+    <div class="-mx-5 shrink-0 md:col-span-2 md:mx-0 md:z-50">
       <ClientOnly>
         <MusicFlow v-if="userStore.loggedIn" :options="MusicFlowConfig" :fetch-url="fetchUrl" />
       </ClientOnly>
-    </section>
-    <div class="h-40" />
+    </div>
   </main>
 </template>
 
