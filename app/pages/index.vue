@@ -239,6 +239,12 @@
             :is-dark="isDark"
             class="mb-4 bg-background!"
           />
+          <Alert v-if="currentArrangement?.unplayedSongs" class="mb-3" variant="destructive">
+            <AlertTitle class="flex items-center gap-2">
+              <Icon name="lucide:alert-circle" class="size-4" />
+              当天有 {{ currentArrangement.unplayedSongs }} 首歌没有播放,将参与下一次排歌
+            </AlertTitle>
+          </Alert>
           <ul class="flex flex-col gap-3">
             <li v-for="song in arrangementListSongs" :key="song.id">
               <SongCard
@@ -421,28 +427,27 @@ function getDateString(date: Date) {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 }
 
+const currentArrangement = computed(() => {
+  const list = userStore.loggedIn ? arrangementList.value : arrangementGuestList.value;
+  return list?.find((e: { date: string }) => e.date === getDateString(selectedDate.value));
+});
+
 const arrangementListSongs = computed(() => {
-  if (userStore.loggedIn) {
-    if (arrangementList.value) {
-      return (
-        arrangementList.value?.find((e: { date: string }) => e.date === getDateString(selectedDate.value))?.songs || []
-      );
-    }
-    return [];
-  } else {
-    return (
-      arrangementGuestList.value?.find((e: { date: string }) => e.date === getDateString(selectedDate.value))?.songs
-      || []
-    );
-  }
+  return currentArrangement.value?.songs || [];
 });
 
 const calendarAttr = computed(() => {
   const res = [];
   const list = userStore.loggedIn ? arrangementList.value : arrangementGuestList.value;
   for (const arrangement of list ?? []) {
+    let dotColor: string | boolean = true;
+    if (arrangement.unplayedSongs) {
+      dotColor = "red";
+    } else if (arrangement.date < getDateString(new Date())) {
+      dotColor = "green";
+    }
     res.push({
-      dot: true,
+      dot: dotColor,
       dates: new Date(arrangement.date),
     });
   }

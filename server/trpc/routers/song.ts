@@ -1,7 +1,8 @@
 import type { TMediaSource, TSubmitType } from "~~/types";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, gt, inArray, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, or } from "drizzle-orm";
 import { z } from "zod";
+import { MAX_DAILY_SONG_DURATION } from "~~/constants";
 import { db } from "~~/server/db";
 import { arrangements, songs, users } from "~~/server/db/schema";
 import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
@@ -178,7 +179,7 @@ export const songRouter = router({
           gt(songs.createdAt, twoWeeksAgo),
         ),
       ),
-      orderBy: desc(songs.createdAt),
+      orderBy: [asc(songs.arrangementDate), desc(songs.likeCount), asc(songs.expectedPlayDate), desc(songs.createdAt)],
       columns: {
         id: true,
         name: true,
@@ -204,7 +205,7 @@ export const songRouter = router({
   listGuest: publicProcedure.query(async () => {
     return await db.query.songs.findMany({
       limit: 5,
-      orderBy: desc(songs.createdAt),
+      orderBy: [desc(songs.createdAt)],
       columns: {
         id: true,
         name: true,
@@ -327,6 +328,7 @@ export const songRouter = router({
       )
       .use(requirePermission(["review"]))
       .mutation(async ({ input }) => {
+        // check if song exists and is pending
         const song = await db.query.songs.findFirst({
           where: eq(songs.id, input.id),
           columns: {
@@ -339,42 +341,58 @@ export const songRouter = router({
         });
         if (!song)
           throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
-
+        if (song.state !== "pending")
+          throw new TRPCError({ code: "BAD_REQUEST", message: "歌曲已被审核" });
+        // if hasn't expectedPlayDate, just approve it
         if (!song.expectedPlayDate) {
           await db.update(songs).set({ state: "approved" }).where(eq(songs.id, input.id));
           return;
         }
-
+        // if has expectedPlayDate
         const date = song.expectedPlayDate;
         const existingArrangement = await db.query.arrangements.findFirst({
           where: eq(arrangements.date, date),
           with: {
             songs: {
-              columns: { id: true, duration: true, createdAt: true },
+              columns: {
+                id: true,
+                duration: true,
+                position: true,
+                createdAt: true,
+                expectedPlayDate: true,
+              },
             },
           },
         });
 
-        interface SlotSong { id: number; duration: number; createdAt: Date }
-        const existingSongs: SlotSong[] = (existingArrangement?.songs ?? []).map(s => ({
-          id: s.id,
-          duration: s.duration ?? 0,
-          createdAt: s.createdAt,
-        }));
-        const currentSong: SlotSong = {
+        const existingSongs = existingArrangement?.songs ?? [];
+        const currentSong = {
           id: song.id,
           duration: song.duration ?? 0,
+          position: -1,
           createdAt: song.createdAt,
+          expectedPlayDate: song.expectedPlayDate,
         };
         const slotSongs = [...existingSongs, currentSong].sort(
-          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+          (a, b) => {
+            // if expectedPlayDate===date, put it last, otherwise put it first
+            // if both expectedPlayDate!==date, keep the order
+            const cmp = Number(a.expectedPlayDate === date) - Number(b.expectedPlayDate === date);
+            if (cmp !== 0)
+              return cmp;
+            return a.createdAt.getTime() - b.createdAt.getTime();
+          },
         );
 
         const removedIds: number[] = [];
-        while (slotSongs.reduce((sum, s) => sum + s.duration, 0) > 45 * 60) {
+        while (slotSongs.reduce((sum, s) => sum + (s.duration ?? 0), 0) > MAX_DAILY_SONG_DURATION) {
           const last = slotSongs.pop();
           if (!last)
             break;
+          if (!last?.expectedPlayDate) {
+            slotSongs.push(last);
+            break;
+          }
           if (last.id === input.id) {
             // 当前歌曲提交时间最晚，无法安排，保持 approved 状态
             await db.transaction(async (tx) => {
@@ -394,7 +412,13 @@ export const songRouter = router({
           }
           removedIds.push(last.id);
         }
-
+        slotSongs.sort((a, b) => {
+          // let songs with expectedPlayDate===date first
+          const cmp = Number(b.expectedPlayDate === date) - Number(a.expectedPlayDate === date);
+          if (cmp !== 0)
+            return cmp;
+          return a.createdAt.getTime() - b.createdAt.getTime();
+        });
         await db.transaction(async (tx) => {
           if (!existingArrangement) {
             await tx.insert(arrangements).values({ date });
