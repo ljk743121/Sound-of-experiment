@@ -146,6 +146,13 @@
             <span class="min-w-20 text-sm text-muted-foreground">播放时间</span>
             <span class="font-mono">{{ song.arrangementDate }}</span>
           </li>
+          <li v-if="song.expectedPlayDate" class="flex justify-between gap-4">
+            <span class="min-w-20 text-sm text-muted-foreground">期望播放日期</span>
+            <span class="font-mono">{{ song.expectedPlayDate }}</span>
+          </li>
+          <li v-else class="flex justify-between gap-4">
+            <span class="min-w-20 text-sm text-muted-foreground">自由分配</span>
+          </li>
           <li v-if="song.msgPublic" class="flex flex-col gap-1">
             <span class="text-sm text-muted-foreground">留言</span>
             <span class="text-sm">{{ song.msgPublic }}</span>
@@ -214,12 +221,21 @@
         {{ formatDuration(song.duration) }}
       </span>
     </div>
+    <div v-if="song.message" class="mt-2 line-clamp-2 text-xs text-muted-foreground">
+      私密留言：{{ song.message }}
+    </div>
     <div class="mt-2 flex flex-wrap items-center gap-1.5">
       <Badge variant="outline" class="text-xs">
         {{ sourceName }}
       </Badge>
       <Badge v-if="song.message" variant="destructive" class="text-xs">
         有留言
+      </Badge>
+      <Badge v-if="song.expectedPlayDate" variant="secondary" class="text-xs">
+        期望：{{ song.expectedPlayDate }}
+      </Badge>
+      <Badge v-else variant="secondary" class="text-xs">
+        自由分配
       </Badge>
     </div>
   </div>
@@ -243,6 +259,12 @@
           </Badge>
           <Badge v-if="song.message" variant="destructive" class="text-xs">
             有留言
+          </Badge>
+          <Badge v-if="song.expectedPlayDate" variant="secondary" class="text-xs">
+            期望：{{ song.expectedPlayDate }}
+          </Badge>
+          <Badge v-else variant="secondary" class="text-xs">
+            自由分配
           </Badge>
         </div>
       </div>

@@ -46,6 +46,7 @@ const { mutate, isPending } = useMutation({
   mutationFn: $trpc.arrangements.delete.mutate,
   onSuccess: async () => {
     await queryClient.invalidateQueries({ queryKey: ["arrangements.list"] });
+    await queryClient.invalidateQueries({ queryKey: ["arrangements.stats"] });
     toast.success("删除成功");
     isOpen.value = false;
   },

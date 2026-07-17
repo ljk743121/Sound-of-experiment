@@ -60,6 +60,7 @@ export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;
 
 export const resetPassword = "Abc123456";
 export const defaultVipSign = "vip-song";
+export const MAX_DAILY_SONG_DURATION = 45 * 60;
 
 export const searchBaseURL = {
   wySearch: "https://music.163.com/api/search/get",

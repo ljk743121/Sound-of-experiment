@@ -43,6 +43,7 @@ export const songs = pgTable("songs", {
   message: text(),
   msgPublic: text(),
   position: integer(), // 添加position字段用于排序
+  expectedPlayDate: text(), // 期望播放日期，YYYY-MM-DD，为空时为自由分配状态
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 

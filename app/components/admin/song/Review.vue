@@ -14,6 +14,14 @@
     </Button>
     <Input v-model="rejectMessage" placeholder="拒绝理由（≥ 4个字符）" />
   </div>
+  <div v-if="song.expectedPlayDate" class="m-5 flex flex-wrap gap-2">
+    <Badge v-if="song.expectedPlayDate" variant="secondary">
+      期望播放日期：{{ song.expectedPlayDate }}
+    </Badge>
+    <Badge v-else variant="secondary">
+      自由分配
+    </Badge>
+  </div>
   <div v-if="song.message">
     <div class="m-5 text-left text-2xl text-foreground">
       私密留言

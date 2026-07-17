@@ -18,7 +18,10 @@
 
     <!-- Rules -->
     <Alert class="mb-6">
-      <AlertTitle><Icon name="lucide:info" class="h-4 w-4 mr-2 mt-2" />投稿前请确认</AlertTitle>
+      <AlertTitle class="flex items-center gap-2">
+        <Icon name="lucide:info" class="size-4" />
+        投稿前请确认
+      </AlertTitle>
       <AlertDescription>
         <ul class="mt-2 list-disc space-y-1 pl-5">
           <li class="text-destructive">
@@ -31,7 +34,7 @@
           <li>最好选择网易云音乐，BiliBili其次，QQ音乐最后选择。</li>
           <li>QQ音乐有时候无法获取完整VIP歌曲，若需投稿请播放确认是否完整。</li>
           <li>BiliBili风控较为严格，有时候无法请求，请等待一段时间或联系管理员</li>
-          <li><span class="text-destructive">注意：</span>切换歌曲来源后搜索框中的内容会消失，请先选择再输入。</li>
+          <li><span class="text-destructive">注意：</span>切换歌曲来源后，点击搜索按钮可使用新来源重新搜索。</li>
         </ul>
       </AlertDescription>
     </Alert>
@@ -265,6 +268,37 @@
               </FormItem>
             </FormField>
 
+            <FormField name="expectedPlayDate">
+              <FormItem v-auto-animate>
+                <FormLabel>期望播放日期（可选）</FormLabel>
+                <FormControl>
+                  <Popover>
+                    <PopoverTrigger as-child>
+                      <Button
+                        variant="outline"
+                        class="w-full justify-start text-left font-normal"
+                        :class="{ 'text-muted-foreground': !form.values.expectedPlayDate }"
+                      >
+                        <Icon name="lucide:calendar" class="mr-2 h-4 w-4" />
+                        {{ form.values.expectedPlayDate || "选择期望播放日期" }}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent class="w-auto p-0">
+                      <Calendar
+                        :model-value="expectedDateValue"
+                        initial-focus
+                        @update:model-value="handleExpectedDateChange"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormControl>
+                <FormDescription>
+                  选择后歌曲将优先安排在该日期播放；不选择则由系统自由分配。
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
             <FormField v-slot="{ componentField }" name="message">
               <FormItem v-auto-animate>
                 <FormLabel>私密留言（可选）</FormLabel>
@@ -297,8 +331,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { DateValue } from "@internationalized/date";
 import type { RouterOutput, TMediaSource, TSubmitType } from "~~/types";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
+import { parseDate } from "@internationalized/date";
 import * as z from "zod";
 import { getImgUrl, getMusicSourceName, musicSources } from "~~/constants";
 import SongPlayer from "~/components/song/SongPlayer.vue";
@@ -357,6 +393,10 @@ const formSchema = toTypedSchema(
     source: z.custom<TMediaSource>(),
     duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
     submitType: z.custom<TSubmitType>(),
+    expectedPlayDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD")
+      .optional(),
     message: z.string().trim().optional(),
     msgPublic: z.string().trim().optional(),
     customUrl: z.string().trim().url().optional(),
@@ -366,6 +406,25 @@ const formSchema = toTypedSchema(
 const form = useForm({
   validationSchema: formSchema,
 });
+
+const expectedDateValue = computed<DateValue | undefined>(() => {
+  const value = form.values.expectedPlayDate;
+  if (!value)
+    return undefined;
+  try {
+    return parseDate(value);
+  } catch {
+    return undefined;
+  }
+});
+
+function handleExpectedDateChange(date: DateValue | undefined) {
+  if (!date) {
+    form.setFieldValue("expectedPlayDate", undefined);
+    return;
+  }
+  form.setFieldValue("expectedPlayDate", date.toString());
+}
 
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.song.create.mutate,
@@ -446,7 +505,6 @@ function onSearch() {
 //   isFetching: false,
 // })
 
-const queryClient = useQueryClient();
 // const songsList = ref<RouterOutput['search']['mixSearch']>([]);
 const { isFetching: songFetching, data: songsList } = useQuery({
   queryFn: () =>
@@ -454,7 +512,7 @@ const { isFetching: songFetching, data: songsList } = useQuery({
       key: SearchKey.value,
       source: form.values.source!,
     }),
-  queryKey: ["search.mixSearch"],
+  queryKey: computed(() => ["search.mixSearch", form.values.source, SearchKey.value]),
   refetchOnWindowFocus: false,
   enabled: computed(() => SearchKey.value.trim().length > 0),
 });
@@ -464,14 +522,6 @@ const { isFetching: songFetching, data: songsList } = useQuery({
 //   refetchOnWindowFocus: false,
 //   enabled: computed(() => SearchKey.value.trim().length > 0),
 // });
-
-// new song selected
-watch([() => SearchKey.value, () => form.values.source], async () => {
-  if (SearchKey.value.trim().length === 0 || !form.values.source) {
-    return;
-  }
-  queryClient.invalidateQueries({ queryKey: ["search.mixSearch"] });
-});
 
 watch(
   () => form.values.source,
@@ -484,35 +534,10 @@ watch(
         source: form.values.source,
         imgId: "",
         duration: 0,
+        expectedPlayDate: undefined,
       },
     });
     SearchKey.value = "";
-    SearchInput.value = "";
-    selectedSong.value = {
-      songId: "",
-      name: "",
-      creator: "",
-      source: "",
-      imgId: "",
-      duration: 0,
-    };
-    songPlayingConfig.value = {
-      id: "",
-      name: "",
-      album: "",
-      source: "" as TMediaSource,
-      artists: "",
-      imgId: "",
-      duration: 0,
-    };
-  },
-);
-
-watch(
-  () => form.values.source,
-  () => {
-    SearchKey.value = "";
-    SearchInput.value = "";
     selectedSong.value = {
       songId: "",
       name: "",

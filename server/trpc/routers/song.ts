@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gt, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~~/server/db";
-import { songs, users } from "~~/server/db/schema";
+import { arrangements, songs, users } from "~~/server/db/schema";
 import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
 import { hasBlockWord } from "~~/server/utils/universal";
 import {
@@ -13,6 +13,7 @@ import {
   requirePermission,
   router,
 } from "../trpc";
+import { invalidateArrangementCache } from "./arrangements";
 import { fitsInTime } from "./time";
 
 function getISOWeekNumber(date: Date): number {
@@ -44,6 +45,10 @@ export const songRouter = router({
         imgId: z.string(),
         duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
         submitType: z.custom<TSubmitType>(),
+        expectedPlayDate: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD")
+          .optional(),
         message: z.string().trim().optional(),
         msgPublic: z.string().trim().optional(),
         customUrl: z.string().trim().url().optional(),
@@ -87,6 +92,7 @@ export const songRouter = router({
         ownerId: ctx.user.id,
         isRealName,
         ownerDisplayName: displayName,
+        expectedPlayDate: input.expectedPlayDate,
         createdAt: now,
       });
       await db
@@ -154,6 +160,7 @@ export const songRouter = router({
         ownerDisplayName: true,
         isRealName: true,
         message: true,
+        expectedPlayDate: true,
         createdAt: true,
         state: true,
         rejectMessage: true,
@@ -187,6 +194,7 @@ export const songRouter = router({
         likeCount: true,
         rejectMessage: true,
         arrangementDate: true,
+        expectedPlayDate: true,
         createdAt: true,
         msgPublic: true,
       },
@@ -319,7 +327,93 @@ export const songRouter = router({
       )
       .use(requirePermission(["review"]))
       .mutation(async ({ input }) => {
-        await db.update(songs).set({ state: "approved" }).where(eq(songs.id, input.id));
+        const song = await db.query.songs.findFirst({
+          where: eq(songs.id, input.id),
+          columns: {
+            id: true,
+            state: true,
+            duration: true,
+            expectedPlayDate: true,
+            createdAt: true,
+          },
+        });
+        if (!song)
+          throw new TRPCError({ code: "NOT_FOUND", message: "歌曲不存在" });
+
+        if (!song.expectedPlayDate) {
+          await db.update(songs).set({ state: "approved" }).where(eq(songs.id, input.id));
+          return;
+        }
+
+        const date = song.expectedPlayDate;
+        const existingArrangement = await db.query.arrangements.findFirst({
+          where: eq(arrangements.date, date),
+          with: {
+            songs: {
+              columns: { id: true, duration: true, createdAt: true },
+            },
+          },
+        });
+
+        interface SlotSong { id: number; duration: number; createdAt: Date }
+        const existingSongs: SlotSong[] = (existingArrangement?.songs ?? []).map(s => ({
+          id: s.id,
+          duration: s.duration ?? 0,
+          createdAt: s.createdAt,
+        }));
+        const currentSong: SlotSong = {
+          id: song.id,
+          duration: song.duration ?? 0,
+          createdAt: song.createdAt,
+        };
+        const slotSongs = [...existingSongs, currentSong].sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+        );
+
+        const removedIds: number[] = [];
+        while (slotSongs.reduce((sum, s) => sum + s.duration, 0) > 45 * 60) {
+          const last = slotSongs.pop();
+          if (!last)
+            break;
+          if (last.id === input.id) {
+            // 当前歌曲提交时间最晚，无法安排，保持 approved 状态
+            await db.transaction(async (tx) => {
+              for (const removedId of removedIds) {
+                await tx
+                  .update(songs)
+                  .set({ state: "approved", arrangementDate: null, position: null })
+                  .where(eq(songs.id, removedId));
+              }
+              await tx
+                .update(songs)
+                .set({ state: "approved", arrangementDate: null, position: null })
+                .where(eq(songs.id, input.id));
+            });
+            await invalidateArrangementCache();
+            return;
+          }
+          removedIds.push(last.id);
+        }
+
+        await db.transaction(async (tx) => {
+          if (!existingArrangement) {
+            await tx.insert(arrangements).values({ date });
+          }
+          for (let i = 0; i < slotSongs.length; i++) {
+            await tx
+              .update(songs)
+              .set({ state: "used", arrangementDate: date, position: i + 1 })
+              .where(eq(songs.id, slotSongs[i]!.id));
+          }
+          for (const removedId of removedIds) {
+            await tx
+              .update(songs)
+              .set({ state: "approved", arrangementDate: null, position: null })
+              .where(eq(songs.id, removedId));
+          }
+        });
+
+        await invalidateArrangementCache();
       }),
 
     reject: adminProcedure
