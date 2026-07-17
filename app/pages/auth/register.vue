@@ -55,8 +55,28 @@
                 <FormMessage />
               </FormItem>
             </FormField>
+            <FormField v-slot="{ value, handleChange }" name="agreed">
+              <FormItem class="flex flex-row items-start gap-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox :model-value="value" @update:model-value="handleChange" />
+                </FormControl>
+                <div class="space-y-1 leading-none text-sm">
+                  <FormLabel class="flex flex-wrap items-center gap-x-1">
+                    我已阅读并同意
+                    <NuxtLink to="/agreement" class="font-semibold underline underline-offset-4" target="_blank">
+                      用户协议和隐私政策
+                    </NuxtLink>
+                    及
+                    <NuxtLink to="/faq" class="font-semibold underline underline-offset-4" target="_blank">
+                      常见问题
+                    </NuxtLink>
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            </FormField>
             <br>
-            <Button type="submit" class="w-full" :disable="isPending">
+            <Button type="submit" class="w-full" :disabled="isPending || !values.agreed">
               <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
               注册
             </Button>
@@ -64,11 +84,12 @@
         </div>
         <div class="mt-4 text-center text-sm">
           <p class="text-muted-foreground mb-2">
-            如有问题请查看<NuxtLink to="https://voszsy.netlify.app/guide/basic/auth.html" class="font-semibold underline underline-offset-4" target="_blank">
+            相关问题请查看<NuxtLink to="https://ljk743121.github.io/soeDoc/guide/basic/auth.html" class="font-semibold underline underline-offset-4" target="_blank">
               注册
-            </NuxtLink>和<NuxtLink to="https://voszsy.netlify.app/guide/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98" class="font-semibold underline underline-offset-4" target="_blank">
+            </NuxtLink>和<NuxtLink to="https://ljk743121.github.io/soeDoc/guide/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98" class="font-semibold underline underline-offset-4" target="_blank">
               常见问题
             </NuxtLink>
+            <span class="text-xs">外部链接</span>
           </p>
           <p class="text-muted-foreground">
             已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
@@ -143,10 +164,13 @@ const formSchema = toTypedSchema(
       .max(16, "最多为16个字符")
       .regex(pwRegex, "密码需包括至少1个字母,1个数字")
       .trim(),
+    agreed: z.boolean().refine(val => val === true, {
+      message: "请确认已阅读用户协议和隐私政策及常见问题",
+    }),
   }),
 );
 
-const { handleSubmit } = useForm({
+const { handleSubmit, values } = useForm({
   validationSchema: formSchema,
 });
 

@@ -15,7 +15,7 @@
 
 ## 说明
 
-**更详细文档请参考[Docs](https://voszsy.netlify.app)**
+**更详细文档请参考[Docs](https://ljk743121.github.io/soeDoc)**
 
 所用技术栈：
 
