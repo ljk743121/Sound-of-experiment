@@ -8,7 +8,7 @@
               用户协议和隐私政策
             </CardTitle>
             <CardDescription class="text-base">
-              Voice of SZSY 点歌系统服务条款与个人信息处理说明
+              SchoolFm 点歌系统服务条款与个人信息处理说明
             </CardDescription>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -30,14 +30,14 @@
           </h2>
           <div class="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              <span class="font-medium text-foreground">Voice of SZSY</span>
+              <span class="font-medium text-foreground">SchoolFm</span>
               是一款由
               <span class="font-medium text-foreground">ljk743121 以及其他贡献者</span>
               （以下简称"我们"）提供的产品。您在使用我们的服务时，我们可能会收集和使用您的相关信息。我们希望通过本《用户协议和隐私政策》向您说明，在使用我们的服务时，我们如何收集、使用、储存和分享这些信息，以及我们为您提供的访问、更新、控制和保护这些信息的方式。
             </p>
             <p>
               本《用户协议和隐私政策》与您所使用的
-              <span class="font-medium text-foreground">Voice of SZSY</span>
+              <span class="font-medium text-foreground">SchoolFm</span>
               服务息息相关，希望您仔细阅读，在需要时，按照本《用户协议和隐私政策》的指引，作出您认为适当的选择。本《用户协议和隐私政策》中涉及的相关技术词汇，我们尽量以简明扼要的表述，并提供进一步说明的链接，以便您的理解。
             </p>
           </div>
@@ -207,7 +207,7 @@
           </h2>
           <div class="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              <span class="font-medium text-foreground">Voice of SZSY</span>
+              <span class="font-medium text-foreground">SchoolFm</span>
               是一款面向校园广播场景的开源点歌系统，我们按"现状"和"可用性"提供本服务，不对服务的及时性、安全性、准确性、连续性作出任何明示或暗示的保证。
             </p>
             <p>

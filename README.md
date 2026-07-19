@@ -1,13 +1,13 @@
 <p align="center">
-  <a href="https://syzsgbz.dynv6.net/" target="_blank" rel="noopener noreferrer">
-    <img width="500" src="./public/favicon.ico" alt="soe logo">
+  <a href="https://voszsy.penacony.cn/" target="_blank" rel="noopener noreferrer">
+    <img height="150" src="./public/SchoolFm.svg" alt="SchoolFm logo">
   </a>
 </p>
 
-<h1 align="center">Voice of SZSY</h1>
-<h2 align="center">实验之声广播站点歌系统</h2>
+<h1 align="center">SchoolFm</h1>
 
-<p align="center">一个基于 Nuxt & Vue 开发的校园点歌系统</p>
+<p align="center">一个基于 Nuxt & Vue 开发的校园点歌管理播放一体化自动化系统</p>
+<p align="center" style="font-style: italic;">曾用名：Sound of Experiment；Voice of SZSY</p>
 <p align="center">
   <a href="https://nuxt.com"><img src="https://img.shields.io/badge/Built%20With%20Nuxt-18181B?logo=nuxt.js" alt="Nuxt Website"></a>
   <img src="https://img.shields.io/github/stars/ljk743121/Sound-of-experiment">
@@ -15,52 +15,103 @@
 
 ## 说明
 
-**更详细文档请参考[Docs](https://ljk743121.github.io/soeDoc)**
+更详细文档请参考 [Docs](https://ljk743121.github.io/soeDoc) (可能未更新)
 
-所用技术栈：
+### 所用技术栈
 
 - Nuxt 3
 - Vue 3
-- TRPC
+- tRPC
 - Drizzle ORM
 - PostgreSQL
-- Tailwind CSS
+- Tailwind CSS v4
 - shadcn-vue
-- Redis
+- Redis（可选，用于缓存）
+- Vitest
 
-主要功能：
+### 主要功能
 
-- 用户管理（创建、编辑权限、重置密码等）
-- 注册信息验证
+- 用户管理（创建、编辑权限、重置密码、删除用户等）
+- 注册信息验证（支持可选的学校认证接口）
 - 歌曲审核系统
-- 歌曲投稿&自动排歌
+- 歌曲投稿与自动排歌
 - 管理员手动排歌
+- 投稿时可选择期望播放日期
 - 歌曲在线播放（无需跳转第三方网站）
 - 自定义音源插件
-- 歌曲数据批量导出
+- 歌曲数据批量导出（CSV）
 - 机器人自动获取排歌信息
-- 公告管理
-- 敏感词管理+AI敏感词过滤
+- 放歌完成监控与外部脚本上报
+- 公告管理（首页展示 + 管理后台）
+- 敏感词管理 + AI 敏感词过滤
 - 投稿时段设置
+- 数据统计面板
+- 常见问题（FAQ）页面
 - 暗黑模式支持
 
-### 歌曲CSV数据导出支持
+### v2.4.0 主要更新
 
-从 v2.0.1 起支持 CSV数据导出，内容包括歌曲名(name),作曲家(creator),音源(source),歌曲ID(songID)，你可以使用此功能获取批量歌曲的数据进行统计
+- 新增「期望播放日期」：投稿时可选择期望日期，系统排歌时优先安排
+- 更新「常见问题（FAQ）」页面
+- 更新首页和管理页面信息展示，优化操作逻辑和用户体验
+- 新增放歌完成监控配置与 `arrangements.hasPlayed` 接口
+- Redis 改为可选依赖，未配置时自动降级为直连数据库
+- 每日播放总时长限制调整为 **45 分钟**
+- 排歌优先级：**期望日期 > 投稿时间（早投稿优先）**
 
-若你想自己更改导出数据，可修改`app\pages\admin\songs\arrange.vue`内逻辑
+### 歌曲 CSV 数据导出
+
+项目支持 CSV 数据导出，内容包括 `id`、`name`（歌曲名）、`creator`（作曲家/艺术家）、`source`（音源）、`songID`（歌曲 ID）。你可以使用此功能获取批量歌曲数据进行统计或与其他系统对接。
+
+导出入口：
+
+- 管理后台 **排歌列表** 页面：按日期下载单天排歌 CSV
+- 管理后台 **排歌列表** 页面「下载数据」：按日期区间导出 CSV
+- 外部脚本 [`externalScripts/fetch_today.py`](./externalScripts/fetch_today.py)：自动获取当天排歌并保存为 CSV
+
+若需自定义导出字段或格式，可修改 [`app/pages/admin/songs/arrange.vue`](./app/pages/admin/songs/arrange.vue) 与 [`app/components/admin/song/DownloadControls.vue`](./app/components/admin/song/DownloadControls.vue) 中的相关逻辑。
 
 ### 歌曲播放支持
 
-从 v2.0.1 起，网站可以无需跳转第三方网站即可播放歌曲，本项目的歌曲播放器使用[nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)(投稿和审核界面)以及[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)(主界面)(v2.3.0开始使用)
+网站无需跳转第三方网站即可播放歌曲。播放器使用：
+
+- 投稿与审核界面：[nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
+- 主界面：[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)（v2.3.0 起使用）
+
+### 外部脚本
+
+项目提供两个 Python 辅助脚本，位于 [`externalScripts/`](./externalScripts/) 目录，用于与机器人/放歌流程对接：
+
+| 脚本                                                 | 说明                                                       | 依赖                   |
+| ---------------------------------------------------- | ---------------------------------------------------------- | ---------------------- |
+| [`fetch_today.py`](./externalScripts/fetch_today.py) | 调用 `arrangements.today` 接口获取当天排歌，导出为 CSV     | `pip install requests` |
+| [`has_played.py`](./externalScripts/has_played.py)   | 读取 CSV 歌曲列表，登录后批量上报 `arrangements.hasPlayed` | `pip install requests` |
+
+使用示例：
+
+```bash
+# 获取当天排歌
+python externalScripts/fetch_today.py --base-url https://voszsy.penacony.cn
+
+# 上报当天已播放（需在后台开启「监控是否完成放歌任务」）
+python externalScripts/has_played.py songs_2026-07-19.csv \
+  --base-url https://voszsy.penacony.cn \
+  --user-id 你的学号 \
+  --password 你的密码
+```
 
 ## 用户界面
 
-图片为v2.3.0版本
+图片为 v2.4.0 版本：
 
-<p><img width="100%" src="./public/images/0.png" alt="main ui"></p>
-<p><img width="100%" src="./public/images/1.png" alt="admin ui"></p>
-<p><img width="100%" src="./public/images/2.png" alt="submit ui"></p>
+<p><img width="100%" src="./public/images/1.jpeg" alt="main arrangement ui"></p>
+<p><img width="100%" src="./public/images/2.jpeg" alt="main songlist ui"></p>
+<p><img width="100%" src="./public/images/3.jpeg" alt="submit ui"></p>
+<p><img width="100%" src="./public/images/4.jpeg" alt="stats ui"></p>
+<p><img width="100%" src="./public/images/5.jpeg" alt="review ui"></p>
+<p><img width="100%" src="./public/images/6.jpeg" alt="arrangement ui"></p>
+<p><img width="100%" src="./public/images/7.jpeg" alt="manual arrangement ui"></p>
+<p><img width="100%" src="./public/images/8.jpeg" alt="permission ui"></p>
 
 ## 项目初始化
 
@@ -72,14 +123,14 @@ pnpm run postinstall
 pnpm run init
 ```
 
-`pnpm run init`会初始化项目环境，包括：
+`pnpm run init` 会初始化项目环境，包括：
 
-- 更新数据库schema
+- 从 `.env.example` 创建 `.env`（若不存在）
+- 更新数据库 schema
 - 检测和配置环境变量
-- 配置会话密码(NUXT_SESSION_PASSWORD)
+- 配置会话密码（`NUXT_SESSION_PASSWORD`）
 - 生成公钥和私钥
-- 配置config数据表
-- 检测认证api是否存在
+- 配置 config 数据表
 
 再启动开发服务器：
 
@@ -87,46 +138,67 @@ pnpm run init
 pnpm run dev
 ```
 
-## 可使用脚本:
+## 可使用脚本
 
-1. `init`: 运行项目初始化脚本
-2. `dev`: 启动开发环境
-3. `build`: 构建生产环境
-4. `postinstall`: 项目安装后自动执行（Nuxt准备）
-5. `preview`: 预览生产环境构建
-6. `db:push`: 将架构更改推送到数据库
-7. `db:studio`: 启动Drizzle Studio数据库管理界面
-8. `auth:genKey`: 生成公钥和私钥
-9. `user:admin`: 创建管理员用户
-10. `user:robot`: 创建机器人用户
-11. `lint`: 运行ESLint检查
-12. `lint:fix`: 自动修复ESLint问题
-13. `lint:lint-staged`: 对暂存文件运行ESLint
-14. `lint:format`: 使用Prettier格式化代码
-15. `husky:prepare`: 初始化Husky Git钩子
+1. `init`：运行项目初始化脚本
+2. `dev`：启动开发环境
+3. `build`：构建生产环境
+4. `generate`：生成静态站点
+5. `preview`：预览生产环境构建
+6. `postinstall`：项目安装后自动执行（Nuxt 准备）
+7. `typecheck`：运行 TypeScript 类型检查
+8. `db:push`：将架构更改推送到数据库
+9. `db:studio`：启动 Drizzle Studio 数据库管理界面
+10. `db:seed`：向数据库填充示例数据
+11. `db:reset`：重置数据库（谨慎使用）
+12. `auth:genKey`：生成公钥和私钥
+13. `user:admin`：创建管理员用户
+14. `user:robot`：创建机器人用户
+15. `lint`：运行 ESLint 检查
+16. `lint:fix`：自动修复 ESLint 问题
+17. `lint:lint-staged`：对暂存文件运行 ESLint
+18. `lint:format`：使用 Prettier 格式化代码
+19. `husky:prepare`：初始化 Husky Git 钩子
+20. `test`：运行 Vitest 单元测试
 
-## 自定义音乐源：
+## 环境变量说明
+
+项目通过 `.env` 文件管理环境变量，首次初始化前请至少填写以下必填项：
+
+| 变量                                   | 必填 | 说明                                                          |
+| -------------------------------------- | ---- | ------------------------------------------------------------- |
+| `DATABASE_URL`                         | 是   | PostgreSQL 数据库连接地址                                     |
+| `DATABASE_URL_DEV`                     | 否   | 开发环境数据库连接地址（可选）                                |
+| `DB_ENV`                               | 否   | `production` 或 `development`，默认 `production`              |
+| `REDIS_URL`                            | 否   | Redis 连接地址，未配置则不启用缓存                            |
+| `NUXT_SESSION_PASSWORD`                | 是   | 会话加密密码，`pnpm run init` 可自动生成                      |
+| `SIGN_PUBLIC_KEY` / `SIGN_PRIVATE_KEY` | 是   | JWT 签名密钥对，`auth:genKey` 生成                            |
+| `ENC_PUBLIC_KEY` / `ENC_PRIVATE_KEY`   | 是   | JWT 加密密钥对，`auth:genKey` 生成                            |
+| `SIGN_KID` / `ENC_KID`                 | 是   | 密钥 ID，`auth:genKey` 生成                                   |
+| `USER_API_CONFIG`                      | 否   | 学校注册认证接口配置 JSON（仅用于深圳实验学校认证，不需配置） |
+
+## 自定义音乐源
 
 项目使用插件系统管理不同的音乐源。要添加自定义音乐源，请按照以下步骤操作：
 
 ### Step 1：创建音乐源插件
 
-在`shared/plugins/`目录中创建一个新的TypeScript文件（例如`MyMusicSource.ts`），实现音乐源插件：
+在 [`server/utils/plugins/`](./server/utils/plugins/) 目录中创建一个新的 TypeScript 文件（例如 `MyMusicSource.ts`），实现音乐源插件：
 
 ```typescript
 // ...existing code
 
 async function mySearchSongs(key: string): Promise<TSong[]> {
   // 实现搜索逻辑
-  // 返回符合TSong类型的歌曲数组
+  // 返回符合 TSong 类型的歌曲数组
 }
 
 async function getMusicUrl(id: string): Promise<{ url: string; pay: boolean }> {
-  // 实现获取歌曲URL的逻辑
+  // 实现获取歌曲 URL 的逻辑
 }
 
 async function getMusicUrl2(id: string): Promise<{ url: string; pay: boolean }> {
-  // 实现获取歌曲URL的逻辑
+  // 实现获取歌曲 URL 的逻辑
 }
 // ...
 
@@ -137,32 +209,29 @@ export const mysource = createPlugin({
   getMusicUrl: [
     { fn: getMusicUrl, priority: 1 },
     { fn: getMusicUrl2, priority: 0.9 },
-    // ...其他获取URL函数，每个函数的priority值不同，数值越大优先级越高
+    // ...其他获取 URL 函数，每个函数的 priority 值不同，数值越大优先级越高
   ],
 });
 ```
 
 ### Step 2：注册音乐源插件
 
-在`server/utils/plugins/index.ts`文件中导入并注册你的自定义插件：
+在 [`server/utils/plugins/index.ts`](./server/utils/plugins/index.ts) 文件中导出你的自定义插件：
 
 ```typescript
 export * from "./MyMusicSource";
 ```
 
-然后在`server/utils/plugins.ts`文件中添加你的插件：
+然后在 [`server/utils/plugin.ts`](./server/utils/plugin.ts) 文件中添加你的插件：
 
 ```typescript
 // ...existing code
-pluginManager
-  .use(plugins.netease)
-  // ...
-  .use(plugins.mysource); // 添加你的插件
+pluginManager.use(plugins.netease).use(plugins.qqmusic).use(plugins.bilibili).use(plugins.mysource); // 添加你的插件
 ```
 
 ### 📌 数据格式要求
 
-自定义音乐源插件返回的歌曲数据必须严格遵守`TSong`类型定义：
+自定义音乐源插件返回的歌曲数据必须严格遵守 `TSong` 类型定义：
 
 ```typescript
 interface TSong {
@@ -182,7 +251,7 @@ interface TSong {
 
 ---
 
-_词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZSY）项目；"使用者"指签署本协议的使用者；"官方音乐平台"指对本项目内置的包括网易云，QQ等音乐源的官方平台统称；"版权数据"指包括但不限于图像、音频、名字等在内的他人拥有所属版权的数据。_
+_词语约定：本协议中的"本项目"指 SchoolFm项目；"使用者"指签署本协议的使用者；"官方音乐平台"指对本项目内置的包括网易云，QQ 等音乐源的官方平台统称；"版权数据"指包括但不限于图像、音频、名字等在内的他人拥有所属版权的数据。_
 
 ### 一、数据来源
 
@@ -224,12 +293,14 @@ _词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZS
 
 感谢[锦木祈杰](https://qijieya.cn/)为本项目提供的[二级域名](https://voszsy.penacony.cn)
 
-1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm) 本项目基于该项目的[v2.0.1](https://github.com/SMS-COSMO/the1068fm/releases/tag/v2.0.1)版本进行二次开发
-2. [copws/qq-music-api](https://github.com/copws/qq-music-api)
-3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
-4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow) 本项目使用的音乐播放组件[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)基于其二次开放
+1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm) 本项目基于该项目的 [v2.0.1](https://github.com/SMS-COSMO/the1068fm/releases/tag/v2.0.1) 版本进行二次开发
+2. [copws/qq-music-api](https://github.com/copws/qq-music-api) qq 音乐 API 参考
+3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer) 本项目使用的音乐播放组件
+4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow) 本项目使用的音乐播放组件 [@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow) 基于其二次开发
 5. [api.vkeys.cn](https://api.vkeys.cn) 本项目使用的第三方音乐源接口
 6. [api.qijieya.cn](https://api.qijieya.cn) 本项目使用的第三方音乐源接口
+7. [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) bilibili API 参考，于分支备份查看文档
+8. [lyswwhut/lx-music-desktop](https://github.com/lywhut/lx-music-desktop) qq 音乐 API 修复参考
 
 ## 贡献者
 
@@ -241,4 +312,4 @@ _词语约定：本协议中的"本项目"指 Sound of Experiment（Voice of SZS
 
 ## 项目版权
 
-[GPL v3](./LICENSE) &copy; 2025 Sound of Experiment contributors
+[GPL v3](./LICENSE) &copy; 2025-2026 SchoolFm contributors

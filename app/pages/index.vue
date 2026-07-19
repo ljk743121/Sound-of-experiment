@@ -1,9 +1,9 @@
 <template>
   <main
-    class="container mx-auto flex h-dvh max-w-screen-xl flex-col gap-4 overflow-hidden p-5 md:grid md:h-screen md:grid-cols-2 md:grid-rows-[1fr_auto] md:gap-8 md:p-10"
+    class="container mx-auto flex min-h-dvh max-w-screen-xl flex-col gap-4 p-5 md:grid md:h-screen md:grid-cols-2 md:grid-rows-[1fr_auto] md:gap-8 md:p-10 md:overflow-hidden"
   >
-    <section class="flex shrink-0 flex-col gap-3 overflow-x-hidden md:h-full md:overflow-y-auto">
-      <LogosSoe class="mx-auto h-20 w-auto object-contain md:h-28" />
+    <section class="flex shrink-0 flex-col gap-2 overflow-x-hidden md:h-full md:gap-3 md:overflow-y-auto">
+      <LogosCombined class="mx-auto h-40 w-auto object-contain md:h-35" />
 
       <div class="grid grid-cols-2 gap-3">
         <div class="grid grid-rows-2 gap-3">
@@ -133,7 +133,7 @@
       </div>
     </section>
 
-    <section class="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden md:h-full md:px-4">
+    <section class="flex flex-1 flex-col md:h-full md:overflow-y-auto md:px-4 md:min-h-0">
       <!-- 添加滚动通知条 -->
       <LazyAlert v-if="announcementList && announcementList.length > 0" class="overflow-hidden py-0">
         <AlertDescription class="overflow-hidden h-12 my-auto flex items-center justify-center">
@@ -150,8 +150,8 @@
           </div>
         </AlertDescription>
       </LazyAlert>
-      <Tabs v-model="selectedTab" default-value="arrangement" class="flex flex-col">
-        <div class="-mx-5 bg-background px-5 pt-4 md:mx-0 md:px-0">
+      <Tabs v-model="selectedTab" default-value="arrangement" class="flex flex-1 flex-col">
+        <div class="-mx-5 shrink-0 bg-background px-5 pt-4 md:mx-0 md:px-0">
           <TabsList class="grid w-full grid-cols-3">
             <TabsTrigger value="arrangement">
               排歌歌单
@@ -172,9 +172,9 @@
             </TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="list" class="flex flex-col space-y-3">
-          <Tabs v-model="listMode" default-value="songList" class="flex flex-col">
-            <div>
+        <TabsContent value="list" class="flex flex-col flex-1 space-y-3">
+          <Tabs v-model="listMode" default-value="songList" class="flex flex-1 flex-col">
+            <div class="shrink-0">
               <TabsList class="grid w-full grid-cols-2">
                 <TabsTrigger value="songList">
                   全部歌曲
@@ -204,7 +204,7 @@
                 </span>
               </div>
             </div>
-            <TabsContent value="songList">
+            <TabsContent value="songList" class="flex-1">
               <LazySongCard
                 v-for="song in filteredList"
                 :key="song.id"
@@ -213,7 +213,7 @@
                 @song-export="playMusic"
               />
             </TabsContent>
-            <TabsContent value="myList">
+            <TabsContent value="myList" class="flex-1">
               <template v-if="userStore.loggedIn">
                 <LazySongCard
                   v-for="song in filteredList"
@@ -227,7 +227,7 @@
             </TabsContent>
           </Tabs>
         </TabsContent>
-        <TabsContent value="arrangement">
+        <TabsContent value="arrangement" class="flex-1">
           <DatePicker
             v-model="selectedDate"
             mode="date"
@@ -256,7 +256,7 @@
             </li>
           </ul>
         </TabsContent>
-        <TabsContent value="notification">
+        <TabsContent value="notification" class="flex-1">
           <div v-if="isAnnouncementListPending">
             <Icon name="lucide:loader-2" size="20" class="animate-spin" />
           </div>
@@ -269,7 +269,7 @@
         </TabsContent>
       </Tabs>
     </section>
-    <div class="-mx-5 shrink-0 md:col-span-2 md:mx-0 md:z-50">
+    <div class="-mx-5 sticky bottom-0 z-10 shrink-0 min-h-[240px] bg-background md:relative md:col-span-2 md:mx-0 md:min-h-[160px] md:z-50 lg:min-h-[80px]">
       <ClientOnly>
         <MusicFlow v-if="userStore.loggedIn" :options="MusicFlowConfig" :fetch-url="fetchUrl" />
       </ClientOnly>
@@ -282,18 +282,18 @@ import type { RouterOutput } from "~~/types";
 import { MusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
 import { useFuse, type UseFuseOptions } from "@vueuse/integrations/useFuse";
 import { DatePicker } from "@ztl-uwu/v-calendar";
-import { getImgUrl, MusicFlowConfig } from "~~/constants";
+import { getImgUrl, MusicFlowConfig, SCHOOL_NAME } from "~~/constants";
 // import { fetchMusicUrl } from "~~/deprecate/shared/plugin";
 
 useSeoMeta({
-  title: "首页 - Voice of SZSY 点歌系统",
-  description: "Voice of SZSY 点歌系统首页 - 浏览排歌歌单、查看全部歌曲、管理个人投稿。开源校园广播站管理系统，支持在线试听和投稿。",
-  keywords: "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,在线试听,歌曲投稿",
-  ogTitle: "首页 - Voice of SZSY 点歌系统",
-  ogDescription: "浏览排歌歌单、查看全部歌曲、管理个人投稿。开源校园广播站管理系统。",
+  title: `首页`,
+  description: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统，支持在线试听、投稿、智能排歌、歌单管理、自动化流程。`,
+  keywords: "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,在线试听,歌曲投稿,智能排歌,歌单管理,自动化",
+  ogTitle: `首页`,
+  ogDescription: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统。`,
   ogUrl: "https://voszsy.penacony.cn",
-  twitterTitle: "首页 - Voice of SZSY 点歌系统",
-  twitterDescription: "浏览排歌歌单、查看全部歌曲、管理个人投稿。开源校园广播站管理系统。",
+  twitterTitle: `首页`,
+  twitterDescription: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统。`,
 });
 
 useHead({
@@ -315,12 +315,12 @@ useHead({
       innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "name": "Voice of SZSY 点歌系统首页",
-        "description": "开源校园广播站管理系统，支持歌曲在线试听、在线投稿、智能审核、一键排歌和歌单导出",
+        "name": `${SCHOOL_NAME} 点歌系统 | SchoolFm`,
+        "description": `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统。`,
         "url": "https://voszsy.penacony.cn",
         "mainEntity": {
           "@type": "WebApplication",
-          "name": "Voice of SZSY 点歌系统",
+          "name": `${SCHOOL_NAME} 点歌系统 | SchoolFm`,
           "applicationCategory": "EducationApplication",
           "operatingSystem": "Any",
         },
@@ -494,7 +494,7 @@ function updateLoginTime() {
 function logout() {
   userStore.logout();
   toast.success("登出成功");
-  navigateTo("/auth/login");
+  navigateTo("/auth/login", { replace: true });
 }
 
 type TLists = RouterOutput["song"]["listSafe"];
@@ -650,6 +650,35 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
   onPlayAsPlaylist(tracks.value, track.value);
 }
 </script>
+
+<style>
+/* 页面级别平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 页面级别自定义滚动条 - Webkit */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* 页面级别自定义滚动条 - Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+</style>
 
 <style scoped>
 .animate-marquee {

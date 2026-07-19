@@ -347,6 +347,7 @@ definePageMeta({
 });
 
 useHead({
+  title: "歌曲投稿",
   meta: [
     {
       name: "referrer",

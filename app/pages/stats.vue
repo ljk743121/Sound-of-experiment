@@ -133,6 +133,10 @@
 <script setup lang="ts">
 import { getImgUrl } from "~~/constants";
 
+useHead({
+  title: "统计",
+});
+
 const { $trpc } = useNuxtApp();
 const userStore = useUserStore();
 

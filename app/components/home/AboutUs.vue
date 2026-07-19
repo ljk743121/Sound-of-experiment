@@ -13,13 +13,12 @@
           <DialogTitle> 关于我们 </DialogTitle>
         </DialogHeader>
 
-        <LogosSoe class="mx-auto w-1/2" />
+        <LogosCombined class="mx-auto w-full lg:max-w-2xl" />
         <section class="prose">
           <p>
-            <span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>
-            是
-            <b>实验之声广播站</b>
-            的一体化系统，包含歌曲投稿，歌曲审核，一键排歌，导出歌单等功能。
+            <span class="mx-1 font-mono font-light tracking-tighter text-blue-700">SchoolFm</span>
+            是一个基于 Nuxt & Vue 开发的校园点歌管理播放一体化自动化系统，包含歌曲投稿，歌曲审核，智能排歌分配，智能播放等功能。
+            现用于<b>实验之声广播站</b>的点歌管理播放。
           </p>
           <p>
             这个项目的代码是开源的，你可以在

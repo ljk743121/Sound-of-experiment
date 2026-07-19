@@ -69,6 +69,10 @@
 <script setup lang="ts">
 import { permissionNames } from "~~/constants";
 
+useHead({
+  title: "个人资料",
+});
+
 const { $trpc } = useNuxtApp();
 const userStore = useUserStore();
 

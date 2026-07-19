@@ -8,8 +8,11 @@
           <h1 class="text-3xl font-bold">
             登录
           </h1>
+          <p class="text-sm text-muted-foreground">
+            {{ SCHOOL_NAME }} 点歌系统
+          </p>
           <p class="text-balance text-muted-foreground">
-            使用<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号登录
+            使用<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">SchoolFm</span>账号登录
           </p>
         </div>
         <div class="grid gap-4">
@@ -42,7 +45,7 @@
         </div>
         <div class="mt-4 text-center text-sm">
           <p class="text-muted-foreground">
-            没有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
+            没有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">SchoolFm</span>账号？
             <NuxtLink to="/auth/register" class="text-primary">
               注册
             </NuxtLink>
@@ -51,7 +54,7 @@
       </div>
     </div>
     <div class="hidden items-center justify-center bg-muted lg:flex">
-      <LogosSoe />
+      <LogosCombined />
     </div>
   </div>
 </template>
@@ -61,23 +64,22 @@ import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import * as z from "zod";
-import { pwRegex } from "~~/constants";
+import { pwRegex, SCHOOL_NAME } from "~~/constants";
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
 useSeoMeta({
-  title: "用户登录 - Voice of SZSY 点歌系统",
-  description: "登录 Voice of SZSY 点歌系统",
+  title: `用户登录`,
+  description: `登录 ${SCHOOL_NAME} 点歌系统 | SchoolFm`,
   keywords: "登录,用户登录,点歌系统登录,校园广播登录",
-  ogTitle: "用户登录 - Voice of SZSY 点歌系统",
-  ogDescription: "登录 Voice of SZSY 点歌系统",
+  ogTitle: `用户登录`,
   ogUrl: "https://voszsy.penacony.cn/auth/login",
   robots: "noindex, follow",
 });
 
 useHead({
-  title: "登录 - Voice of SZSY",
+  title: `登录`,
   link: [
     {
       rel: "canonical",
@@ -85,8 +87,8 @@ useHead({
     },
   ],
   meta: [
-    { name: "description", content: "Voice of SZSY 登录" },
-    { name: "keywords", content: "点歌系统,登录,用户登录,广播站系统" },
+    { name: "description", content: `${SCHOOL_NAME} 点歌系统 | SchoolFm` },
+    { name: "keywords", content: `点歌系统,登录,用户登录,校园广播登录` },
   ],
 });
 

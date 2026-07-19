@@ -38,6 +38,10 @@
 <script setup lang="ts">
 import { breadCrumb } from "~~/constants";
 
+useHead({
+  title: "管理",
+});
+
 const userStore = useUserStore();
 
 if (!userStore.loggedIn) {

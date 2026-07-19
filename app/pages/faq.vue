@@ -155,4 +155,8 @@ definePageMeta({
   title: "常见问题",
   description: "常见问题解答",
 });
+
+useHead({
+  title: "常见问题",
+});
 </script>

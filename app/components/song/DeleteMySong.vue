@@ -1,10 +1,9 @@
 <template>
   <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
-      <Button variant="destructive" :disabled="isPending">
-        <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
-        <Icon name="lucide:trash" class="mr-1" />
-        删除
+      <Button variant="outline" :disabled="isPending">
+        <Icon v-if="isPending" name="lucide:loader-circle" class="mr-1 animate-spin" />
+        <Icon name="lucide:trash" size="icon" />
       </Button>
     </DialogTrigger>
 

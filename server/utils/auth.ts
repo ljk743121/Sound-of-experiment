@@ -19,7 +19,7 @@ export async function produceAccessToken(id: string, days: string = env.TOKEN_EX
     .setSubject(id.toString())
     .setIssuedAt()
     .setExpirationTime(days)
-    .setIssuer("soe")
+    .setIssuer("sfm")
     .setJti(nanoid(32))
     .setProtectedHeader({
       alg: "RS512",

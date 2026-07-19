@@ -8,8 +8,11 @@
           <h1 class="text-3xl font-bold">
             注册
           </h1>
+          <p class="text-sm text-muted-foreground">
+            {{ SCHOOL_NAME }} 点歌系统
+          </p>
           <p class="text-balance text-muted-foreground">
-            注册<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号
+            注册<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">SchoolFm</span>账号
           </p>
         </div>
         <div class="grid gap-4">
@@ -92,7 +95,7 @@
             <span class="text-xs">外部链接</span>
           </p>
           <p class="text-muted-foreground">
-            已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
+            已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">SchoolFm</span>账号？
             <NuxtLink to="/auth/login" class="font-semibold underline underline-offset-4">
               登录
             </NuxtLink>
@@ -101,7 +104,7 @@
       </div>
     </div>
     <div class="hidden items-center justify-center bg-muted lg:flex">
-      <LogosSoe />
+      <LogosCombined />
     </div>
   </div>
 </template>
@@ -111,17 +114,17 @@ import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import * as z from "zod";
-import { pwRegex } from "~~/constants";
+import { pwRegex, SCHOOL_NAME } from "~~/constants";
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
 useSeoMeta({
-  title: "账号注册 - Voice of SZSY 点歌系统",
-  description: "注册 Voice of SZSY 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。",
+  title: `账号注册`,
+  description: `注册 ${SCHOOL_NAME} 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。`,
   keywords: "注册,账号注册,用户注册,点歌系统注册,校园广播注册",
-  ogTitle: "账号注册 - Voice of SZSY 点歌系统",
-  ogDescription: "注册 Voice of SZSY 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。",
+  ogTitle: `账号注册`,
+  ogDescription: `注册 ${SCHOOL_NAME} 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。`,
   ogUrl: "https://voszsy.penacony.cn/auth/register",
   robots: "noindex, follow",
 });
