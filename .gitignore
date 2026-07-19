@@ -40,7 +40,10 @@ deprecated
 **/*.csv
 
 # PyInstaller / Python build outputs
-externalScripts/build/build/
+externalScripts/build/
 externalScripts/dist/
+externalScripts/gui_automation/
+externalScripts/music_downloader/
+*.log
 *.spec.bak
 *.exe

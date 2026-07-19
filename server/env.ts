@@ -16,7 +16,7 @@ const envSchema = z.object({
   ENC_PRIVATE_KEY: z.string(),
   SIGN_KID: z.string(),
   ENC_KID: z.string(),
-  HAS_PLAYED_TOKEN_SECRET: z.string().optional(),
+  // HAS_PLAYED_TOKEN_SECRET: z.string().optional(),
   CF_TOKEN: z.string().optional(),
   REDIS_URL: z.string().url().optional(),
   USER_API_CONFIG: z.string().optional(),

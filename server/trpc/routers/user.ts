@@ -291,8 +291,9 @@ export const userRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (await hasBlockWord(input.alias)) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "昵称包含违禁词" });
+      const blockWords = await hasBlockWord(input.alias);
+      if (blockWords.length > 0) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `昵称包含违禁词: ${blockWords.join(",")}` });
       }
       const username = await db.query.users.findFirst({
         where: eq(users.name, input.alias),
