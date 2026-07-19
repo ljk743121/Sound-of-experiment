@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "installCommand": "npx -y pnpm@11.15.0 install",
   "headers": [
     {
       "source": "/(.*)",
