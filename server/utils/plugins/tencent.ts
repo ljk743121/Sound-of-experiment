@@ -2,7 +2,7 @@ import type { TMediaSource } from "~~/types";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
-// import { consola } from "consola";
+
 import { defaultVipSign, mediaBaseURL, searchBaseURL } from "~~/constants";
 import { createPlugin } from "../plugin";
 
@@ -65,10 +65,7 @@ interface ISongSearchResult {
   duration: number;
 }
 
-async function officialSearch(key: string, retryNum = 0): Promise<ISongSearchResult[]> {
-  if (retryNum > 5)
-    throw new TRPCError({ code: "BAD_REQUEST", message: "搜索失败" });
-
+async function officialSearch(key: string): Promise<ISongSearchResult[]> {
   const bodyData = {
     comm: {
       ct: "11",
@@ -152,11 +149,10 @@ async function officialSearch(key: string, retryNum = 0): Promise<ISongSearchRes
   const body = await signRequest<TSearchResponse>(bodyData);
 
   if (!body || body.code !== 0 || body.req.code !== 0 || !body.req.data?.body?.item_song) {
-    consola.warn(
-      `QQ Music search failed for "${key}" (code: ${body?.code}, req.code: ${body?.req?.code}). Retrying ${retryNum + 1}/5...`,
-    );
-    await new Promise(resolve => setTimeout(resolve, 1_000 * (retryNum + 1)));
-    return officialSearch(key, retryNum + 1);
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `QQ音乐搜索失败 (code: ${body?.code}, req.code: ${body?.req?.code})`,
+    });
   }
 
   const songList = body.req.data.body.item_song

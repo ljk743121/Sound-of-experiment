@@ -1,6 +1,6 @@
 import type { TMediaSource } from "~~/types";
 import { TRPCError } from "@trpc/server";
-// import { consola } from "consola";
+
 import { mediaBaseURL, searchBaseURL } from "~~/constants";
 import { createPlugin } from "../plugin";
 
@@ -60,11 +60,8 @@ async function officialSearch(key: string) {
       }
     },
   });
-  if (resSongs.code !== 200) {
+  if (resSongs.code !== 200 || !resSongs.result?.songs) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "搜索失败" });
-  }
-  if (!resSongs.result.songs) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "搜索结果为空" });
   }
 
   songsIdList = resSongs.result.songs.map(song => song.id);
@@ -83,11 +80,8 @@ async function officialSearch(key: string) {
     },
   });
 
-  if (resAlbums.code !== 200) {
+  if (resAlbums.code !== 200 || !resAlbums.songs) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲信息失败" });
-  }
-  if (!resAlbums.songs) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲信息为空" });
   }
 
   const transformSongs = resAlbums.songs.map(song => ({
@@ -128,10 +122,7 @@ async function officialFetch(id: string) {
       }
     },
   });
-  if (res.code !== 200) {
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "获取歌曲链接失败" });
-  }
-  if (!res.data[0].url) {
+  if (res.code !== 200 || !res.data[0]?.url) {
     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "获取歌曲链接失败" });
   }
   return { url: res.data[0].url, pay: false };

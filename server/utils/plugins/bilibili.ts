@@ -1,6 +1,7 @@
 // modify from listen 1 bilibili.js by ljk743121
 import type { TMediaSource } from "~~/types";
 import { TRPCError } from "@trpc/server";
+
 import { createPlugin } from "../plugin";
 import WrapBiliRequest from "../wbi";
 
@@ -95,6 +96,9 @@ async function getTrackUrl(id: string) {
       bvid,
     },
   });
+  if (resp1.code !== 0 || !resp1.data?.pages?.[0]?.cid) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "获取视频信息失败" });
+  }
   const cid = resp1.data.pages[0].cid;
   const target_url2 = "http://api.bilibili.com/x/player/playurl";
   // const resp2 = await $fetch<PlayUrlRes>(target_url2, {
@@ -118,12 +122,11 @@ async function getTrackUrl(id: string) {
   //   const url = resp2.data.dash.audio[0].baseUrl;
   //   return { url: `/api/bbapi?p=${encodeURIComponent(url)}`, pay: false };
   //   // return { url, pay: false };
-  if (resp2.data.durl.length > 0) {
-    const url = resp2.data.durl[0].url;
-    return { url, pay: false };
-  } else {
+  if (resp2.code !== 0 || !resp2.data?.durl?.[0]?.url) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲链接失败" });
   }
+  const url = resp2.data.durl[0].url;
+  return { url, pay: false };
 }
 
 async function search(keyword: string) {
@@ -151,6 +154,9 @@ async function search(keyword: string) {
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.56 Safari/537.36",
     },
   });
+  if (resp.code !== 0 || !resp.data?.result) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "搜索失败" });
+  }
   return resp.data.result.map((song) => {
     return bi_convert_song(song);
   });
