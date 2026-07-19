@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from "@tailwindcss/vite";
+import { SCHOOL_NAME } from "./constants";
 
 export default defineNuxtConfig({
   app: {
@@ -16,7 +17,7 @@ export default defineNuxtConfig({
         { name: "robots", content: "index, follow" },
         { name: "author", content: "Ljk743121" },
         { name: "theme-color", content: "#3b82f6" },
-        { property: "og:site_name", content: "Voice of SZSY 点歌系统" },
+        { property: "og:site_name", content: `SchoolFm 点歌系统 | ${SCHOOL_NAME}` },
         { property: "og:type", content: "website" },
         { property: "og:locale", content: "zh_CN" },
         { property: "og:url", content: "https://voszsy.penacony.cn/" },
@@ -25,7 +26,7 @@ export default defineNuxtConfig({
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-status-bar-style", content: "default" },
-        { name: "apple-mobile-web-app-title", content: "Voice of SZSY" },
+        { name: "apple-mobile-web-app-title", content: `SchoolFm | ${SCHOOL_NAME}` },
       ],
       link: [
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },

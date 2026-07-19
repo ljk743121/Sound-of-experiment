@@ -35,6 +35,7 @@ export const defaultConfigs: { key: string; value: string; label: string }[] = [
   { key: "isRegisterOpen", value: "true", label: "开放注册" },
   { key: "blockWordsApi", value: "true", label: "第三方屏蔽词检测" },
   { key: "auth", value: "false", label: "学校注册认证" },
+  { key: "monitorHasPlayed", value: "false", label: "监控是否完成放歌任务" },
 ];
 
 export const breadCrumb: Record<string, string> = {
@@ -60,6 +61,8 @@ export const pwRegex = /.*(?=.*\d)(?=.*[A-Za-z]).*/;
 
 export const resetPassword = "Abc123456";
 export const defaultVipSign = "vip-song";
+export const MAX_DAILY_SONG_DURATION = 45 * 60;
+export const SCHOOL_NAME = "实验之声广播站";
 
 export const searchBaseURL = {
   wySearch: "https://music.163.com/api/search/get",

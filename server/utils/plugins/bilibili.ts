@@ -2,6 +2,7 @@
 import type { TMediaSource } from "~~/types";
 import { TRPCError } from "@trpc/server";
 import { createPlugin } from "../plugin";
+import WrapBiliRequest from "../wbi";
 
 interface SongInfo {
   id: number;
@@ -126,24 +127,28 @@ async function getTrackUrl(id: string) {
 }
 
 async function search(keyword: string) {
-  const target_url = `https://api.bilibili.com/x/web-interface/search/type`;
-  const resp = await $fetch<SearchRes>(target_url, {
+  const sessdata = "fbda0bdc%2C1636301184%2C30180681";// 2021-08-10 00:06:25 CST
+  const target_url = "https://api.bilibili.com/x/web-interface/wbi/search/type";
+  const params = {
+    __refresh__: "true",
+    page: 1,
+    page_size: 15,
+    platform: "pc",
+    highlight: 1,
+    single_column: 0,
+    keyword,
+    search_type: "video",
+    dynamic_offset: 0,
+    preload: "true",
+    com2co: "true",
+  };
+  const query = await WrapBiliRequest(sessdata, params);
+  const resp = await $fetch<SearchRes>(`${target_url}?${query}`, {
     method: "GET",
-    params: {
-      __refresh__: true,
-      page: 1,
-      page_size: 15,
-      platform: "pc",
-      highlight: 1,
-      single_column: 0,
-      keyword,
-      search_type: "video",
-      dynamic_offset: 0,
-      preload: true,
-      com2co: true,
-    },
     headers: {
-      Cookie: "buvid3=0",
+      "Cookie": "buvid3=0",
+      "Referer": "https://www.bilibili.com/",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.56 Safari/537.36",
     },
   });
   return resp.data.result.map((song) => {

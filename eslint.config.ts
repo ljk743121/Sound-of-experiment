@@ -10,7 +10,7 @@ export default antfu(
       quotes: "double",
       semi: true,
     },
-    ignores: ["public/**", "app/components/ui/**", ".github/**", ".husky/**"],
+    ignores: ["public/**", "app/components/ui/**", ".github/**", ".husky/**", "pnpm-lock.yaml", "pnpm-workspace.yaml"],
     regexp: false,
   },
   {

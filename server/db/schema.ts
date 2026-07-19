@@ -9,8 +9,8 @@ export const users = pgTable("users", {
   password: text().notNull(),
   permissions: json().notNull().$type<TPermission[]>().default(["login"]),
   identity: text().notNull().$type<TIdentity>().default("student"),
-  remainSubmitSongs: integer().notNull().default(2),
-  maxSubmitSongs: integer().notNull().default(2),
+  remainSubmitSongs: integer().notNull().default(3),
+  maxSubmitSongs: integer().notNull().default(3),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   lastLoginAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   lastSubmitAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -19,6 +19,7 @@ export const users = pgTable("users", {
 export const arrangements = pgTable("arrangements", {
   date: text().primaryKey(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  unplayedSongs: integer().notNull().default(0),
 });
 
 export const songs = pgTable("songs", {
@@ -43,6 +44,7 @@ export const songs = pgTable("songs", {
   message: text(),
   msgPublic: text(),
   position: integer(), // 添加position字段用于排序
+  expectedPlayDate: text(), // 期望播放日期，YYYY-MM-DD，为空时为自由分配状态
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 

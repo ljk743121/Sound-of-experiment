@@ -1,135 +1,203 @@
 <template>
-  <div class="min-w-max overflow-x-auto">
-    <div class="flex w-max">
-      <div class="flex h-full w-min flex-col justify-between border-r bg-sidebar p-4">
-        <div>
-          <div class="justify-center text-center text-sm text-muted-foreground">
-            排歌选取
-          </div>
-          <RangeCalendar
-            v-model="calendarValue"
-            locale="zh"
-            class="p-0"
-          />
-          <!-- :is-date-unavailable="isDateUnavailable" -->
-          <div
-            v-if="calendarValue.start && calendarValue.end"
-            class="mt-4 flex items-center justify-between"
+  <div class="flex min-h-[calc(100svh-4rem)] flex-col">
+    <!-- 顶部工具栏：统计与操作入口 -->
+    <header class="sticky top-0 z-30 min-h-16 shrink-0 border-b bg-background p-4">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="grid grid-cols-3 gap-3 sm:flex">
+          <Card
+            class="cursor-pointer transition-colors hover:bg-accent"
+            @click="navigateToApproved"
           >
-            <Badge variant="outline">
-              {{ calendarValue.start }}
-            </Badge>
-            <Icon name="lucide:arrow-right" size="14" />
-            <Badge variant="outline">
-              {{ calendarValue.end }}
-            </Badge>
-          </div>
+            <CardHeader class="pb-2">
+              <CardDescription>已通过</CardDescription>
+              <CardTitle class="text-2xl">
+                {{ stats?.approved ?? "-" }}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p class="text-xs text-muted-foreground">
+                可供排歌
+              </p>
+            </CardContent>
+          </Card>
+          <Card
+            class="cursor-pointer transition-colors hover:bg-accent"
+            @click="navigateToDropped"
+          >
+            <CardHeader class="pb-2">
+              <CardDescription>落选</CardDescription>
+              <CardTitle class="text-2xl">
+                {{ stats?.dropped ?? "-" }}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p class="text-xs text-muted-foreground">
+                被舍弃歌曲
+              </p>
+            </CardContent>
+          </Card>
+          <Card
+            class="cursor-pointer transition-colors hover:bg-accent"
+            @click="navigateToReview"
+          >
+            <CardHeader class="pb-2">
+              <CardDescription>未审核</CardDescription>
+              <CardTitle class="text-2xl">
+                {{ stats?.pending ?? "-" }}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p class="text-xs text-muted-foreground">
+                待审核歌曲
+              </p>
+            </CardContent>
+          </Card>
         </div>
-        <div>
-          <div class="justify-center text-center text-sm text-muted-foreground">
-            选择下载CSV数据区段
-          </div>
-          <RangeCalendar
-            v-model="copyValue"
-            :is-date-unavailable="isDateAvailable"
-            locale="zh"
-            class="p-0"
-          />
-          <div
-            v-if="copyValue.start && copyValue.end"
-            class="mt-4 flex items-center justify-between"
-          >
-            <Badge variant="outline">
-              {{ copyValue.start }}
-            </Badge>
-            <Icon name="lucide:arrow-right" size="14" />
-            <Badge variant="outline">
-              {{ copyValue.end }}
-            </Badge>
-          </div>
-        </div>
-        <div class="grid gap-3 rounded-lg border bg-background p-4">
-          <div class="grid gap-1">
-            <div
-              v-for="requirement in requirementList"
-              :key="requirement.label"
-              class="flex items-center gap-2"
-            >
-              <Icon v-if="requirement.value" name="lucide:check" class="text-green-500" />
-              <Icon v-else name="lucide:x" class="text-red-500" />
-              <span class="text-sm font-medium">
-                {{ requirement.label }}
-              </span>
-            </div>
-          </div>
 
-          <NumberField id="songCount" v-model="songCount" :default-value="0" :min="0">
-            <Label for="songCount" class="text-xs font-medium">每日歌曲数目：</Label>
-            <NumberFieldContent class="bg-background">
-              <NumberFieldDecrement />
-              <NumberFieldInput />
-              <NumberFieldIncrement />
-            </NumberFieldContent>
-          </NumberField>
+        <div class="flex flex-wrap gap-2">
+          <Sheet>
+            <SheetTrigger as-child>
+              <Button variant="outline" class="flex-1 sm:flex-none">
+                <Icon name="lucide:settings" class="mr-2 h-4 w-4" />
+                排歌设置
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left">
+              <SheetHeader>
+                <SheetTitle>排歌设置</SheetTitle>
+                <SheetDescription>
+                  选择日期范围并执行排歌
+                </SheetDescription>
+              </SheetHeader>
+              <div class="mt-6">
+                <AdminSongArrangeControls
+                  v-model:calendar-value="calendarValue"
+                  v-model:song-count="songCount"
+                  :requirement-list="requirementList"
+                  :can-arrange="canArrange"
+                  :is-pending="isPending"
+                  :arrange-result="arrangeResult"
+                  @arrange="onArrange"
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
 
-          <Button
-            :disabled="!canArrange || isPending"
-            class="transition-all"
-            @click="
-              arrange({
-                start: calendarValue.start!.toString(),
-                end: calendarValue.end!.toString(),
-                songCount,
-              })
-            "
-          >
-            <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
-            <Icon name="lucide:play" class="mr-2" />
-            {{ songCount ? "手动排歌" : "自动排歌" }}
-          </Button>
-          <Button class="transition-all" @click="copyAllSongs(arrangementList)">
-            <Icon name="lucide:clipboard" class="mr-2" />
-            下载选定区域全部歌曲CSV数据
-          </Button>
+          <Sheet>
+            <SheetTrigger as-child>
+              <Button variant="outline" class="flex-1 sm:flex-none">
+                <Icon name="lucide:download" class="mr-2 h-4 w-4" />
+                下载数据
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left">
+              <SheetHeader>
+                <SheetTitle>下载数据</SheetTitle>
+                <SheetDescription>
+                  选择日期区段并导出 CSV
+                </SheetDescription>
+              </SheetHeader>
+              <div class="mt-6">
+                <AdminSongDownloadControls
+                  v-model:copy-value="copyValue"
+                  :arrangement-list="arrangementList"
+                  @copy-all="copyAllSongs(arrangementList)"
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-      <Carousel class="flex h-svh max-w-sm justify-end border-r" @init-api="setApi">
-        <CarouselContent>
-          <CarouselItem
+    </header>
+
+    <!-- 日期侧边栏 + 主内容区 -->
+    <div class="flex flex-1 flex-col overflow-hidden md:flex-row">
+      <!-- 侧边日期列表 -->
+      <aside class="border-b bg-sidebar md:h-full md:w-64 md:shrink-0 md:border-b-0 md:border-r">
+        <!-- 移动端：横向滚动日期选择 -->
+        <div v-if="arrangementList && arrangementList.length > 0" class="flex gap-1 overflow-x-auto p-2 md:hidden">
+          <Button
             v-for="(day, index) in arrangementList"
             :key="index"
-            class="basis-full pl-1"
+            :variant="selectedDayIndex === index ? 'default' : 'outline'"
+            size="sm"
+            @click="selectedDayIndex = index"
           >
-            <div class="flex h-16 items-center justify-between border-b bg-background px-4">
-              <span class="text-sm font-semibold">{{ day.date }}</span>
-              <Button variant="outline" size="sm" @click="copySongInfo(day)">
-                <Icon name="lucide:clipboard" class="mr-1" />
-                下载CSV文件
-              </Button>
-            </div>
-            <ul class="flex flex-col gap-3 p-4">
-              <li v-for="song in day.songs" :key="song.id">
-                <SongCard :song="song" is-arrangement type="review" />
-              </li>
-            </ul>
-          </CarouselItem>
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext class="z-10" />
-      </Carousel>
-      <div>
-        <ScrollArea class="h-svh">
-          <div v-for="(day, index) in arrangementList" :key="index" class="mb-4 flex gap-1">
-            <Button variant="outline" class="max-w-min" @click="onThumbClick(index)">
+            {{ day.date }}
+          </Button>
+        </div>
+        <div v-else class="p-4 text-sm text-muted-foreground md:hidden">
+          暂无排歌数据
+        </div>
+
+        <!-- 桌面端：纵向列表 -->
+        <ScrollArea class="hidden h-full md:block">
+          <div class="flex flex-col gap-1 p-2">
+            <Button
+              v-for="(day, index) in arrangementList"
+              :key="index"
+              :variant="selectedDayIndex === index ? 'default' : 'ghost'"
+              class="w-full justify-start"
+              @click="selectedDayIndex = index"
+            >
+              <Icon
+                v-if="selectedDayIndex === index"
+                name="lucide:chevron-right"
+                class="mr-2 h-4 w-4"
+              />
               {{ day.date }}
             </Button>
-            <AdminSongDeleteArrangement
-              v-if="userStore.permissions.includes('deleteArrangement')"
-              :date="day.date"
-            />
+          </div>
+          <div v-if="!arrangementList?.length" class="p-4 text-sm text-muted-foreground">
+            暂无排歌数据
           </div>
         </ScrollArea>
-      </div>
+      </aside>
+
+      <!-- 主内容区 -->
+      <main class="flex-1 overflow-y-auto p-4">
+        <div v-if="selectedDay" class="mx-auto max-w-4xl">
+          <Card>
+            <CardHeader class="flex flex-row flex-wrap items-start justify-between gap-2 pb-2">
+              <div class="min-w-0">
+                <CardTitle class="text-lg font-semibold">
+                  {{ selectedDay.date }}
+                </CardTitle>
+                <CardDescription>
+                  {{ selectedDay.songs.length }} 首歌曲
+                </CardDescription>
+              </div>
+              <div class="flex shrink-0 items-center gap-1">
+                <Button variant="outline" size="sm" @click="copySongInfo(selectedDay)">
+                  <Icon name="lucide:download" class="mr-1 h-4 w-4" />
+                  下载 CSV
+                </Button>
+                <LazyAdminSongDeleteArrangement
+                  v-if="userStore.permissions.includes('deleteArrangement')"
+                  :date="selectedDay.date"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul v-if="selectedDay.songs.length" class="flex flex-col gap-3">
+                <li v-for="song in selectedDay.songs" :key="song.id">
+                  <LazySongCard :song="song" is-arrangement type="review" />
+                </li>
+              </ul>
+              <p v-else class="py-8 text-center text-sm text-muted-foreground">
+                当日暂无歌曲
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <div v-else class="flex h-full min-h-[300px] flex-col items-center justify-center gap-2 text-muted-foreground">
+          <Icon name="lucide:calendar-x" class="h-10 w-10 opacity-50" />
+          <p>暂无排歌数据</p>
+          <p class="text-sm">
+            点击上方“排歌设置”选择日期并执行排歌
+          </p>
+        </div>
+      </main>
     </div>
   </div>
 </template>
@@ -137,43 +205,15 @@
 <script setup lang="ts">
 import type { DateRange } from "reka-ui";
 import type { RouterOutput } from "~~/types";
-import type { CarouselApi } from "@/components/ui/carousel";
-import { type DateValue, getLocalTimeZone, startOfWeek, today } from "@internationalized/date";
-import { watchOnce } from "@vueuse/core";
-import { RangeCalendar } from "@/components/ui/range-calendar";
+import { getLocalTimeZone, startOfWeek, today } from "@internationalized/date";
 
 definePageMeta({
   layout: "admin",
 });
 
-const api = ref<CarouselApi>();
-const totalCount = ref(0);
-const current = ref(0);
-
-function setApi(val: CarouselApi) {
-  api.value = val;
-}
-
-function onThumbClick(index: number) {
-  if (!api.value)
-    return;
-  api.value.scrollTo(index);
-}
-
-watchOnce(api, (api) => {
-  if (!api)
-    return;
-
-  totalCount.value = api.scrollSnapList().length;
-  current.value = api.selectedScrollSnap() + 1;
-
-  api.on("select", () => {
-    current.value = api.selectedScrollSnap() + 1;
-  });
-});
-
 const { $trpc } = useNuxtApp();
 const userStore = useUserStore();
+const router = useRouter();
 
 const { data: arrangementList } = useQuery({
   queryFn: () => $trpc.arrangements.list.query(),
@@ -182,30 +222,58 @@ const { data: arrangementList } = useQuery({
   refetchOnWindowFocus: false,
 });
 
-const { data: reviewAll } = useQuery({
-  queryFn: () => $trpc.arrangements.reviewAll.query(),
-  queryKey: ["arrangements.reviewAll"],
+const { data: stats } = useQuery({
+  queryFn: () => $trpc.arrangements.stats.query(),
+  queryKey: ["arrangements.stats"],
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
 });
 
-// const { data: timeCurrently } = useQuery({
-//   queryFn: () => $trpc.time.currently.query(),
-//   queryKey: ["time.currently"],
-//   refetchIntervalInBackground: false,
-// });
+const selectedDayIndex = ref(0);
 
-function downloadCsv(csvContent: string) {
+const selectedDay = computed(() => {
+  if (!arrangementList.value?.length)
+    return null;
+  return arrangementList.value[selectedDayIndex.value] ?? arrangementList.value[0];
+});
+
+watch(arrangementList, (list) => {
+  if (list && selectedDayIndex.value >= list.length)
+    selectedDayIndex.value = 0;
+});
+
+function navigateToReview() {
+  if (!userStore.permissions.includes("review")) {
+    toast.error("您没有审核歌曲的权限");
+    return;
+  }
+  if (stats.value?.pending && stats.value.pending > 0)
+    router.push("/admin/songs/review");
+}
+
+function navigateToApproved() {
+  if (!userStore.permissions.includes("manualArrange")) {
+    toast.error("您没有排歌的权限");
+    return;
+  }
+  router.push("/admin/songs/manualArrange");
+}
+
+function navigateToDropped() {
+  router.push("/admin/songs");
+}
+
+function downloadCsv(csvContent: string, date?: string) {
   try {
-    const today = new Date();
+    const now = date ? new Date(date) : new Date();
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `songs_${today.toISOString()}.csv`;
+    link.download = `songs_${now.toISOString().split("T")[0]}.csv`;
     link.click();
-    URL.revokeObjectURL(url); // 清理内存
-    toast.success("正在下载csv文件...");
+    URL.revokeObjectURL(url);
+    toast.success("正在下载 CSV 文件...");
   } catch (e: any) {
     if (e.message)
       toast.error(e.message);
@@ -213,19 +281,18 @@ function downloadCsv(csvContent: string) {
   }
 }
 
-// const { copy: useCopy } = useClipboard({ legacy: true });
 async function copySongInfo(day: RouterOutput["arrangements"]["list"][0]) {
   if (!day.songs.length) {
     toast.error("排歌表为空");
     return;
   }
 
-  const csvHeader = "name,creator,source,songID\n";
+  const csvHeader = "id,name,creator,source,songID\n";
   let csvContent = csvHeader;
   for (const song of day.songs) {
-    csvContent += `"${song.name}","${song.creator}","${song.source}","${song.songId}"\n`;
+    csvContent += `"${song.id}","${song.name}","${song.creator}","${song.source}","${song.songId}"\n`;
   }
-  downloadCsv(csvContent);
+  downloadCsv(csvContent, day.date);
 }
 
 const _start = startOfWeek(today(getLocalTimeZone()).add({ weeks: 1 }), "zh-CN");
@@ -261,12 +328,12 @@ async function copyAllSongs(list: RouterOutput["arrangements"]["list"] | undefin
     toast.error("所选时间段内没有歌曲");
     return;
   }
-  const csvHeader = "name,creator,source,songID\n";
+  const csvHeader = "id,name,creator,source,songID\n";
   let csvContent = csvHeader;
 
   for (const day of selectedDays) {
     for (const song of day.songs) {
-      csvContent += `"${song.name}","${song.creator}","${song.source}","${song.songId}"\n`;
+      csvContent += `"${song.id}","${song.name}","${song.creator}","${song.source}","${song.songId}"\n`;
     }
   }
   downloadCsv(csvContent);
@@ -283,14 +350,6 @@ const requirementList = computed<
       label: "选择时间段",
       value: calendarValue.value.start !== undefined && calendarValue.value.end !== undefined,
     },
-    {
-      label: "审核全部歌曲",
-      value: reviewAll.value ?? true,
-    },
-    // {
-    //   label: "投稿截止",
-    //   value: !(timeCurrently.value ?? false),
-    // },
   ];
 });
 
@@ -298,21 +357,30 @@ const canArrange = computed(() => requirementList.value.every(x => x.value));
 
 const songCount = ref(0);
 
-// function isDateUnavailable(date: DateValue) {
-//   return arrangementList.value?.some(x => x.date === date.toString()) ?? false;
-// }
-
-function isDateAvailable(date: DateValue) {
-  return !arrangementList.value?.some(x => x.date === date.toString());
-}
+const arrangeResult = ref<RouterOutput["arrangements"]["arrange"] | null>(null);
 
 const queryClient = useQueryClient();
 const { mutate: arrange, isPending } = useMutation({
   mutationFn: $trpc.arrangements.arrange.mutate,
-  onSuccess: () => {
+  onSuccess: (data) => {
     queryClient.invalidateQueries({ queryKey: ["arrangements.list"] });
-    toast.success("排歌成功！");
+    queryClient.invalidateQueries({ queryKey: ["arrangements.stats"] });
+    arrangeResult.value = data;
+    selectedDayIndex.value = 0;
+    if (data.conflicts.length === 0 && data.droppedCount === 0) {
+      toast.success("排歌成功！");
+    } else {
+      toast.warning(`排歌完成：${data.placedCount} 首已安排，${data.droppedCount} 首被舍弃，${data.conflicts.length} 个期望日期冲突`);
+    }
   },
   onError: err => useErrorHandler(err),
 });
+
+function onArrange() {
+  arrange({
+    start: calendarValue.value.start!.toString(),
+    end: calendarValue.value.end!.toString(),
+    songCount: songCount.value,
+  });
+}
 </script>

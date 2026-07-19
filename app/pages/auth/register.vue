@@ -8,8 +8,11 @@
           <h1 class="text-3xl font-bold">
             注册
           </h1>
+          <p class="text-sm text-muted-foreground">
+            {{ SCHOOL_NAME }} 点歌系统
+          </p>
           <p class="text-balance text-muted-foreground">
-            注册<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号
+            注册<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">SchoolFm</span>账号
           </p>
         </div>
         <div class="grid gap-4">
@@ -55,8 +58,28 @@
                 <FormMessage />
               </FormItem>
             </FormField>
+            <FormField v-slot="{ value, handleChange }" name="agreed">
+              <FormItem class="flex flex-row items-start gap-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox :model-value="value" @update:model-value="handleChange" />
+                </FormControl>
+                <div class="space-y-1 leading-none text-sm">
+                  <FormLabel class="flex flex-wrap items-center gap-x-1">
+                    我已阅读并同意
+                    <NuxtLink to="/agreement" class="font-semibold underline underline-offset-4" target="_blank">
+                      用户协议和隐私政策
+                    </NuxtLink>
+                    及
+                    <NuxtLink to="/faq" class="font-semibold underline underline-offset-4" target="_blank">
+                      常见问题
+                    </NuxtLink>
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            </FormField>
             <br>
-            <Button type="submit" class="w-full" :disable="isPending">
+            <Button type="submit" class="w-full" :disabled="isPending || !values.agreed">
               <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
               注册
             </Button>
@@ -64,14 +87,15 @@
         </div>
         <div class="mt-4 text-center text-sm">
           <p class="text-muted-foreground mb-2">
-            如有问题请查看<NuxtLink to="https://voszsy.netlify.app/guide/basic/auth.html" class="font-semibold underline underline-offset-4" target="_blank">
+            相关问题请查看<NuxtLink to="https://ljk743121.github.io/soeDoc/guide/basic/auth.html" class="font-semibold underline underline-offset-4" target="_blank">
               注册
-            </NuxtLink>和<NuxtLink to="https://voszsy.netlify.app/guide/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98" class="font-semibold underline underline-offset-4" target="_blank">
+            </NuxtLink>和<NuxtLink to="https://ljk743121.github.io/soeDoc/guide/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98" class="font-semibold underline underline-offset-4" target="_blank">
               常见问题
             </NuxtLink>
+            <span class="text-xs">外部链接</span>
           </p>
           <p class="text-muted-foreground">
-            已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">Voice of SZSY</span>账号？
+            已有<span class="mx-1 font-mono font-light tracking-tighter text-blue-700">SchoolFm</span>账号？
             <NuxtLink to="/auth/login" class="font-semibold underline underline-offset-4">
               登录
             </NuxtLink>
@@ -80,7 +104,7 @@
       </div>
     </div>
     <div class="hidden items-center justify-center bg-muted lg:flex">
-      <LogosSoe />
+      <LogosCombined />
     </div>
   </div>
 </template>
@@ -90,17 +114,17 @@ import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import * as z from "zod";
-import { pwRegex } from "~~/constants";
+import { pwRegex, SCHOOL_NAME } from "~~/constants";
 
 const userStore = useUserStore();
 const { $trpc } = useNuxtApp();
 
 useSeoMeta({
-  title: "账号注册 - Voice of SZSY 点歌系统",
-  description: "注册 Voice of SZSY 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。",
+  title: `账号注册`,
+  description: `注册 ${SCHOOL_NAME} 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。`,
   keywords: "注册,账号注册,用户注册,点歌系统注册,校园广播注册",
-  ogTitle: "账号注册 - Voice of SZSY 点歌系统",
-  ogDescription: "注册 Voice of SZSY 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。",
+  ogTitle: `账号注册`,
+  ogDescription: `注册 ${SCHOOL_NAME} 点歌系统账号，使用学号注册后即可投稿歌曲到校园广播站。`,
   ogUrl: "https://voszsy.penacony.cn/auth/register",
   robots: "noindex, follow",
 });
@@ -143,10 +167,13 @@ const formSchema = toTypedSchema(
       .max(16, "最多为16个字符")
       .regex(pwRegex, "密码需包括至少1个字母,1个数字")
       .trim(),
+    agreed: z.boolean().refine(val => val === true, {
+      message: "请确认已阅读用户协议和隐私政策及常见问题",
+    }),
   }),
 );
 
-const { handleSubmit } = useForm({
+const { handleSubmit, values } = useForm({
   validationSchema: formSchema,
 });
 

@@ -1,294 +1,343 @@
+<!-- refactored by Kimi-K2.7-Coder -->
 <template>
-  <SearchTemplate>
-    <FormField v-slot="{ componentField }" name="source">
-      <FormItem v-auto-animate>
-        <FormLabel>来源</FormLabel>
-        <FormControl>
-          <Select v-bind="componentField">
-            <SelectTrigger>
-              <SelectValue placeholder="请选择" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="(source, index) in musicSources" :key="index" :value="source.value">
-                {{ source.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
-    <div class="flex w-full items-center gap-1.5">
-      <Input id="search" v-model="SearchInput" type="text" placeholder="搜你想搜" :disabled="isPending || songFetching" />
-      <Button :disabled="isPending || songFetching || submitDisabled" @click.prevent="onSearch()">
-        搜索
+  <div class="mx-auto max-w-6xl p-4 md:p-6">
+    <!-- Header -->
+    <div class="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">
+          歌曲投稿
+        </h1>
+        <p class="text-muted-foreground">
+          搜索并选择一首歌曲，填写投稿信息后提交
+        </p>
+      </div>
+      <Button variant="outline" size="icon" class="shrink-0" @click.prevent="navigateTo('/')">
+        <Icon name="lucide:arrow-left" class="h-4 w-4" />
       </Button>
     </div>
 
-    <div v-if="SearchKey.trim()" class="mt-4">
-      <div v-if="!songFetching">
-        <div v-if="songsList && songsList.length" class="flex flex-col gap-3 p-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>搜索结果</CardTitle>
-              <CardDescription>共 {{ songsList.length }} 首</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div v-for="songInfo in songsList" :key="songInfo.id" class="w-full">
-                <div
-                  class="mx-auto flex flex-col gap-4 rounded-lg border p-4 shadow-xs transition-colors sm:max-w-md sm:flex-row"
-                >
-                  <div class="shrink-0">
-                    <Avatar class="size-12 rounded">
-                      <NuxtImg
-                        :src="getImgUrl(songInfo.imgId, songInfo.source)" class="object-cover"
-                        :alt="songInfo.name" loading="lazy"
-                      />
-                      <Icon name="lucide:music" size="24" />
-                    </Avatar>
-                  </div>
-                  <div class="min-w-0 grow">
-                    <div class="mb-3 text-start">
-                      <CardTitle class="line-clamp-1 text-base font-medium">
-                        {{ songInfo.name }}
-                      </CardTitle>
-                      <CardDescription class="line-clamp-1 text-sm">
-                        {{ songInfo.artists }}
-                      </CardDescription>
-                    </div>
-
-                    <div class="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline" size="sm" class="min-w-[120px] flex-1 sm:flex-none"
-                        :disable="submitDisabled" @click.prevent="
-                          () => {
-                            songPlayingConfig = songInfo;
-                          }
-                        "
-                      >
-                        <Icon name="lucide:play" class="mr-1" size="16" />
-                        播放
-                      </Button>
-
-                      <Button
-                        size="sm" class="min-w-[120px] flex-1 sm:flex-none" :disabled="submitDisabled"
-                        @click.prevent="
-                          () => {
-                            form.setFieldValue('name', songInfo.name);
-                            form.setFieldValue('creator', songInfo.artists);
-                            form.setFieldValue('songId', songInfo.id);
-                            form.setFieldValue('imgId', songInfo.imgId);
-                            form.setFieldValue('duration', songInfo.duration);
-                            selectedSong = {
-                              songId: songInfo.id,
-                              name: songInfo.name,
-                              creator: songInfo.artists,
-                              source: songInfo.source,
-                              imgId: songInfo.imgId,
-                              duration: songInfo.duration,
-                            };
-                          }
-                        "
-                      >
-                        <Icon name="lucide:check" class="mr-1" size="16" />
-                        选择
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div v-if="songPlayingConfig.id.length < 1" class="text-center text-sm">
-            选择歌曲试听或确认歌曲信息
-          </div>
-          <SongPlayer
-            v-if="songPlayingConfig.id.length > 0" :id="songPlayingConfig.id" :name="songPlayingConfig.name"
-            :artists="songPlayingConfig.artists" :album="songPlayingConfig.album" :source="songPlayingConfig.source"
-            :img-id="songPlayingConfig.imgId"
-          />
-        </div>
-        <div v-else class="flex w-full flex-col items-center justify-center">
-          无搜索结果。
-        </div>
-      </div>
-      <div v-else class="flex h-[calc(100svh-10rem)] w-full flex-col items-center justify-center">
-        <Icon name="lucide:loader-circle" class="animate-spin" size="35" />
-        正在搜索中...
-      </div>
-    </div>
-  </SearchTemplate>
-  <UseTemplate>
-    <form class="mx-auto grid max-w-(--breakpoint-md) grid-cols-1 gap-6 p-4 md:p-6" @submit="onSubmit">
-      <FormField v-slot="{ componentField }" name="name">
-        <FormItem v-auto-animate>
-          <FormLabel>歌曲名</FormLabel>
-          <FormControl>
-            <Input v-bind="componentField" :disabled="tabStatus === 'search'" class="cursor-not-allowed" />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <FormField v-slot="{ componentField }" name="creator">
-        <FormItem v-auto-animate>
-          <FormLabel>歌手</FormLabel>
-          <FormControl>
-            <Input v-bind="componentField" :disabled="tabStatus === 'search'" class="cursor-not-allowed" />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <FormField v-if="tabStatus === 'search'" v-slot="{ componentField }" name="songId">
-        <FormItem v-auto-animate>
-          <FormLabel>歌曲ID</FormLabel>
-          <FormControl>
-            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <!-- <FormField v-if="tabStatus === 'custom'" v-slot="{ componentField }" name="customUrl">
-        <FormItem v-auto-animate>
-          <FormLabel>音频链接(URL)</FormLabel>
-          <FormControl>
-            <Input v-bind="componentField" />
-          </FormControl>
-        </FormItem>
-        <Button @click.prevent="getDuration(form.values.)">获取歌曲时长</Button>
-      </FormField> -->
-
-      <FormField v-slot="{ componentField }" name="duration">
-        <FormItem v-auto-animate>
-          <FormLabel>时长</FormLabel>
-          <FormControl>
-            <Input v-bind="componentField" disabled class="cursor-not-allowed" />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <SearchModule v-if="tabStatus === 'search'" />
-
-      <FormField v-slot="{ componentField }" type="radio" name="submitType">
-        <FormItem v-auto-animate class="space-y-3">
-          <FormLabel>投稿时名称</FormLabel>
-          <FormControl>
-            <RadioGroup class="flex flex-col space-y-1" v-bind="componentField">
-              <FormItem class="flex items-center space-y-0 gap-x-3">
-                <FormControl>
-                  <RadioGroupItem value="realName" />
-                </FormControl>
-                <FormLabel class="font-normal">
-                  实名
-                </FormLabel>
-              </FormItem>
-              <FormItem class="flex items-center space-y-0 gap-x-3">
-                <FormControl>
-                  <RadioGroupItem value="anonymous" />
-                </FormControl>
-                <FormLabel class="font-normal">
-                  匿名
-                </FormLabel>
-              </FormItem>
-              <FormItem class="flex items-center space-y-0 gap-x-3">
-                <FormControl>
-                  <RadioGroupItem value="alias" :disabled="!userStore.displayName" />
-                </FormControl>
-                <FormLabel class="font-normal">
-                  昵称
-                  <span v-if="userStore.displayName">({{ userStore.displayName }})</span>
-                </FormLabel>
-              </FormItem>
-            </RadioGroup>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <FormField v-slot="{ componentField }" name="message">
-        <FormItem v-auto-animate>
-          <FormLabel>私密留言（可选）</FormLabel>
-          <FormControl>
-            <Textarea v-bind="componentField" />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <FormField v-slot="{ componentField }" name="msgPublic">
-        <FormItem v-auto-animate>
-          <FormLabel>公开留言（可选）</FormLabel>
-          <FormControl>
-            <Textarea v-bind="componentField" />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <Button type="submit" :disabled="isPending || submitDisabled">
-        <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
-        提交
-      </Button>
-    </form>
-  </UseTemplate>
-
-  <Card class="mx-auto max-w-screen border backdrop-blur-xs">
-    <CardHeader>
-      <div class="flex justify-end">
-        <Button variant="outline" size="icon" @click.prevent="navigateTo('/')">
-          <Icon name="lucide:arrow-right" class="h-4 w-4" />
-        </Button>
-      </div>
-      <CardTitle class="text-lg font-semibold">
-        歌曲投稿
-      </CardTitle>
-      <CardDescription>
-        投稿前请确认：
-        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+    <!-- Rules -->
+    <Alert class="mb-6">
+      <AlertTitle class="flex items-center gap-2">
+        <Icon name="lucide:info" class="size-4" />
+        投稿前请确认
+      </AlertTitle>
+      <AlertDescription>
+        <ul class="mt-2 list-disc space-y-1 pl-5">
           <li class="text-destructive">
-            已阅读投稿规则和<NuxtLink to="/faq" class="text-blue-600">
+            已阅读投稿规则和<NuxtLink to="/faq" class="text-blue-600 hover:underline">
               常见问题
             </NuxtLink>
           </li>
           <li>检查是否已有相同歌曲</li>
-          <li>选择合适的投稿方式</li>
+          <li>选择合适的音乐源</li>
+          <li>最好选择网易云音乐，BiliBili其次，QQ音乐最后选择。</li>
+          <li>QQ音乐有时候无法获取完整VIP歌曲，若需投稿请播放确认是否完整。</li>
+          <li>BiliBili风控较为严格，有时候无法请求，请等待一段时间或联系管理员</li>
+          <li><span class="text-destructive">注意：</span>切换歌曲来源后，点击搜索按钮可使用新来源重新搜索。</li>
         </ul>
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Tabs default-value="search">
-        <TabsList class="grid w-full grid-cols-1">
-          <TabsTrigger value="search" @click="tabStatus = 'search'">
-            搜索歌曲
-          </TabsTrigger>
-          <!-- <TabsTrigger value="custom" @click="tabStatus = 'custom'">
-            手动投稿
-          </TabsTrigger> -->
-        </TabsList>
-        <TabsContent value="search">
-          <GridForm />
-        </TabsContent>
-        <!-- <TabsContent value="custom">
-          <GridForm />
-        </TabsContent> -->
-      </Tabs>
-    </CardContent>
-  </Card>
+      </AlertDescription>
+    </Alert>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <!-- Search Panel -->
+      <Card class="flex flex-col">
+        <CardHeader>
+          <div class="flex items-center gap-2">
+            <Icon name="lucide:search" class="text-primary" size="20" />
+            <CardTitle>搜索歌曲</CardTitle>
+          </div>
+          <CardDescription>选择来源并输入关键词搜索，可获取最多15首。</CardDescription>
+        </CardHeader>
+        <CardContent class="flex flex-col gap-4">
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <FormField v-slot="{ componentField }" name="source">
+              <FormItem v-auto-animate class="w-full sm:w-[160px]">
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger>
+                      <SelectValue placeholder="请选择来源" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem v-for="(source, index) in musicSources" :key="index" :value="source.value">
+                        {{ source.label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <div class="flex w-full items-center gap-2">
+              <Input
+                id="search"
+                v-model="SearchInput"
+                type="text"
+                placeholder="输入歌曲名或歌手名"
+                :disabled="isPending || songFetching"
+                class="grow"
+                @keyup.enter="onSearch"
+              />
+              <Button :disabled="isPending || songFetching || submitDisabled" @click.prevent="onSearch">
+                <Icon v-if="songFetching" name="lucide:loader-circle" class="mr-2 animate-spin" size="16" />
+                搜索
+              </Button>
+            </div>
+          </div>
+
+          <!-- Scrollable Results -->
+          <template v-if="SearchKey.trim()">
+            <ScrollArea v-if="!songFetching && songsList && songsList.length" class="h-[340px] rounded-md border">
+              <div class="p-2">
+                <div
+                  v-for="songInfo in songsList"
+                  :key="songInfo.id"
+                  class="group relative flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/60"
+                  :class="{ 'bg-primary/10 hover:bg-primary/10': selectedSong.songId === songInfo.id }"
+                >
+                  <Avatar class="size-12 shrink-0 rounded">
+                    <NuxtImg
+                      :src="getImgUrl(songInfo.imgId, songInfo.source)"
+                      class="object-cover"
+                      :alt="songInfo.name"
+                      loading="lazy"
+                    />
+                    <AvatarFallback>
+                      <Icon name="lucide:music" size="20" />
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div class="min-w-0 flex-1 cursor-pointer" @click="handleSelectSong(songInfo)">
+                    <p class="truncate font-medium">
+                      {{ songInfo.name }}
+                    </p>
+                    <p class="truncate text-sm text-muted-foreground">
+                      {{ songInfo.artists }}
+                    </p>
+                    <div class="mt-1 flex items-center gap-2">
+                      <Badge variant="outline" class="text-xs">
+                        {{ getMusicSourceName(songInfo.source) }}
+                      </Badge>
+                      <span class="text-xs text-muted-foreground">
+                        {{ formatDuration(songInfo.duration) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="flex shrink-0 flex-col gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-8 w-8"
+                      :disabled="submitDisabled"
+                      @click.prevent="handlePlaySong(songInfo)"
+                    >
+                      <Icon name="lucide:play" size="16" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-8 w-8"
+                      :class="{ 'text-primary': selectedSong.songId === songInfo.id }"
+                      :disabled="submitDisabled"
+                      @click.prevent="handleSelectSong(songInfo)"
+                    >
+                      <Icon :name="selectedSong.songId === songInfo.id ? 'lucide:check-circle' : 'lucide:check'" size="16" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+
+            <div v-else-if="!songFetching" class="flex h-[200px] flex-col items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
+              <Icon name="lucide:music-off" class="mb-2" size="32" />
+              无搜索结果
+            </div>
+
+            <div v-else class="flex h-[200px] flex-col items-center justify-center rounded-md border text-sm text-muted-foreground">
+              <Icon name="lucide:loader-circle" class="mb-2 animate-spin" size="32" />
+              正在搜索中...
+            </div>
+          </template>
+
+          <div v-else class="flex h-[200px] flex-col items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
+            <Icon name="lucide:search" class="mb-2" size="32" />
+            输入关键词开始搜索
+          </div>
+
+          <!-- Player -->
+          <SongPlayer
+            v-if="songPlayingConfig.id.length > 0"
+            :id="songPlayingConfig.id"
+            :name="songPlayingConfig.name"
+            :artists="songPlayingConfig.artists"
+            :album="songPlayingConfig.album"
+            :source="songPlayingConfig.source"
+            :img-id="songPlayingConfig.imgId"
+          />
+        </CardContent>
+      </Card>
+
+      <!-- Submission Form -->
+      <Card>
+        <CardHeader>
+          <div class="flex items-center gap-2">
+            <Icon name="lucide:send" class="text-primary" size="20" />
+            <CardTitle>确认投稿</CardTitle>
+          </div>
+          <CardDescription>核对歌曲信息并完善投稿内容</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form class="space-y-5" @submit="onSubmit">
+            <!-- Selected Song Summary -->
+            <div
+              v-if="selectedSong.songId"
+              class="flex items-center gap-3 rounded-lg border bg-muted/30 p-3"
+            >
+              <Avatar class="size-14 rounded">
+                <NuxtImg
+                  :src="getImgUrl(selectedSong.imgId, selectedSong.source as TMediaSource)"
+                  class="object-cover"
+                  :alt="selectedSong.name"
+                  loading="lazy"
+                />
+                <AvatarFallback>
+                  <Icon name="lucide:music" size="24" />
+                </AvatarFallback>
+              </Avatar>
+              <div class="min-w-0 flex-1">
+                <p class="truncate font-medium">
+                  {{ selectedSong.name }}
+                </p>
+                <p class="truncate text-sm text-muted-foreground">
+                  {{ selectedSong.creator }}
+                </p>
+                <div class="mt-1 flex items-center gap-2">
+                  <Badge variant="outline" class="text-xs">
+                    {{ getMusicSourceName(selectedSong.source as TMediaSource) }}
+                  </Badge>
+                  <span class="text-xs text-muted-foreground">
+                    {{ formatDuration(selectedSong.duration) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-else
+              class="flex h-[88px] flex-col items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground"
+            >
+              <Icon name="lucide:mouse-pointer-click" class="mb-1" size="20" />
+              从左侧或上侧选择一首歌曲
+            </div>
+
+            <FormField v-slot="{ componentField }" type="radio" name="submitType">
+              <FormItem v-auto-animate class="space-y-3">
+                <FormLabel>投稿时名称</FormLabel>
+                <FormControl>
+                  <RadioGroup class="flex flex-col space-y-1" v-bind="componentField">
+                    <FormItem class="flex items-center space-y-0 gap-x-3">
+                      <FormControl>
+                        <RadioGroupItem value="realName" />
+                      </FormControl>
+                      <FormLabel class="font-normal">
+                        实名
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem class="flex items-center space-y-0 gap-x-3">
+                      <FormControl>
+                        <RadioGroupItem value="anonymous" />
+                      </FormControl>
+                      <FormLabel class="font-normal">
+                        匿名
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem class="flex items-center space-y-0 gap-x-3">
+                      <FormControl>
+                        <RadioGroupItem value="alias" :disabled="!userStore.displayName" />
+                      </FormControl>
+                      <FormLabel class="font-normal">
+                        昵称
+                        <span v-if="userStore.displayName">({{ userStore.displayName }})</span>
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField name="expectedPlayDate">
+              <FormItem v-auto-animate>
+                <FormLabel>期望播放日期（可选）</FormLabel>
+                <FormControl>
+                  <Popover>
+                    <PopoverTrigger as-child>
+                      <Button
+                        variant="outline"
+                        class="w-full justify-start text-left font-normal"
+                        :class="{ 'text-muted-foreground': !form.values.expectedPlayDate }"
+                      >
+                        <Icon name="lucide:calendar" class="mr-2 h-4 w-4" />
+                        {{ form.values.expectedPlayDate || "选择期望播放日期" }}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent class="w-auto p-0">
+                      <Calendar
+                        :model-value="expectedDateValue"
+                        initial-focus
+                        @update:model-value="handleExpectedDateChange"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormControl>
+                <FormDescription>
+                  选择后歌曲将优先安排在该日期播放；不选择则由系统自由分配。
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField v-slot="{ componentField }" name="message">
+              <FormItem v-auto-animate>
+                <FormLabel>私密留言（可选）</FormLabel>
+                <FormControl>
+                  <Textarea v-bind="componentField" placeholder="写下你想对管理员说的话..." />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField v-slot="{ componentField }" name="msgPublic">
+              <FormItem v-auto-animate>
+                <FormLabel>公开留言（可选）</FormLabel>
+                <FormControl>
+                  <Textarea v-bind="componentField" placeholder="写下你想对大家说的话..." />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <Button type="submit" class="w-full" :disabled="isPending || submitDisabled || !selectedSong.songId">
+              <Icon v-if="isPending" name="lucide:loader-circle" class="mr-2 animate-spin" />
+              提交投稿
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
+import type { DateValue } from "@internationalized/date";
 import type { RouterOutput, TMediaSource, TSubmitType } from "~~/types";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
+import { parseDate } from "@internationalized/date";
 import * as z from "zod";
-import { getImgUrl, musicSources } from "~~/constants";
-// import { searchSongs } from "~~/deprecate/shared/plugin";
+import { getImgUrl, getMusicSourceName, musicSources } from "~~/constants";
 import SongPlayer from "~/components/song/SongPlayer.vue";
-// import { songFetching } from '~/composables/ClientSearch';
 
 const { $trpc } = useNuxtApp();
 const userStore = useUserStore();
@@ -298,6 +347,7 @@ definePageMeta({
 });
 
 useHead({
+  title: "歌曲投稿",
   meta: [
     {
       name: "referrer",
@@ -327,12 +377,6 @@ try {
   navigateTo("/");
 }
 
-// Reuse `form` section
-const [UseTemplate, GridForm] = createReusableTemplate();
-const [SearchTemplate, SearchModule] = createReusableTemplate();
-
-const tabStatus = ref<"search" | "custom">("search");
-
 const formSchema = toTypedSchema(
   z.object({
     name: z
@@ -345,11 +389,15 @@ const formSchema = toTypedSchema(
       .trim()
       .min(1, "请输入歌手名")
       .max(128, "歌手长度最大为128"),
-    songId: z.string({ required_error: "请输入歌曲ID" }).trim().min(1, "请输入歌曲ID").optional(),
+    songId: z.string({ required_error: "请输入歌曲ID" }).trim().min(1, "请输入歌曲ID"),
     imgId: z.string().trim(),
     source: z.custom<TMediaSource>(),
     duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
     submitType: z.custom<TSubmitType>(),
+    expectedPlayDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD")
+      .optional(),
     message: z.string().trim().optional(),
     msgPublic: z.string().trim().optional(),
     customUrl: z.string().trim().url().optional(),
@@ -359,6 +407,25 @@ const formSchema = toTypedSchema(
 const form = useForm({
   validationSchema: formSchema,
 });
+
+const expectedDateValue = computed<DateValue | undefined>(() => {
+  const value = form.values.expectedPlayDate;
+  if (!value)
+    return undefined;
+  try {
+    return parseDate(value);
+  } catch {
+    return undefined;
+  }
+});
+
+function handleExpectedDateChange(date: DateValue | undefined) {
+  if (!date) {
+    form.setFieldValue("expectedPlayDate", undefined);
+    return;
+  }
+  form.setFieldValue("expectedPlayDate", date.toString());
+}
 
 const { mutate, isPending } = useMutation({
   mutationFn: $trpc.song.create.mutate,
@@ -390,6 +457,27 @@ const selectedSong = ref({
   duration: 0,
 });
 
+function handleSelectSong(songInfo: RouterOutput["search"]["mixSearch"][0]) {
+  form.setFieldValue("name", songInfo.name);
+  form.setFieldValue("creator", songInfo.artists);
+  form.setFieldValue("songId", songInfo.id);
+  form.setFieldValue("imgId", songInfo.imgId);
+  form.setFieldValue("source", songInfo.source);
+  form.setFieldValue("duration", songInfo.duration);
+  selectedSong.value = {
+    songId: songInfo.id,
+    name: songInfo.name,
+    creator: songInfo.artists,
+    source: songInfo.source,
+    imgId: songInfo.imgId,
+    duration: songInfo.duration,
+  };
+}
+
+function handlePlaySong(songInfo: RouterOutput["search"]["mixSearch"][0]) {
+  songPlayingConfig.value = songInfo;
+}
+
 const onSubmit = form.handleSubmit((values) => {
   const finalValues = {
     ...values,
@@ -404,13 +492,6 @@ const onSubmit = form.handleSubmit((values) => {
 });
 
 function onSearch() {
-  // if (!(form.values.name?.trim() || form.values.creator?.trim())) {
-  //   toast.error('请输入歌曲名和歌手名！');
-  // } else if (!form.values.source) {
-  //   toast.error('请选择歌曲来源！');
-  // } else {
-  //   SearchKey.value = `${form.values.name?.trim() || ''} ${form.values.creator?.trim() || ''}`.trim();
-  // }
   if (SearchInput.value.trim().length < 1) {
     toast.error("请输入歌曲名或歌手名！");
   } else if (!form.values.source) {
@@ -425,7 +506,6 @@ function onSearch() {
 //   isFetching: false,
 // })
 
-const queryClient = useQueryClient();
 // const songsList = ref<RouterOutput['search']['mixSearch']>([]);
 const { isFetching: songFetching, data: songsList } = useQuery({
   queryFn: () =>
@@ -433,7 +513,7 @@ const { isFetching: songFetching, data: songsList } = useQuery({
       key: SearchKey.value,
       source: form.values.source!,
     }),
-  queryKey: ["search.mixSearch"],
+  queryKey: computed(() => ["search.mixSearch", form.values.source, SearchKey.value]),
   refetchOnWindowFocus: false,
   enabled: computed(() => SearchKey.value.trim().length > 0),
 });
@@ -444,30 +524,21 @@ const { isFetching: songFetching, data: songsList } = useQuery({
 //   enabled: computed(() => SearchKey.value.trim().length > 0),
 // });
 
-// new song selected
-watch([() => SearchKey.value, () => form.values.source], async () => {
-  if (SearchKey.value.trim().length === 0 || !form.values.source || !tabStatus.value) {
-    return;
-  }
-  queryClient.invalidateQueries({ queryKey: ["search.mixSearch"] });
-});
-
 watch(
-  () => tabStatus.value,
+  () => form.values.source,
   () => {
     form.resetForm({
       values: {
         name: "",
         creator: "",
         songId: "",
-        source: undefined,
+        source: form.values.source,
         imgId: "",
         duration: 0,
+        expectedPlayDate: undefined,
       },
     });
-    // songsList.value = []; //have been cached by queryClient
     SearchKey.value = "";
-    SearchInput.value = "";
     selectedSong.value = {
       songId: "",
       name: "",
@@ -487,4 +558,13 @@ watch(
     };
   },
 );
+
+function formatDuration(seconds: number): string {
+  if (!seconds || seconds <= 0)
+    return "00:00";
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  const pad = (num: number) => num.toString().padStart(2, "0");
+  return `${pad(minutes)}:${pad(remainingSeconds)}`;
+}
 </script>

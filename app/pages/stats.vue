@@ -22,7 +22,7 @@
     </div>
     <div>
       <CardHeader>
-        <CardTitle> <span class="text-muted-foreground">#1</span> 每周投稿 </CardTitle>
+        <CardTitle> <span class="text-muted-foreground">#1</span> 每周投稿(最近14天数据) </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="flex gap-2 overflow-x-auto">
@@ -50,17 +50,17 @@
     </div>
     <div>
       <CardHeader>
-        <CardTitle> <span class="text-muted-foreground">#2</span> 歌手统计 </CardTitle>
+        <CardTitle> <span class="text-muted-foreground">#2</span> 歌手统计(前10名) </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea class="h-[500px]" type="always">
+        <ScrollArea class="h-[400px]" type="always">
           <div class="flex flex-col gap-2">
             <div
               v-for="(singer, i) of singerData"
               :key="singer.name"
               class="items-center gap-3 md:flex"
             >
-              <div class="truncate text-xs text-muted-foreground md:w-40 md:text-right">
+              <div class="truncate text-xs md:w-40 md:text-right">
                 {{ singer.name }}
               </div>
               <div class="flex w-full">
@@ -88,7 +88,7 @@
     </div>
     <div>
       <CardHeader>
-        <CardTitle> <span class="text-muted-foreground">#3</span> 热门歌曲统计(点赞量) </CardTitle>
+        <CardTitle> <span class="text-muted-foreground">#3</span> 热门歌曲统计(点赞量前10名) </CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea class="h-[500px]" type="always">
@@ -132,6 +132,10 @@
 
 <script setup lang="ts">
 import { getImgUrl } from "~~/constants";
+
+useHead({
+  title: "统计",
+});
 
 const { $trpc } = useNuxtApp();
 const userStore = useUserStore();

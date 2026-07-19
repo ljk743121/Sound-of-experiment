@@ -32,3 +32,18 @@ logs
 
 # Deprecated Modules
 deprecated
+
+#python cache
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.csv
+
+# PyInstaller / Python build outputs
+externalScripts/build/
+externalScripts/dist/
+externalScripts/gui_automation/
+externalScripts/music_downloader/
+*.log
+*.spec.bak
+*.exe
