@@ -265,7 +265,7 @@ function navigateToDropped() {
 
 function downloadCsv(csvContent: string, date?: string) {
   try {
-    const dateStr = date || new Date().toISOString().split("T")[0];
+    const dateStr = date || new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()).replace(/\//g, "-");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
