@@ -11,7 +11,7 @@ import { arrangements, songs } from "~~/server/db/schema";
 import { scheduleSongs } from "~~/server/utils/arrange";
 import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
 import { getConfig } from "~~/server/utils/universal";
-import verifyHasPlayedToken from "~~/server/utils/verifyHasPlayedToken";
+// import verifyHasPlayedToken from "~~/server/utils/verifyHasPlayedToken";
 import {
   adminProcedure,
   protectedProcedure,
@@ -509,12 +509,11 @@ export const arrangementsRouter = router({
     return arrangement;
   }),
 
-  hasPlayed: publicProcedure
+  hasPlayed: protectedProcedure.use(requirePermission(["robot"]))
     .input(
       z.object({
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
         songs: z.array(z.number().int().positive()).min(1, "歌曲列表不能为空"),
-        token: z.string().min(1, "Token 不能为空"),
         hasPlayed: z.boolean().default(true),
       }),
     )
@@ -526,13 +525,13 @@ export const arrangementsRouter = router({
           message: "监控是否完成放歌任务未开启，无法处理请求",
         });
       }
-      const { date, songs: songIds, token, hasPlayed } = input;
-      if (!(await verifyHasPlayedToken(token))) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Token 验证失败",
-        });
-      }
+      const { date, songs: songIds, hasPlayed } = input;
+      // if (!(await verifyHasPlayedToken(token))) {
+      //   throw new TRPCError({
+      //     code: "UNAUTHORIZED",
+      //     message: "Token 验证失败",
+      //   });
+      // }
       if (songIds.length === 0) {
         return {
           success: true,

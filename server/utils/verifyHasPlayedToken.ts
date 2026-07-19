@@ -1,3 +1,4 @@
+// deprecated
 import CryptoJS from "crypto-js";
 import { env } from "~~/server/env";
 
