@@ -152,6 +152,10 @@ async function officialSearch(key: string, retryNum = 0): Promise<ISongSearchRes
   const body = await signRequest<TSearchResponse>(bodyData);
 
   if (!body || body.code !== 0 || body.req.code !== 0 || !body.req.data?.body?.item_song) {
+    consola.warn(
+      `QQ Music search failed for "${key}" (code: ${body?.code}, req.code: ${body?.req?.code}). Retrying ${retryNum + 1}/5...`,
+    );
+    await new Promise(resolve => setTimeout(resolve, 1_000 * (retryNum + 1)));
     return officialSearch(key, retryNum + 1);
   }
 
