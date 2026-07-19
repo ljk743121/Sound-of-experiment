@@ -269,7 +269,7 @@
         </TabsContent>
       </Tabs>
     </section>
-    <div class="-mx-5 sticky bottom-0 z-10 shrink-0 min-h-[240px] bg-background md:relative md:col-span-2 md:mx-0 md:min-h-[160px] md:z-50 lg:min-h-[80px]">
+    <div class="-mx-5 shrink-0 min-h-[240px] bg-background md:col-span-2 md:mx-0 md:min-h-[160px] lg:min-h-[80px]">
       <ClientOnly>
         <MusicFlow v-if="userStore.loggedIn" :options="MusicFlowConfig" :fetch-url="fetchUrl" />
       </ClientOnly>
