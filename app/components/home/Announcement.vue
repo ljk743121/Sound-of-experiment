@@ -1,11 +1,11 @@
 <template>
   <ClientOnly>
-    <div v-if="announcementList && announcementList.length">
-      <div v-for="(item, index) in announcementList" :key="index">
+    <div v-if="items && items.length">
+      <div v-for="(item, index) in items" :key="index">
         <Card class="border-none p-4">
           <CardTitle>
             <div v-if="item.createdAt" class="text-right text-xs text-muted-foreground">
-              {{ useTimeAgo(item.createdAt) }}
+              {{ item.timeAgo }}
             </div>
           </CardTitle>
           <CardDescription>
@@ -36,4 +36,11 @@ const { announcementList } = defineProps<{
 }>();
 
 const { $mdRenderer } = useNuxtApp();
+
+const items = computed(() =>
+  announcementList?.map(item => ({
+    ...item,
+    timeAgo: item.createdAt ? useTimeAgo(item.createdAt) : undefined,
+  })),
+);
 </script>

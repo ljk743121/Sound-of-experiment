@@ -265,12 +265,12 @@ function navigateToDropped() {
 
 function downloadCsv(csvContent: string, date?: string) {
   try {
-    const now = date ? new Date(date) : new Date();
+    const dateStr = date || new Date().toISOString().split("T")[0];
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `songs_${now.toISOString().split("T")[0]}.csv`;
+    link.download = `songs_${dateStr}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     toast.success("正在下载 CSV 文件...");

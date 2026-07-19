@@ -107,11 +107,6 @@
       </AccordionItem>
 
       <AccordionItem value="item-12">
-        <AccordionTrigger>什么是期望播放日期？</AccordionTrigger>
-        <AccordionContent />
-      </AccordionItem>
-
-      <AccordionItem value="item-13">
         <AccordionTrigger><strong>歌曲排歌规则是怎样的？</strong></AccordionTrigger>
         <AccordionContent>
           首先解释一个概念：期望播放日期。<br>
@@ -127,7 +122,7 @@
         </AccordionContent>
       </AccordionItem>
 
-      <AccordionItem value="item-14">
+      <AccordionItem value="item-13">
         <AccordionTrigger>我的投稿会有哪些状态？</AccordionTrigger>
         <AccordionContent>
           <ul class="list-disc space-y-2 pl-5">

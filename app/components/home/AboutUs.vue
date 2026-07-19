@@ -163,6 +163,8 @@ const { data: commits, status } = useFetch<GitHubCommit[]>(
   {
     key: "github-commits",
     default: () => [],
+    lazy: true,
+    server: false,
   },
 );
 

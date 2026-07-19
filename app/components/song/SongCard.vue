@@ -357,7 +357,8 @@ const sourceName = computed(() => getMusicSourceName(song.source as TMediaSource
 
 const realNameLabel = computed(() => (song.isRealName ? "实名" : "匿名"));
 
-const timeAgo = computed(() => (song.createdAt ? useTimeAgo(song.createdAt) : undefined));
+const rawTimeAgo = useTimeAgo(() => song.createdAt ?? "");
+const timeAgo = computed(() => (song.createdAt ? rawTimeAgo.value : undefined));
 
 const canPlay = computed(() => Boolean(song.songId && song.source && song.songId.length > 0));
 
