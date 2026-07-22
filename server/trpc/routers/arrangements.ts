@@ -7,7 +7,7 @@ import { and, asc, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { MAX_DAILY_SONG_DURATION } from "~~/constants";
 import { db } from "~~/server/db";
-import { arrangements, songs } from "~~/server/db/schema";
+import { arrangements, songs, users } from "~~/server/db/schema";
 import { scheduleSongs } from "~~/server/utils/arrange";
 import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
 import { getConfig } from "~~/server/utils/universal";
@@ -207,10 +207,27 @@ export const arrangementsRouter = router({
       },
     });
 
-    await cacheSet("arrangement:listSafe", JSON.stringify(arrangementsData), { EX: 86400 });
+    const likerIds = [...new Set(arrangementsData.flatMap(a => a.songs.flatMap(s => s.likes)))];
+    const likers = likerIds.length
+      ? await db.query.users.findMany({
+        where: inArray(users.id, likerIds),
+        columns: { id: true, displayName: true, name: true },
+      })
+      : [];
+    const likerMap = new Map(likers.map(u => [u.id, u]));
+
+    const result = arrangementsData.map(arrangement => ({
+      ...arrangement,
+      songs: arrangement.songs.map(song => ({
+        ...song,
+        likeUsers: song.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)?.name || id),
+      })),
+    }));
+
+    await cacheSet("arrangement:listSafe", JSON.stringify(result), { EX: 86400 });
     consola.info(`${new Date().toLocaleString()} Redis 缓存写入：arrangement:listSafe`);
 
-    return arrangementsData;
+    return result;
   }),
 
   listGuest: publicProcedure.query(async () => {

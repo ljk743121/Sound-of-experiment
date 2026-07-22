@@ -1,31 +1,44 @@
 import type { TSong } from "~~/types";
 import { consola } from "consola";
+import { defaultVipSign } from "~~/constants";
 import * as plugins from "./plugins";
+
+export interface GetMusicUrlItem {
+  fn: (id: string) => Promise<{ url: string; pay: boolean }>;
+  priority: number;
+  retryCount?: number;
+}
 
 export interface MusicSourcePlugin {
   name: string;
   alias: string;
-  searchSongs: (key: string) => Promise<TSong[]>;
-  getMusicUrl: { fn: (id: string) => Promise<{ url: string; pay: boolean }>; priority: number }[];
+  retryCount?: number;
+  searchSongs:
+    | ((key: string) => Promise<TSong[]>)
+    | { fn: (key: string) => Promise<TSong[]>; retryCount?: number };
+  getMusicUrl: GetMusicUrlItem[];
 }
-
-const MAX_RETRIES = 5;
 
 function withRetry<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   pluginName: string,
   fnName: string,
+  maxRetries: number,
 ): T {
   return (async (...args: any[]) => {
     let lastError: unknown;
-    for (let i = 0; i <= MAX_RETRIES; i++) {
+    for (let i = 0; i <= maxRetries; i++) {
       try {
         return await fn(...args);
       } catch (error) {
         lastError = error;
-        if (i < MAX_RETRIES) {
+        // VIP 歌曲无需重试
+        if (error instanceof Error && error.message === defaultVipSign) {
+          throw error;
+        }
+        if (i < maxRetries) {
           consola.warn(
-            `[${pluginName}] ${fnName} failed (${error instanceof Error ? error.message : String(error)}). Retrying ${i + 1}/${MAX_RETRIES}...`,
+            `[${pluginName}] ${fnName} failed (${error instanceof Error ? error.message : String(error)}). Retrying ${i + 1}/${maxRetries}...`,
           );
           await new Promise(resolve => setTimeout(resolve, 1_000 * (i + 1)));
         }
@@ -39,14 +52,22 @@ class PluginManager {
   private plugins: Map<string, MusicSourcePlugin> = new Map();
 
   use(plugin: MusicSourcePlugin): this {
-    // Wrap searchSongs with retry
-    const wrappedSearchSongs = withRetry(plugin.searchSongs, plugin.name, "searchSongs");
+    const pluginRetry = plugin.retryCount ?? 3;
 
-    // Wrap each getMusicUrl fn with retry
-    const wrappedGetMusicUrl = plugin.getMusicUrl.map(item => ({
-      ...item,
-      fn: withRetry(item.fn, plugin.name, item.fn.name || "getMusicUrl"),
-    }));
+    // Normalize searchSongs — accept both plain fn and { fn, retryCount? }
+    const searchRaw = plugin.searchSongs;
+    const searchFn = typeof searchRaw === "function" ? searchRaw : searchRaw.fn;
+    const searchRetry = typeof searchRaw === "function" ? pluginRetry : (searchRaw.retryCount ?? pluginRetry);
+    const wrappedSearchSongs = withRetry(searchFn, plugin.name, "searchSongs", searchRetry);
+
+    // Wrap each getMusicUrl fn — each item can override retryCount
+    const wrappedGetMusicUrl = plugin.getMusicUrl.map((item) => {
+      const itemRetry = item.retryCount ?? pluginRetry;
+      return {
+        priority: item.priority,
+        fn: withRetry(item.fn, plugin.name, item.fn.name || "getMusicUrl", itemRetry),
+      };
+    });
 
     this.plugins.set(plugin.name, {
       ...plugin,

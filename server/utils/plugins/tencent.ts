@@ -278,10 +278,10 @@ async function metingapiFetch(id: string) {
 export const qqmusic = createPlugin({
   name: "tx",
   alias: "QQ音乐",
-  searchSongs: officialSearch,
+  searchSongs: { fn: officialSearch, retryCount: 5 },
   getMusicUrl: [
-    { fn: officialFetch, priority: 1 },
-    { fn: metingapiFetch, priority: 0.9 },
-    { fn: vkeyFetch, priority: 0.8 },
+    { fn: officialFetch, priority: 1, retryCount: 1 },
+    { fn: metingapiFetch, priority: 0.9, retryCount: 1 },
+    { fn: vkeyFetch, priority: 0.8, retryCount: 4 },
   ],
 });

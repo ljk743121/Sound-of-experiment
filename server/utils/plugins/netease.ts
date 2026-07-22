@@ -200,11 +200,11 @@ async function metingapiFetch(id: string) {
 export const netease = createPlugin({
   name: "wy",
   alias: "网易云音乐",
-  searchSongs: officialSearch,
+  searchSongs: { fn: officialSearch, retryCount: 1 },
   getMusicUrl: [
-    { fn: officialFetch, priority: 1 },
+    { fn: officialFetch, priority: 1, retryCount: 0 },
     // { fn: officialFetch2, priority: 0.9 },
-    { fn: metingapiFetch, priority: 0.9 },
-    { fn: vkeyFetch, priority: 0.8 },
+    { fn: metingapiFetch, priority: 0.9, retryCount: 2 },
+    { fn: vkeyFetch, priority: 0.8, retryCount: 2 },
   ],
 });

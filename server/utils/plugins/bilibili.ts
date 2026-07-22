@@ -165,8 +165,8 @@ async function search(keyword: string) {
 export const bilibili = createPlugin({
   name: "bilibili",
   alias: "哔哩哔哩",
-  searchSongs: search,
+  searchSongs: { fn: search, retryCount: 1 },
   getMusicUrl: [
-    { fn: getTrackUrl, priority: 1 },
+    { fn: getTrackUrl, priority: 1, retryCount: 1 },
   ],
 });

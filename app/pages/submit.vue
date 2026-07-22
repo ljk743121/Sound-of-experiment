@@ -232,6 +232,20 @@
               从左侧或上侧选择一首歌曲
             </div>
 
+            <div
+              v-if="selectedSong.songId && (form.errors.value.songId || form.errors.value.duration)"
+              class="space-y-1 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive"
+            >
+              <p v-if="form.errors.value.songId" class="flex items-center gap-1.5">
+                <Icon name="lucide:circle-alert" size="14" />
+                <span>歌曲ID：{{ form.errors.value.songId }}</span>
+              </p>
+              <p v-if="form.errors.value.duration" class="flex items-center gap-1.5">
+                <Icon name="lucide:circle-alert" size="14" />
+                <span>时长：{{ form.errors.value.duration }}</span>
+              </p>
+            </div>
+
             <FormField v-slot="{ componentField }" type="radio" name="submitType">
               <FormItem v-auto-animate class="space-y-3">
                 <FormLabel>投稿时名称</FormLabel>
@@ -391,9 +405,13 @@ const formSchema = toTypedSchema(
       .max(128, "歌手长度最大为128"),
     songId: z.string({ required_error: "请输入歌曲ID" }).trim().min(1, "请输入歌曲ID"),
     imgId: z.string().trim(),
-    source: z.custom<TMediaSource>(),
+    source: z.custom<TMediaSource>(val => musicSources.some(source => source.value === val), {
+      message: "请选择歌曲来源",
+    }),
     duration: z.number().positive().min(30, "歌曲长度最小为30秒").max(60 * 10, "歌曲长度最大为10分钟"),
-    submitType: z.custom<TSubmitType>(),
+    submitType: z.custom<TSubmitType>(val => ["realName", "anonymous", "alias"].includes(val as string), {
+      message: "请选择投稿时名称",
+    }),
     expectedPlayDate: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD")

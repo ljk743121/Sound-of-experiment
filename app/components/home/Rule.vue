@@ -64,7 +64,7 @@
                 <li class="flex gap-2">
                   <span class="text-primary">•</span>
                   <span>
-                    支持音源优先级：<strong>网易云音乐</strong>（推荐）> BiliBili > QQ音乐 > 自定义链接。
+                    支持音源优先级：<strong>网易云音乐</strong>（推荐）> BiliBili > QQ音乐。
                   </span>
                 </li>
                 <li class="flex gap-2">

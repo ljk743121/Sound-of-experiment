@@ -47,6 +47,7 @@
 - 投稿时段设置
 - 数据统计面板
 - 常见问题（FAQ）页面
+- 歌曲点赞显示（显示点赞数及点赞人）
 - 暗黑模式支持
 
 ### v2.4.0 主要更新
@@ -244,6 +245,32 @@ interface TSong {
   duration: number; // 时长（单位：s）
 }
 ```
+
+### ⏳ 重试机制
+
+插件管理器自动为每个插件的 `searchSongs` 和 `getMusicUrl` 中的所有函数添加失败重试，无需在每个插件中单独实现。支持三级重试次数配置，优先级从高到低：
+
+1. **函数级别** — 单独指定某个搜索或 URL 获取函数的重试次数
+2. **插件级别** — 该插件所有函数使用同一个重试次数
+3. **默认值** — 不配置时默认为 `5` 次
+
+```typescript
+export const mysource = createPlugin({
+  name: "my-source",
+  alias: "我的音源",
+  retryCount: 3, // 插件级兜底：重试 3 次
+  searchSongs: { fn: mySearchSongs, retryCount: 2 }, // 搜索只重试 2 次（覆盖插件级）
+  getMusicUrl: [
+    { fn: getMusicUrl, priority: 1, retryCount: 1 }, // 主链只重试 1 次
+    { fn: getMusicUrl2, priority: 0.9 }, // 未设，使用插件级 3
+    { fn: getMusicUrl3, priority: 0.8 }, // 未设，使用插件级 3
+  ],
+});
+```
+
+重试策略：每次失败后等待 `1s × 重试序号`，依次递增（1s, 2s, 3s...），每次重试时在控制台输出 `[插件名称] 函数名 failed (...). Retrying N/最大重试次数...`。
+
+**注意：** 插件各函数正常抛错即可，`PluginManager.use()` 自动包裹重试逻辑，无需在插件实现中编写任何重试代码。
 
 ## 项目协议
 

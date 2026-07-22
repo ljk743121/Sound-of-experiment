@@ -125,6 +125,11 @@
         <Icon name="lucide:info" class="mr-1 size-4" />
         详情
       </Button>
+
+      <div v-if="likeUsersText" class="w-full pt-2 text-xs text-muted-foreground">
+        <Icon name="lucide:heart" class="mr-1 inline size-3" />
+        {{ likeUsersText }}
+      </div>
     </CardContent>
 
     <ClientOnly>
@@ -321,6 +326,10 @@
 import type { RouterOutput, TMediaSource } from "~~/types";
 import { getImgUrl, getMusicSourceName } from "~~/constants";
 
+type TSongCardSong = Partial<RouterOutput["song"]["list"][0]> & {
+  likeUsers?: string[];
+};
+
 const {
   song,
   type = "public",
@@ -331,14 +340,14 @@ const {
 } = defineProps<{
   type?: "public" | "review" | "songs";
   selected?: boolean;
-  song: Partial<RouterOutput["song"]["listMine"][0]>;
+  song: TSongCardSong;
   isArrangement?: boolean;
   isMine?: boolean;
   isPlaying?: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "songExport", songInformation: Partial<RouterOutput["song"]["listMine"][0]>): void;
+  (e: "songExport", songInformation: TSongCardSong): void;
 }>();
 
 const isOpen = ref(false);
@@ -352,6 +361,7 @@ const queryClient = useQueryClient();
 const imgUrl = computed(() =>
   song.imgId && song.source ? getImgUrl(song.imgId, song.source) : undefined,
 );
+const likeUsersText = computed(() => song.likeUsers?.join(", ") ?? "");
 
 const sourceName = computed(() => getMusicSourceName(song.source as TMediaSource));
 

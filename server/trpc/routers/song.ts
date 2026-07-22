@@ -171,7 +171,7 @@ export const songRouter = router({
 
   listSafe: protectedProcedure.query(async () => {
     const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);// two weeks
-    return await db.query.songs.findMany({
+    const rawSongs = await db.query.songs.findMany({
       where: or(
         inArray(songs.state, ["pending", "approved", "dropped"]),
         and(
@@ -200,6 +200,20 @@ export const songRouter = router({
         msgPublic: true,
       },
     });
+
+    const likerIds = [...new Set(rawSongs.flatMap(s => s.likes))];
+    const likers = likerIds.length
+      ? await db.query.users.findMany({
+        where: inArray(users.id, likerIds),
+        columns: { id: true, displayName: true, name: true },
+      })
+      : [];
+    const likerMap = new Map(likers.map(u => [u.id, u]));
+
+    return rawSongs.map(song => ({
+      ...song,
+      likeUsers: song.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)?.name || id),
+    }));
   }),
 
   listGuest: publicProcedure.query(async () => {
@@ -232,8 +246,22 @@ export const songRouter = router({
       orderBy: desc(songs.createdAt),
       where: eq(songs.ownerId, ctx.user.id),
     });
-    await cacheSet(cacheKey, JSON.stringify(list), { EX: 86400 });
-    return list;
+
+    const likerIds = [...new Set(list.flatMap(s => s.likes))];
+    const likers = likerIds.length
+      ? await db.query.users.findMany({
+        where: inArray(users.id, likerIds),
+        columns: { id: true, displayName: true, name: true },
+      })
+      : [];
+    const likerMap = new Map(likers.map(u => [u.id, u]));
+
+    const finalList = list.map(song => ({
+      ...song,
+      likeUsers: song.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)?.name || id),
+    }));
+    await cacheSet(cacheKey, JSON.stringify(finalList), { EX: 86400 });
+    return finalList;
   }),
 
   canSubmit: protectedProcedure.query(async ({ ctx }) => {
