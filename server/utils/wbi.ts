@@ -38,7 +38,7 @@ function encWbi(
     .sort()
     .map((key) => {
       // 过滤 value 中的 "!'()*" 字符
-      const value = params[key].toString().replace(chr_filter, "");
+      const value = (params[key] ?? "").toString().replace(chr_filter, "");
       return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
     })
     .join("&");
@@ -53,7 +53,8 @@ async function getWbiKeys(SESSDATA: string) {
     headers: {
       // SESSDATA 字段
       "Cookie": `SESSDATA=${SESSDATA}`,
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.56 Safari/537.36",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.56 Safari/537.36",
       "Referer": "https://www.bilibili.com/", // 对于直接浏览器调用可能不适用
     },
   });
@@ -68,18 +69,15 @@ async function getWbiKeys(SESSDATA: string) {
   };
 
   return {
-    img_key: img_url.slice(
-      img_url.lastIndexOf("/") + 1,
-      img_url.lastIndexOf("."),
-    ),
-    sub_key: sub_url.slice(
-      sub_url.lastIndexOf("/") + 1,
-      sub_url.lastIndexOf("."),
-    ),
+    img_key: img_url.slice(img_url.lastIndexOf("/") + 1, img_url.lastIndexOf(".")),
+    sub_key: sub_url.slice(sub_url.lastIndexOf("/") + 1, sub_url.lastIndexOf(".")),
   };
 }
 
-async function WrapBiliRequest(sessdata: string, params: { [key: string]: string | number | object }) {
+async function WrapBiliRequest(
+  sessdata: string,
+  params: { [key: string]: string | number | object },
+) {
   const web_keys = await getWbiKeys(sessdata);
   // const params = { foo: "114", bar: "514", baz: 1919810 };
   const img_key = web_keys.img_key;

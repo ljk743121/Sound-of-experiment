@@ -11,7 +11,28 @@ import { createPlugin } from "../plugin";
 // start
 const PART_1_INDEXES = [23, 14, 6, 36, 16, 40, 7, 19];
 const PART_2_INDEXES = [16, 1, 32, 12, 19, 27, 8, 5];
-const SCRAMBLE_VALUES = [89, 39, 179, 150, 218, 82, 58, 252, 177, 52, 186, 123, 120, 64, 242, 133, 143, 161, 121, 179];
+const SCRAMBLE_VALUES = [
+  89,
+  39,
+  179,
+  150,
+  218,
+  82,
+  58,
+  252,
+  177,
+  52,
+  186,
+  123,
+  120,
+  64,
+  242,
+  133,
+  143,
+  161,
+  121,
+  179,
+];
 
 function hashSHA1(data: string) {
   return crypto.createHash("sha1").update(data).digest("hex");
@@ -31,7 +52,9 @@ async function zzcSign(text: string) {
   const hash = hashSHA1(text);
   const part1 = pickHashByIdx(hash, PART_1_INDEXES);
   const part2 = pickHashByIdx(hash, PART_2_INDEXES);
-  const part3 = SCRAMBLE_VALUES.map((value, i) => value ^ Number.parseInt(hash.slice(i * 2, i * 2 + 2), 16));
+  const part3 = SCRAMBLE_VALUES.map(
+    (value, i) => value ^ Number.parseInt(hash.slice(i * 2, i * 2 + 2), 16),
+  );
   const b64Part = base64Encode(part3).replace(/[\\/+=]/g, "");
   return `zzc${part1}${b64Part}${part2}`.toLowerCase();
 }
@@ -163,10 +186,11 @@ async function officialSearch(key: string): Promise<ISongSearchResult[]> {
       return {
         id: item.mid ?? "",
         name: item.title ?? "",
-        artists: item.singer
-          ?.map(artist => artist.name)
-          .join(", ")
-          .trim() ?? "",
+        artists:
+          item.singer
+            ?.map(artist => artist.name)
+            .join(", ")
+            .trim() ?? "",
         album: item.album?.name ?? "",
         source: "tx" as TMediaSource,
         imgId: albumMid || singerMid,
@@ -212,11 +236,12 @@ async function officialFetch(mid: string) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "获取歌曲链接失败" });
     },
   });
-  if (resPURL.req_0.data.midurlinfo[0].purl.length < 1)
+  const purl = resPURL.req_0.data.midurlinfo[0]?.purl ?? "";
+  if (purl.length < 1)
     throw new TRPCError({ code: "BAD_REQUEST", message: defaultVipSign });
 
   return {
-    url: `${serverBaseURL}${resPURL.req_0.data.midurlinfo[0].purl}`.replace(/^http:/, "https:"),
+    url: `${serverBaseURL}${purl}`.replace(/^http:/, "https:"),
     pay: false,
   };
 }

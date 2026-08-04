@@ -87,6 +87,7 @@ import {
 } from "@tanstack/vue-table";
 
 import Button from "~/components/ui/button/Button.vue";
+import Table from "~/components/ui/table/Table.vue";
 import { valueUpdater } from "~/lib/table";
 
 const { columns, data = [] } = defineProps<{

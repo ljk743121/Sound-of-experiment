@@ -288,7 +288,7 @@ import { getImgUrl, MusicFlowConfig, SCHOOL_NAME } from "~~/constants";
 useSeoMeta({
   title: `首页`,
   description: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统，支持在线试听、投稿、智能排歌、歌单管理、自动化流程。`,
-  keywords: "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,在线试听,歌曲投稿,智能排歌,歌单管理,自动化",
+  keywords: "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,在线试听,歌曲投稿,智能排歌,歌单管理,自动化,SchoolFm",
   ogTitle: `首页`,
   ogDescription: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统。`,
   ogUrl: "https://voszsy.penacony.cn",

@@ -28,16 +28,21 @@ async function getSongMap() {
   const map = new Map<string, { [key in TSongState]: number }>();
   for (const song of songs) {
     const date = song.createdAt.toLocaleDateString("zh-CN");
-    const val = map.get(date) ?? { approved: 0, dropped: 0, pending: 0, rejected: 0, used: 0 };
+    const val = map.get(date) ?? {
+      approved: 0,
+      dropped: 0,
+      missed: 0,
+      pending: 0,
+      rejected: 0,
+      used: 0,
+    };
     val[song.state]++;
     map.set(date, val);
   }
 
-  await cacheSet(
-    cacheKey,
-    JSON.stringify({ songs, map: Array.from(map.entries()) }),
-    { EX: 86400 },
-  );
+  await cacheSet(cacheKey, JSON.stringify({ songs, map: Array.from(map.entries()) }), {
+    EX: 86400,
+  });
 
   consola.info(`${new Date().toLocaleString()} Redis 缓存写入: ${cacheKey}`);
 
@@ -50,8 +55,8 @@ function splitSingerNames(creator: string): string[] {
   const match = creator.match(parenthesesRegex);
 
   if (match) {
-    const outer = match[1].trim();
-    const inner = match[2].trim();
+    const outer = (match[1] ?? "").trim();
+    const inner = (match[2] ?? "").trim();
 
     if (outer) {
       results.push(outer);
@@ -99,8 +104,11 @@ export const statsRouter = router({
     const { map } = await getSongMap();
     return Array.from(map, ([date, count]) => ({
       date,
-      count: count.approved + count.used + count.dropped + count.pending + count.rejected,
-    })).toSorted((b, a) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 14);
+      count:
+        count.approved + count.used + count.dropped + count.missed + count.pending + count.rejected,
+    }))
+      .toSorted((b, a) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 14);
   }),
 
   singer: protectedProcedure.query(async () => {
@@ -126,9 +134,9 @@ export const statsRouter = router({
       }
     }
 
-    return Array.from(map, ([name, count]) => ({ name, count })).toSorted(
-      (a, b) => b.count - a.count,
-    ).slice(0, 10);
+    return Array.from(map, ([name, count]) => ({ name, count }))
+      .toSorted((a, b) => b.count - a.count)
+      .slice(0, 10);
   }),
 
   like: protectedProcedure.query(async () => {
@@ -154,8 +162,8 @@ export const statsRouter = router({
         imgId: existing?.imgId ?? song.imgId ?? null,
       });
     }
-    return Array.from(map, ([name, data]) => ({ name, ...data })).toSorted(
-      (a, b) => b.count - a.count,
-    ).slice(0, 10);
+    return Array.from(map, ([name, data]) => ({ name, ...data }))
+      .toSorted((a, b) => b.count - a.count)
+      .slice(0, 10);
   }),
 });

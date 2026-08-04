@@ -23,7 +23,11 @@ export const searchRouter = router({
       if (!musicSource) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "未知的源" });
       }
-      return await musicSource.searchSongs(input.key);
+      const searchSongs
+        = typeof musicSource.searchSongs === "function"
+          ? musicSource.searchSongs
+          : musicSource.searchSongs.fn;
+      return await searchSongs(input.key);
     }),
   mixGetUrl: protectedProcedure
     .input(
