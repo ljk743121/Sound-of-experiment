@@ -47,7 +47,7 @@
           <p class="text-muted-foreground leading-relaxed">
             如对本《用户协议和隐私政策》或相关事宜有任何问题，请通过
             <Button variant="link" as-child class="h-auto p-0 text-base">
-              <a href="https://github.com/ljk743121/Sound-of-experiment/issues" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/ljk743121/SchoolFm/issues" target="_blank" rel="noopener noreferrer">
                 GitHub Issues
               </a>
             </Button>

@@ -18,14 +18,16 @@ interface SearchRes {
   code: number;
   message: string;
   data: {
-    result: [{
-      id: number;
-      bvid: string;
-      title: string;
-      author: string;
-      pic: string;
-      duration: string;
-    }];
+    result: [
+      {
+        id: number;
+        bvid: string;
+        title: string;
+        author: string;
+        pic: string;
+        duration: string;
+      },
+    ];
   };
 }
 
@@ -33,9 +35,11 @@ interface CidRes {
   code: number;
   message: string;
   data: {
-    pages: [{
-      cid: string;
-    }];
+    pages: [
+      {
+        cid: string;
+      },
+    ];
   };
 }
 
@@ -55,9 +59,11 @@ interface NoRefererPlayUrlRes {
   code: number;
   message: string;
   data: {
-    durl: [{
-      url: string;
-    }];
+    durl: [
+      {
+        url: string;
+      },
+    ];
   };
 }
 
@@ -67,10 +73,13 @@ function htmlDecode(value: string) {
 
 function bi_convert_song(song_info: SongInfo) {
   let imgUrl = song_info.pic;
-  const durationStr = song_info.duration.split(":").map(x => Number.parseInt(x)).reverse();
-  let duration = durationStr[0] + durationStr[1] * 60;
+  const durationStr = song_info.duration
+    .split(":")
+    .map(x => Number.parseInt(x))
+    .reverse();
+  let duration = (durationStr[0] ?? 0) + (durationStr[1] ?? 0) * 60;
   if (durationStr.length === 3) {
-    duration += durationStr[2] * 60 * 60;
+    duration += (durationStr[2] ?? 0) * 60 * 60;
   }
   if (imgUrl.startsWith("//")) {
     imgUrl = `https:${imgUrl}`;
@@ -130,7 +139,7 @@ async function getTrackUrl(id: string) {
 }
 
 async function search(keyword: string) {
-  const sessdata = "fbda0bdc%2C1636301184%2C30180681";// 2021-08-10 00:06:25 CST
+  const sessdata = "fbda0bdc%2C1636301184%2C30180681"; // 2021-08-10 00:06:25 CST
   const target_url = "https://api.bilibili.com/x/web-interface/wbi/search/type";
   const params = {
     __refresh__: "true",
@@ -151,7 +160,8 @@ async function search(keyword: string) {
     headers: {
       "Cookie": "buvid3=0",
       "Referer": "https://www.bilibili.com/",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.56 Safari/537.36",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.56 Safari/537.36",
     },
   });
   if (resp.code !== 0 || !resp.data?.result) {
@@ -160,13 +170,11 @@ async function search(keyword: string) {
   return resp.data.result.map((song) => {
     return bi_convert_song(song);
   });
-};
+}
 
 export const bilibili = createPlugin({
   name: "bilibili",
   alias: "哔哩哔哩",
   searchSongs: { fn: search, retryCount: 1 },
-  getMusicUrl: [
-    { fn: getTrackUrl, priority: 1, retryCount: 1 },
-  ],
+  getMusicUrl: [{ fn: getTrackUrl, priority: 1, retryCount: 1 }],
 });

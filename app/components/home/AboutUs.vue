@@ -23,7 +23,7 @@
           <p>
             这个项目的代码是开源的，你可以在
             <NuxtLink
-              to="https://github.com/ljk743121/Sound-of-experiment"
+              to="https://github.com/ljk743121/SchoolFm"
               class="font-semibold underline underline-offset-4"
             >
               <span>这里</span>
@@ -60,12 +60,12 @@
             项目贡献者：
           </p>
           <NuxtLink
-            to="https://github.com/ljk743121/Sound-of-experiment/graphs/contributors"
+            to="https://github.com/ljk743121/SchoolFm/graphs/contributors"
             target="_blank"
             class="block"
           >
             <NuxtImg
-              src="https://contrib.rocks/image?repo=ljk743121/Sound-of-experiment"
+              src="https://contrib.rocks/image?repo=ljk743121/SchoolFm"
               alt="Contributors"
               class="mx-auto w-1/2"
               @error="contribError = true"
@@ -74,7 +74,7 @@
           <p v-if="contribError" class="text-xs text-muted-foreground">
             贡献者图片加载失败，可点击
             <NuxtLink
-              to="https://github.com/ljk743121/Sound-of-experiment/graphs/contributors"
+              to="https://github.com/ljk743121/SchoolFm/graphs/contributors"
               target="_blank"
               class="font-semibold underline underline-offset-4"
             >
@@ -128,7 +128,7 @@
             >@Ljk743121</NuxtLink>
             and other contributors</span>
           <div class="flex gap-2">
-            <NuxtLink to="https://github.com/ljk743121/Sound-of-experiment" target="_blank">
+            <NuxtLink to="https://github.com/ljk743121/SchoolFm" target="_blank">
               <Button variant="outline" size="icon">
                 <Icon name="lucide:github" />
               </Button>
@@ -159,7 +159,7 @@ interface GitHubCommit {
 }
 
 const { data: commits, status } = useFetch<GitHubCommit[]>(
-  "https://api.github.com/repos/ljk743121/Sound-of-experiment/commits?per_page=30",
+  "https://api.github.com/repos/ljk743121/SchoolFm/commits?per_page=30",
   {
     key: "github-commits",
     default: () => [],

@@ -16,6 +16,8 @@ export interface ArrangeSong {
   duration: number;
   expectedPlayDate: string | null;
   createdAt: Date;
+  /** 排歌优先级，数值越小越优先安排（missed=0，approved=1，dropped=2） */
+  priority: number;
 }
 
 export interface ScheduleConflict {
@@ -63,7 +65,9 @@ function getDateRange(startStr: string, endStr: string): string[] {
   return dates;
 }
 
-function sortByCreatedAt(a: ArrangeSong, b: ArrangeSong): number {
+function sortByPriorityAndCreatedAt(a: ArrangeSong, b: ArrangeSong): number {
+  if (a.priority !== b.priority)
+    return a.priority - b.priority;
   return a.createdAt.getTime() - b.createdAt.getTime();
 }
 
@@ -112,11 +116,11 @@ export function scheduleSongs(
 
   const expectedSongs = songs
     .filter(s => s.expectedPlayDate && dayIndex.has(s.expectedPlayDate))
-    .sort(sortByCreatedAt);
+    .sort(sortByPriorityAndCreatedAt);
 
   const freeSongs = songs
     .filter(s => !s.expectedPlayDate || !dayIndex.has(s.expectedPlayDate))
-    .sort(sortByCreatedAt);
+    .sort(sortByPriorityAndCreatedAt);
 
   const assignments: Record<string, number[]> = {};
   for (const [date, ids] of Object.entries(existingAssignments)) {
@@ -160,7 +164,11 @@ export function scheduleSongs(
       const leftIndex = targetIndex - offset;
       if (leftIndex >= 0) {
         const day = days[leftIndex]!;
-        if (!day.unavailable && canFitDay(day, duration) && (!excludeSet || !excludeSet.has(leftIndex))) {
+        if (
+          !day.unavailable
+          && canFitDay(day, duration)
+          && (!excludeSet || !excludeSet.has(leftIndex))
+        ) {
           return day;
         }
       }
@@ -168,7 +176,11 @@ export function scheduleSongs(
       const rightIndex = targetIndex + offset;
       if (offset > 0 && rightIndex < days.length) {
         const day = days[rightIndex]!;
-        if (!day.unavailable && canFitDay(day, duration) && (!excludeSet || !excludeSet.has(rightIndex))) {
+        if (
+          !day.unavailable
+          && canFitDay(day, duration)
+          && (!excludeSet || !excludeSet.has(rightIndex))
+        ) {
           return day;
         }
       }

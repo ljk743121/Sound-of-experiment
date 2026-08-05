@@ -81,12 +81,15 @@
 
 ### 外部脚本
 
-项目提供两个 Python 辅助脚本，位于 [`externalScripts/`](./externalScripts/) 目录，用于与机器人/放歌流程对接：
+##### 注意：脚本由AI编写，仅进行简要测试，可能会有bug
 
-| 脚本                                                 | 说明                                                       | 依赖                   |
-| ---------------------------------------------------- | ---------------------------------------------------------- | ---------------------- |
-| [`fetch_today.py`](./externalScripts/fetch_today.py) | 调用 `arrangements.today` 接口获取当天排歌，导出为 CSV     | `pip install requests` |
-| [`has_played.py`](./externalScripts/has_played.py)   | 读取 CSV 歌曲列表，登录后批量上报 `arrangements.hasPlayed` | `pip install requests` |
+项目提供 Python 辅助脚本，位于 [`externalScripts/`](./externalScripts/) 目录，用于与机器人/放歌流程对接：
+
+| 脚本                                                   | 说明                                                                                | 依赖                   |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------- | ---------------------- |
+| [`fetch_today.py`](./externalScripts/fetch_today.py)   | 调用 `arrangements.today` 接口获取当天排歌，导出为 CSV                              | `pip install requests` |
+| [`has_played.py`](./externalScripts/has_played.py)     | 读取 CSV 歌曲列表，登录后批量上报 `arrangements.hasPlayed`                          | `pip install requests` |
+| [`missed_dates.py`](./externalScripts/missed_dates.py) | 检查区间内服务器有排歌但本地未下载的日期，并上报未播放为 `missed`；支持本地增量缓存 | `pip install requests` |
 
 使用示例：
 
@@ -99,6 +102,17 @@ python externalScripts/has_played.py songs_2026-07-19.csv \
   --base-url https://voszsy.penacony.cn \
   --user-id 你的学号 \
   --password 你的密码
+
+# 检查 2026-07-20 至 2026-07-31 的漏跑日期（需开启「监控是否完成放歌任务」；此例不实际上报）
+python externalScripts/missed_dates.py \
+  --base-url https://voszsy.penacony.cn \
+  --user-id 你的学号 \
+  --password 你的密码 \
+  --csv-dir externalScripts \
+  --cache-path externalScripts/arrangement_cache.json \
+  --start 2026-07-20 \
+  --end 2026-07-31 \
+  --dry-run
 ```
 
 ## 用户界面

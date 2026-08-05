@@ -20,6 +20,7 @@ export const arrangements = pgTable("arrangements", {
   date: text().primaryKey(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   unplayedSongs: integer().notNull().default(0),
+  status: text().notNull().default("pending"),
 });
 
 export const songs = pgTable("songs", {

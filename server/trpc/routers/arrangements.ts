@@ -10,6 +10,7 @@ import { db } from "~~/server/db";
 import { arrangements, songs, users } from "~~/server/db/schema";
 import { scheduleSongs } from "~~/server/utils/arrange";
 import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
+import { getArrangementVolatileMap, getVolatileSongMap } from "~~/server/utils/songCache";
 import { getConfig } from "~~/server/utils/universal";
 // import verifyHasPlayedToken from "~~/server/utils/verifyHasPlayedToken";
 import {
@@ -24,9 +25,10 @@ import {
 const order = [asc(songs.position), asc(songs.createdAt)];
 
 export async function invalidateArrangementCache() {
-  await cacheDel("arrangement:listSafe");
-  await cacheDel("arrangement:listGuest");
-  consola.info(`Redis 缓存失效：arrangement:listSafe, arrangement:listGuest`);
+  // status 为易变字段不缓存，稳定缓存仅含 date 与 songs；统一使用单一版本键
+  await cacheDel("arrangement:listSafe:stable");
+  await cacheDel("arrangement:listGuest:stable");
+  consola.info(`Redis 缓存失效：arrangement:listSafe:stable, arrangement:listGuest:stable`);
 }
 
 async function deleteArrangement(date: string) {
@@ -80,14 +82,12 @@ export const arrangementsRouter = router({
     });
   }),
 
-  listApproved: adminProcedure
-    .use(requirePermission(["manualArrange"]))
-    .query(async () => {
-      return await db.query.songs.findMany({
-        where: eq(songs.state, "approved"),
-        orderBy: [desc(songs.arrangementDate), desc(songs.createdAt)],
-      });
-    }),
+  listApproved: adminProcedure.use(requirePermission(["manualArrange"])).query(async () => {
+    return await db.query.songs.findMany({
+      where: inArray(songs.state, ["approved", "missed"]),
+      orderBy: [desc(songs.arrangementDate), desc(songs.createdAt)],
+    });
+  }),
 
   updateOrder: adminProcedure
     .use(requirePermission(["manualArrange"]))
@@ -131,7 +131,8 @@ export const arrangementsRouter = router({
             for (const songId of dayChange.songOrder) {
               if (!songId)
                 continue;
-              await tx.update(songs)
+              await tx
+                .update(songs)
                 .set({
                   state: "approved",
                   arrangementDate: null,
@@ -153,7 +154,8 @@ export const arrangementsRouter = router({
             const songId = dayChange.songOrder[i];
             if (!songId)
               continue;
-            await tx.update(songs)
+            await tx
+              .update(songs)
               .set({
                 state: "used",
                 arrangementDate: dayChange.date,
@@ -167,47 +169,62 @@ export const arrangementsRouter = router({
     }),
 
   listSafe: protectedProcedure.query(async () => {
-    const cached = await cacheGet("arrangement:listSafe");
+    const cacheKey = "arrangement:listSafe:stable";
+    const cached = await cacheGet(cacheKey);
+
+    let arrangementsData;
     if (cached) {
-      consola.info(`${new Date().toLocaleString()} Redis 缓存命中：arrangement:listSafe`);
-      return JSON.parse(cached);
-    }
+      consola.info(`${new Date().toLocaleString()} Redis 缓存命中：${cacheKey}`);
+      arrangementsData = JSON.parse(cached);
+    } else {
+      const Ago = new Date();
+      Ago.setDate(Ago.getDate() - 90);
+      const AgoString = Ago.toISOString().split("T")[0]!;
 
-    const Ago = new Date();
-    Ago.setDate(Ago.getDate() - 90);
-    const AgoString = Ago.toISOString().split("T")[0]!;
-
-    const arrangementsData = await db.query.arrangements.findMany({
-      orderBy: desc(arrangements.date),
-      where: gte(arrangements.date, AgoString),
-      columns: {
-        date: true,
-        unplayedSongs: true,
-      },
-      with: {
-        songs: {
-          orderBy: order,
-          columns: {
-            id: true,
-            creator: true,
-            ownerDisplayName: true,
-            name: true,
-            songId: true,
-            source: true,
-            imgId: true,
-            duration: true,
-            likes: true,
-            likeCount: true,
-            rejectMessage: true,
-            msgPublic: true,
-            state: true,
-            createdAt: true,
+      arrangementsData = await db.query.arrangements.findMany({
+        orderBy: desc(arrangements.date),
+        where: gte(arrangements.date, AgoString),
+        columns: {
+          date: true,
+        },
+        with: {
+          songs: {
+            orderBy: order,
+            columns: {
+              id: true,
+              creator: true,
+              ownerDisplayName: true,
+              name: true,
+              songId: true,
+              source: true,
+              imgId: true,
+              duration: true,
+              msgPublic: true,
+              createdAt: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    const likerIds = [...new Set(arrangementsData.flatMap(a => a.songs.flatMap(s => s.likes)))];
+      await cacheSet(cacheKey, JSON.stringify(arrangementsData), { EX: 86400 });
+      consola.info(`${new Date().toLocaleString()} Redis 缓存写入：${cacheKey}`);
+    }
+
+    // 易变字段（点赞、状态、未播放数等）不缓存，每次实时读取并合并
+    const songIds = arrangementsData.flatMap((a: { songs: { id: number }[] }) =>
+      a.songs.map((s: { id: number }) => s.id),
+    );
+    const volatileMap = await getVolatileSongMap(songIds);
+    const dates = arrangementsData.map((a: { date: string }) => a.date);
+    const arrangementVolatileMap = await getArrangementVolatileMap(dates);
+
+    const likerIds = [
+      ...new Set(
+        arrangementsData.flatMap((a: { songs: { id: number }[] }) =>
+          a.songs.flatMap((s: { id: number }) => volatileMap.get(s.id)?.likes ?? []),
+        ),
+      ),
+    ] as string[];
     const likers = likerIds.length
       ? await db.query.users.findMany({
         where: inArray(users.id, likerIds),
@@ -216,59 +233,89 @@ export const arrangementsRouter = router({
       : [];
     const likerMap = new Map(likers.map(u => [u.id, u]));
 
-    const result = arrangementsData.map(arrangement => ({
-      ...arrangement,
-      songs: arrangement.songs.map(song => ({
-        ...song,
-        likeUsers: song.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)?.name || id),
-      })),
-    }));
-
-    await cacheSet("arrangement:listSafe", JSON.stringify(result), { EX: 86400 });
-    consola.info(`${new Date().toLocaleString()} Redis 缓存写入：arrangement:listSafe`);
-
-    return result;
+    return arrangementsData.map((arrangement: { date: string; songs: { id: number }[] }) => {
+      const arrangementVolatile = arrangementVolatileMap.get(arrangement.date) ?? {
+        unplayedSongs: 0,
+        status: "pending",
+      };
+      return {
+        ...arrangement,
+        unplayedSongs: arrangementVolatile.unplayedSongs,
+        status: arrangementVolatile.status,
+        songs: arrangement.songs.map((song: { id: number }) => {
+          const volatile = volatileMap.get(song.id);
+          return {
+            ...song,
+            ...volatile,
+            likeUsers:
+              volatile?.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)!.name)
+              ?? [],
+          };
+        }),
+      };
+    });
   }),
 
   listGuest: publicProcedure.query(async () => {
-    const cached = await cacheGet("arrangement:listGuest");
+    const cacheKey = "arrangement:listGuest:stable";
+    const cached = await cacheGet(cacheKey);
+
+    let arrangementsData;
     if (cached) {
-      consola.info(`${new Date().toLocaleString()} Redis 缓存命中：arrangement:listGuest`);
-      return JSON.parse(cached);
-    }
+      consola.info(`${new Date().toLocaleString()} Redis 缓存命中：${cacheKey}`);
+      arrangementsData = JSON.parse(cached);
+    } else {
+      const Ago = new Date();
+      Ago.setDate(Ago.getDate() - 7);
+      const AgoString = Ago.toISOString().split("T")[0]!;
 
-    const Ago = new Date();
-    Ago.setDate(Ago.getDate() - 7);
-    const AgoString = Ago.toISOString().split("T")[0]!;
-
-    const arrangementsData = await db.query.arrangements.findMany({
-      orderBy: desc(arrangements.date),
-      where: gte(arrangements.date, AgoString),
-      columns: {
-        date: true,
-        unplayedSongs: true,
-      },
-      with: {
-        songs: {
-          orderBy: order,
-          columns: {
-            id: true,
-            creator: true,
-            name: true,
-            imgId: true,
-            source: true,
-            state: true,
-            likeCount: true,
-            createdAt: true,
+      arrangementsData = await db.query.arrangements.findMany({
+        orderBy: desc(arrangements.date),
+        where: gte(arrangements.date, AgoString),
+        columns: { date: true },
+        with: {
+          songs: {
+            orderBy: order,
+            columns: {
+              id: true,
+              creator: true,
+              name: true,
+              imgId: true,
+              source: true,
+              createdAt: true,
+            },
           },
         },
-      },
+      });
+
+      await cacheSet(cacheKey, JSON.stringify(arrangementsData), { EX: 86400 });
+      consola.info(`${new Date().toLocaleString()} Redis 缓存写入：${cacheKey}`);
+    }
+
+    // 易变字段（点赞数、状态、未播放数等）不缓存，每次实时读取并合并
+    const songIds = arrangementsData.flatMap((a: { songs: { id: number }[] }) =>
+      a.songs.map((s: { id: number }) => s.id),
+    );
+    const volatileMap = await getVolatileSongMap(songIds);
+    const dates = arrangementsData.map((a: { date: string }) => a.date);
+    const arrangementVolatileMap = await getArrangementVolatileMap(dates);
+
+    return arrangementsData.map((arrangement: { date: string; songs: { id: number }[] }) => {
+      const arrangementVolatile = arrangementVolatileMap.get(arrangement.date) ?? {
+        unplayedSongs: 0,
+        status: "pending",
+      };
+      return {
+        ...arrangement,
+        unplayedSongs: arrangementVolatile.unplayedSongs,
+        status: arrangementVolatile.status,
+        songs: arrangement.songs.map((song: { id: number }) => ({
+          ...song,
+          state: volatileMap.get(song.id)?.state,
+          likeCount: volatileMap.get(song.id)?.likeCount ?? 0,
+        })),
+      };
     });
-
-    await cacheSet("arrangement:listGuest", JSON.stringify(arrangementsData), { EX: 86400 });
-    consola.info(`${new Date().toLocaleString()} Redis 缓存写入：arrangement:listGuest`);
-
-    return arrangementsData;
   }),
 
   stats: adminProcedure.use(requirePermission(["arrange"])).query(async () => {
@@ -284,11 +331,16 @@ export const arrangementsRouter = router({
       .select({ count: count() })
       .from(songs)
       .where(eq(songs.state, "dropped"));
+    const missedCount = await db
+      .select({ count: count() })
+      .from(songs)
+      .where(eq(songs.state, "missed"));
 
     return {
       approved: approvedCount[0]?.count ?? 0,
       pending: pendingCount[0]?.count ?? 0,
       dropped: droppedCount[0]?.count ?? 0,
+      missed: missedCount[0]?.count ?? 0,
     };
   }),
 
@@ -317,6 +369,7 @@ export const arrangementsRouter = router({
         duration: true,
         expectedPlayDate: true,
         createdAt: true,
+        state: true,
       } as const;
 
       const approvedSongs = await db.query.songs.findMany({
@@ -324,10 +377,16 @@ export const arrangementsRouter = router({
         orderBy: [desc(songs.likeCount), asc(songs.createdAt)],
         columns: dateColumns,
       });
+      const missedSongs = await db.query.songs.findMany({
+        where: eq(songs.state, "missed"),
+        orderBy: [desc(songs.likeCount), asc(songs.createdAt)],
+        columns: dateColumns,
+      });
 
       let droppedSongs: typeof approvedSongs = [];
+      const availableSongs = [...approvedSongs, ...missedSongs];
       if (
-        (end.compare(start) + 1) * (input.songCount || 1) > approvedSongs.length
+        (end.compare(start) + 1) * (input.songCount || 1) > availableSongs.length
         || input.songCount === 0
       ) {
         droppedSongs = await db.query.songs.findMany({
@@ -337,11 +396,12 @@ export const arrangementsRouter = router({
         });
       }
 
-      const candidateSongs: ArrangeSong[] = [...approvedSongs, ...droppedSongs].map(s => ({
+      const candidateSongs: ArrangeSong[] = [...availableSongs, ...droppedSongs].map(s => ({
         id: s.id,
         duration: s.duration ?? 0,
         expectedPlayDate: s.expectedPlayDate,
         createdAt: s.createdAt,
+        priority: s.state === "missed" ? 0 : s.state === "dropped" ? 2 : 1,
       }));
       if (candidateSongs.length === 0) {
         throw new TRPCError({
@@ -356,10 +416,7 @@ export const arrangementsRouter = router({
       }
 
       const existingArrangements = await db.query.arrangements.findMany({
-        where: and(
-          gte(arrangements.date, input.start),
-          lte(arrangements.date, input.end),
-        ),
+        where: and(gte(arrangements.date, input.start), lte(arrangements.date, input.end)),
         with: {
           songs: {
             orderBy: order,
@@ -385,6 +442,7 @@ export const arrangementsRouter = router({
               duration: s.duration ?? 0,
               expectedPlayDate: null,
               createdAt: new Date(),
+              priority: 0,
             });
           }
           return s.id;
@@ -438,11 +496,19 @@ export const arrangementsRouter = router({
           }
         }
 
-        for (const songId of result.dropped) {
+        const droppedSongRows = result.dropped.length
+          ? await db.query.songs.findMany({
+            where: inArray(songs.id, result.dropped),
+            columns: { id: true, state: true },
+          })
+          : [];
+        // missed 状态的歌曲未排上时保持 missed，不降级为 dropped
+        const songsToDrop = droppedSongRows.filter(s => s.state !== "missed").map(s => s.id);
+        if (songsToDrop.length > 0) {
           await tx
             .update(songs)
             .set({ state: "dropped", arrangementDate: null, position: null })
-            .where(eq(songs.id, songId));
+            .where(inArray(songs.id, songsToDrop));
         }
       });
 
@@ -463,10 +529,13 @@ export const arrangementsRouter = router({
       };
     }),
 
-  getArrangement: protectedProcedure.use(requirePermission(["robot"]))
-    .input(z.object({
-      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
-    }))
+  getArrangement: protectedProcedure
+    .use(requirePermission(["robot"]))
+    .input(
+      z.object({
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
+      }),
+    )
     .query(async ({ input }) => {
       return await db.query.arrangements.findFirst({
         where: eq(arrangements.date, input.date),
@@ -492,6 +561,40 @@ export const arrangementsRouter = router({
               likeCount: true,
               ownerDisplayName: true,
               isRealName: true,
+            },
+          },
+        },
+      });
+    }),
+  listRange: protectedProcedure
+    .use(requirePermission(["robot"]))
+    .input(
+      z.object({
+        start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
+        end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
+      }),
+    )
+    .query(async ({ input }) => {
+      if (input.end < input.start) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "结束日期不能早于开始日期",
+        });
+      }
+
+      return await db.query.arrangements.findMany({
+        where: and(gte(arrangements.date, input.start), lte(arrangements.date, input.end)),
+        orderBy: asc(arrangements.date),
+        columns: {
+          date: true,
+          unplayedSongs: true,
+          status: true,
+        },
+        with: {
+          songs: {
+            orderBy: order,
+            columns: {
+              id: true,
             },
           },
         },
@@ -526,7 +629,8 @@ export const arrangementsRouter = router({
     return arrangement;
   }),
 
-  hasPlayed: protectedProcedure.use(requirePermission(["robot"]))
+  hasPlayed: protectedProcedure
+    .use(requirePermission(["robot"]))
     .input(
       z.object({
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
@@ -584,12 +688,16 @@ export const arrangementsRouter = router({
             .set({
               arrangementDate: null,
               position: null,
-              state: "approved",
+              state: "missed",
             })
             .where(eq(songs.id, i.id));
         }
-        await db.update(arrangements).set({ unplayedSongs: usedSongs.length }).where(eq(arrangements.date, date));
+        await db
+          .update(arrangements)
+          .set({ unplayedSongs: usedSongs.length, status: "missed" })
+          .where(eq(arrangements.date, date));
         await invalidateArrangementCache();
+        await cacheDel("songMap");
         return {
           success: true,
           count: usedSongs.length,
@@ -628,9 +736,13 @@ export const arrangementsRouter = router({
           .where(inArray(songs.id, foundIds));
       });
 
-      await db.update(arrangements).set({ unplayedSongs: foundIds.length }).where(eq(arrangements.date, date));
+      await db
+        .update(arrangements)
+        .set({ unplayedSongs: foundIds.length, status: "failed" })
+        .where(eq(arrangements.date, date));
 
       await invalidateArrangementCache();
+      await cacheDel("songMap");
 
       return {
         success: true,
@@ -638,6 +750,104 @@ export const arrangementsRouter = router({
         processedIds: foundIds,
         notFoundIds,
         message: `成功处理 ${foundIds.length} 首歌曲`,
+      };
+    }),
+
+  finish: protectedProcedure
+    .use(requirePermission(["robot"]))
+    .input(
+      z.object({
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const monitorHasPlayed = getConfig("monitorHasPlayed");
+      if (!monitorHasPlayed) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "监控是否完成放歌任务未开启，无法处理请求",
+        });
+      }
+      const arrangement = await db.query.arrangements.findFirst({
+        where: eq(arrangements.date, input.date),
+        columns: { date: true },
+      });
+      if (!arrangement) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `指定日期 ${input.date} 的排歌记录不存在`,
+        });
+      }
+      await db
+        .update(arrangements)
+        .set({ unplayedSongs: 0, status: "success" })
+        .where(eq(arrangements.date, input.date));
+      await invalidateArrangementCache();
+      await cacheDel("songMap");
+      return {
+        success: true,
+        date: input.date,
+        message: `成功将 ${input.date} 标记为全部播放完成`,
+      };
+    }),
+
+  recover: protectedProcedure
+    .use(requirePermission(["robot"]))
+    .input(
+      z.object({
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式必须为 YYYY-MM-DD"),
+        songIds: z.array(z.number()).min(1),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const monitorHasPlayed = getConfig("monitorHasPlayed");
+      if (!monitorHasPlayed) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "监控是否完成放歌任务未开启，无法处理请求",
+        });
+      }
+      const arrangement = await db.query.arrangements.findFirst({
+        where: eq(arrangements.date, input.date),
+        columns: { date: true, unplayedSongs: true },
+      });
+      if (!arrangement) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `指定日期 ${input.date} 的排歌记录不存在`,
+        });
+      }
+
+      // 恢复重试后重新下载成功的歌曲到当天（仅当未被安排到其他日期）
+      const restorable = await db.query.songs.findMany({
+        where: inArray(songs.id, input.songIds),
+        columns: { id: true, arrangementDate: true },
+      });
+      const restoredIds = restorable
+        .filter(s => s.arrangementDate === null || s.arrangementDate === input.date)
+        .map(s => s.id);
+      if (restoredIds.length > 0) {
+        await db
+          .update(songs)
+          .set({ state: "used", arrangementDate: input.date })
+          .where(inArray(songs.id, restoredIds));
+      }
+
+      // 扣减未播放数；归零则标记当天为 success，否则保持 failed
+      const remaining = Math.max((arrangement.unplayedSongs ?? 0) - restoredIds.length, 0);
+      const status = remaining === 0 ? "success" : "failed";
+      await db
+        .update(arrangements)
+        .set({ unplayedSongs: remaining, status })
+        .where(eq(arrangements.date, input.date));
+      await invalidateArrangementCache();
+      await cacheDel("songMap");
+      return {
+        success: true,
+        date: input.date,
+        restored: restoredIds.length,
+        unplayedSongs: remaining,
+        status,
       };
     }),
 
