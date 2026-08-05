@@ -100,24 +100,6 @@ export function getMusicSourceName(id: TMediaSource | undefined | null) {
   return musicSources.find(source => source.value === id)?.label;
 }
 
-export const MusicFlowConfig = {
-  height: 50,
-  waveColor: "#ffffff",
-  progressColor: "#348ada",
-  cursorColor: "#5834da",
-  cursorWidth: 1,
-  barWidth: 4,
-  barGap: 4,
-  barRadius: 4,
-  barHeight: 0.8,
-  minPxPerSec: 0,
-  autoScroll: false,
-  autoCenter: false,
-  hideScrollbar: false,
-  interact: true,
-  autoplay: true,
-};
-
 // export const proxy = {
 //   "/api/bb/**": {
 //     proxy: {

@@ -1,6 +1,6 @@
 <template>
   <main
-    class="container mx-auto flex min-h-dvh max-w-screen-xl flex-col gap-4 p-5 md:grid md:h-screen md:grid-cols-2 md:grid-rows-[1fr_auto] md:gap-8 md:p-10 md:overflow-hidden"
+    class="container mx-auto flex min-h-dvh max-w-screen-xl flex-col gap-4 p-5 pb-32 md:grid md:h-screen md:grid-cols-2 md:grid-rows-[1fr_auto] md:gap-8 md:p-10 md:overflow-hidden"
   >
     <section class="flex shrink-0 flex-col gap-2 overflow-x-hidden md:h-full md:gap-3 md:overflow-y-auto">
       <LogosCombined class="mx-auto h-40 w-auto object-contain md:h-35" />
@@ -275,29 +275,40 @@
         </TabsContent>
       </Tabs>
     </section>
-    <div class="-mx-5 shrink-0 min-h-[240px] bg-background md:col-span-2 md:mx-0 md:min-h-[160px] lg:min-h-[80px]">
+    <div class="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 md:static md:z-auto md:col-span-2 md:px-0 md:pb-0">
       <ClientOnly>
-        <MusicFlow v-if="userStore.loggedIn" :options="MusicFlowConfig" :fetch-url="fetchUrl" />
+        <MusicPlayer v-if="userStore.loggedIn" :fetch-url="fetchUrl" />
       </ClientOnly>
     </div>
   </main>
+  <footer class="mt-auto border-t pt-3 text-xs leading-relaxed text-muted-foreground text-center w-full">
+    <p class="mb-2">
+      {{ SCHOOL_NAME }}是<b>深圳实验学校</b>的校园广播站，提供<b>歌曲投稿</b>、<b>在线试听</b>、<b>智能排歌</b>与<b>自动化流程</b>服务，支持广播站放歌流程的自动化运行。
+    </p>
+    <p class="mb-2">
+      Powered by <a href="https://github.com/ljk743121/SchoolFm" target="_blank" rel="noopener noreferrer hover:text-foreground hover:underline">
+        SchoolFm
+      </a>
+    </p>
+  </footer>
 </template>
 
 <script setup lang="ts">
 import type { RouterOutput } from "~~/types";
-import { MusicFlow, type TMusicFlow } from "@ljk743121/vue-music-flow";
+import type { TPlayerTrack } from "~/composables/useMusicPlayer";
 import { useFuse, type UseFuseOptions } from "@vueuse/integrations/useFuse";
 import { DatePicker } from "@ztl-uwu/v-calendar";
-import { getImgUrl, MusicFlowConfig, SCHOOL_NAME } from "~~/constants";
+import { getImgUrl, SCHOOL_NAME } from "~~/constants";
 // import { fetchMusicUrl } from "~~/deprecate/shared/plugin";
 
 useSeoMeta({
   title: `首页`,
   description: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统，支持在线试听、投稿、智能排歌、歌单管理、自动化流程。`,
-  keywords: "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,在线试听,歌曲投稿,智能排歌,歌单管理,自动化,SchoolFm",
+  keywords: "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,歌曲投稿,智能排歌,自动化,SchoolFm,nuxt",
   ogTitle: `首页`,
   ogDescription: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统。`,
   ogUrl: "https://voszsy.penacony.cn",
+  twitterCard: "summary_large_image",
   twitterTitle: `首页`,
   twitterDescription: `${SCHOOL_NAME} 点歌系统首页 - 浏览排歌歌单、查看歌曲、投稿歌曲。开源校园广播站管理系统。`,
 });
@@ -467,17 +478,19 @@ const calendarAttr = computed(() => {
 
 if (userStore.loggedIn) {
   try {
-    await songListSuspense();
-    await canSubmitSuspense();
-    await mySongListSuspense();
-    await arrangementListSuspense();
-    await remainSubmitSongsSuspense();
+    // 并行等待首屏数据，减少串行等待时间，加快页面首次绘制
+    await Promise.all([
+      songListSuspense(),
+      canSubmitSuspense(),
+      mySongListSuspense(),
+      arrangementListSuspense(),
+      remainSubmitSongsSuspense(),
+    ]);
   } catch {
     navigateTo("/auth/login");
   }
 
-  await announcementHashSuspense();
-  await announcementListSuspense();
+  await Promise.all([announcementHashSuspense(), announcementListSuspense()]);
 
   if (announcementHash.value && userStore.announcementHash !== announcementHash.value.hash) {
     // 哈希值不同，说明有新通知，使用新获取的通知
@@ -550,10 +563,10 @@ const filteredList = computed(() => fuse.value.results.value.map(e => e.item));
 
 const selectedTab = ref<"list" | "arrangement" | "notification">("arrangement");
 
-const { onPlayAsPlaylist, isTrackPlaying } = useMusicFlow();
+const { playAsPlaylist, isTrackPlaying } = useMusicPlayer();
 
-const tracks = ref<TMusicFlow[]>([]);
-const track = ref<TMusicFlow>();
+const tracks = ref<TPlayerTrack[]>([]);
+const track = ref<TPlayerTrack>();
 const previousList = ref<string>();
 const previousDate = ref(new Date());
 
@@ -629,7 +642,7 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
     }
     previousList.value = selectedTab.value === "list" ? listMode.value : selectedTab.value;
     if (TrackList) {
-      tracks.value = Array.from(TrackList, (e) => {
+      tracks.value = Array.from(TrackList, (e): TPlayerTrack | undefined => {
         if (!e.songId || !e.source)
           return undefined;
         return {
@@ -643,7 +656,7 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
             source: e.source!,
           },
         };
-      }).filter(e => e !== undefined);
+      }).filter((e): e is TPlayerTrack => e !== undefined);
     }
   }
   track.value = {
@@ -657,7 +670,7 @@ async function playMusic(song: Partial<RouterOutput["song"]["listSafe"][0]>) {
       source: song.source!,
     },
   };
-  onPlayAsPlaylist(tracks.value, track.value);
+  playAsPlaylist(tracks.value, track.value);
 }
 </script>
 

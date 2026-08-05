@@ -23,9 +23,11 @@
 
     <div class="relative shrink min-w-0 overflow-hidden [contain:paint] w-[220px] h-[120px] lg:w-[260px] lg:h-[140px] [@media(max-width:480px)]:w-[150px] [@media(max-width:480px)]:h-[90px]">
       <img
-        src="~/public/syzsgbz.webp"
+        src="/syzsgbz.webp"
         alt="SZSY logo"
         class="absolute inset-0 size-full object-contain"
+        loading="eager"
+        fetchpriority="high"
       >
     </div>
   </div>
