@@ -145,7 +145,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // private
     public: {
-      // public
+      // 百度统计 ID，通过 NUXT_PUBLIC_BAIDU_ANALYTICS_ID 注入
+      baiduAnalyticsId: "",
     },
   },
 
