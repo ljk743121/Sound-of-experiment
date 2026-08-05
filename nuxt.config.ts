@@ -30,13 +30,19 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+        // 预加载首屏 LCP 图片（Logo），加快首次内容绘制
+        { rel: "preload", as: "image", href: "/syzsgbz.webp", fetchpriority: "high" },
+        // 音乐封面/音频常来自这些外部域名，提前建立连接以加速加载
+        { rel: "preconnect", href: "https://music.163.com" },
+        { rel: "preconnect", href: "https://y.qq.com" },
+        { rel: "preconnect", href: "https://api.bilibili.com" },
       ],
     },
   },
 
   devtools: { enabled: false },
 
-  css: ["@ljk743121/vue-music-flow/dist/vue-music-flow.css", "~/assets/css/tailwind.css"],
+  css: ["~/assets/css/tailwind.css"],
   vite: {
     plugins: [tailwindcss()],
   },
@@ -69,7 +75,7 @@ export default defineNuxtConfig({
 
   colorMode: {
     classSuffix: "",
-    // disableTransition: true,
+    disableTransition: true,
     fallback: "light",
     storage: "localStorage",
   },
@@ -92,10 +98,6 @@ export default defineNuxtConfig({
         from: "vue-sonner",
         imports: ["toast"],
       },
-      {
-        from: "@ljk743121/vue-music-flow",
-        imports: ["useMusicFlow"],
-      },
     ],
   },
 
@@ -105,7 +107,7 @@ export default defineNuxtConfig({
   },
 
   build: {
-    transpile: ["trpc-nuxt", "@ljk743121/vue-music-flow"],
+    transpile: ["trpc-nuxt"],
   },
 
   nitro: {
@@ -143,7 +145,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // private
     public: {
-      // public
+      // 百度统计 ID，通过 NUXT_PUBLIC_BAIDU_ANALYTICS_ID 注入
+      baiduAnalyticsId: "",
     },
   },
 

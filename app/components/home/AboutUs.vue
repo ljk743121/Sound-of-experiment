@@ -4,7 +4,7 @@
       <slot />
     </template>
 
-    <Dialog>
+    <Dialog v-model:open="isOpen">
       <DialogTrigger>
         <slot />
       </DialogTrigger>
@@ -158,15 +158,23 @@ interface GitHubCommit {
   } | null;
 }
 
-const { data: commits, status } = useFetch<GitHubCommit[]>(
+const isOpen = ref(false);
+const { data: commits, status, execute } = useFetch<GitHubCommit[]>(
   "https://api.github.com/repos/ljk743121/SchoolFm/commits?per_page=30",
   {
     key: "github-commits",
     default: () => [],
     lazy: true,
     server: false,
+    immediate: false,
   },
 );
+
+watch(isOpen, (open) => {
+  if (open) {
+    execute();
+  }
+});
 
 const isLoading = computed(() => status.value === "pending");
 const contribError = ref(false);

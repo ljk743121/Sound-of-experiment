@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import type { TPermission } from "~~/types";
-import { ChevronRight } from "lucide-vue-next";
+import { ChevronRight } from "@lucide/vue";
 
 defineProps<{
   items: {

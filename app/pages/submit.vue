@@ -31,7 +31,7 @@
           </li>
           <li>检查是否已有相同歌曲</li>
           <li>选择合适的音乐源</li>
-          <li>最好选择网易云音乐，BiliBili其次，QQ音乐最后选择。</li>
+          <li>最好选择网易云音乐，BiliBili其次，QQ音乐最后选择(若QQ音乐无VIP可优先于BillBili)。</li>
           <li>QQ音乐有时候无法获取完整VIP歌曲，若需投稿请播放确认是否完整。</li>
           <li>BiliBili风控较为严格，有时候无法请求，请等待一段时间或联系管理员</li>
           <li><span class="text-destructive">注意：</span>切换歌曲来源后，点击搜索按钮可使用新来源重新搜索。</li>

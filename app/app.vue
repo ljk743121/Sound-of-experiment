@@ -33,7 +33,7 @@ useHead({
     {
       name: "keywords",
       content:
-        "深圳实验,校园点歌系统,广播站,管理系统,点歌平台,开源广播系统,教育科技,Nuxt3,Vue3,SchoolFm,voszsy,Github项目,开源项目,校园广播,歌曲投稿",
+        "深圳实验,校园点歌系统,广播站,排歌歌单,歌曲列表,歌曲投稿,智能排歌,自动化,SchoolFm,nuxt",
     },
     {
       property: "og:title",
@@ -58,6 +58,14 @@ useHead({
     {
       name: "twitter:description",
       content: "开源校园广播站管理系统，支持歌曲在线试听、在线投稿、智能审核、一键排歌和歌单导出",
+    },
+    {
+      name: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      name: "twitter:image",
+      content: "https://voszsy.penacony.cn/images/syzs.jpg",
     },
   ],
   link: [

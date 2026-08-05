@@ -77,7 +77,8 @@
 网站无需跳转第三方网站即可播放歌曲。播放器使用：
 
 - 投稿与审核界面：[nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer)
-- 主界面：[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)（v2.3.0 起使用）
+- 主界面：<del>[@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow)</del>（v2.3.0 起使用，v2.4.2起弃用）
+  使用重构后的播放器组件，参考[XiangZi7/GlassMusicPlayer](https://github.com/XiangZi7/GlassMusicPlayer)
 
 ### 外部脚本
 
@@ -118,8 +119,9 @@ python externalScripts/missed_dates.py \
 ## 用户界面
 
 图片为 v2.4.0 版本：
+(图一为v2.4.2版本)
 
-<p><img width="100%" src="./public/images/1.jpeg" alt="main arrangement ui"></p>
+<!-- <p><img width="100%" src="./public/images/1.jpeg" alt="main arrangement ui"></p> -->
 <p><img width="100%" src="./public/images/2.jpeg" alt="main songlist ui"></p>
 <p><img width="100%" src="./public/images/3.jpeg" alt="submit ui"></p>
 <p><img width="100%" src="./public/images/4.jpeg" alt="stats ui"></p>
@@ -337,11 +339,12 @@ _词语约定：本协议中的"本项目"指 SchoolFm项目；"使用者"指签
 1. [SMS-COSMO/the1068fm](https://github.com/SMS-COSMO/the1068fm) 本项目基于该项目的 [v2.0.1](https://github.com/SMS-COSMO/the1068fm/releases/tag/v2.0.1) 版本进行二次开发
 2. [copws/qq-music-api](https://github.com/copws/qq-music-api) qq 音乐 API 参考
 3. [Yizack/nuxt-musicfyplayer](https://github.com/Yizack/nuxt-musicfyplayer) 本项目使用的音乐播放组件
-4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow) 本项目使用的音乐播放组件 [@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow) 基于其二次开发
-5. [api.vkeys.cn](https://api.vkeys.cn) 本项目使用的第三方音乐源接口
-6. [api.qijieya.cn](https://api.qijieya.cn) 本项目使用的第三方音乐源接口
-7. [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) bilibili API 参考，于分支备份查看文档
-8. [lyswwhut/lx-music-desktop](https://github.com/lywhut/lx-music-desktop) qq 音乐 API 修复参考
+4. [ndragun92/vue-music-flow](https://github.com/ndragun92/vue-music-flow) 本项目使用的音乐播放组件 [@ljk743121/vue-music-flow](https://github.com/ljk743121/vue-music-flow) 基于其二次开发,v2.4.2起弃用
+5. [XiangZi7/GlassMusicPlayer](https://github.com/XiangZi7/GlassMusicPlayer) 本项目使用的音乐播放组件参考其二次开发
+6. [api.vkeys.cn](https://api.vkeys.cn) 本项目使用的第三方音乐源接口
+7. [api.qijieya.cn](https://api.qijieya.cn) 本项目使用的第三方音乐源接口
+8. [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) bilibili API 参考，于分支备份查看文档
+9. [lyswwhut/lx-music-desktop](https://github.com/lywhut/lx-music-desktop) qq 音乐 API 修复参考
 
 ## 贡献者
 
