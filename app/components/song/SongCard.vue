@@ -283,7 +283,7 @@
     </CardHeader>
 
     <CardContent class="flex flex-col gap-2 pt-0 sm:flex-row sm:flex-wrap sm:items-center">
-      <template v-if="song.state !== 'used' && song.state !== 'dropped'">
+      <template v-if="song.state !== 'used' && song.state !== 'dropped' && song.state !== 'missed'">
         <Button
           v-if="song.state !== 'approved' && song.id"
           variant="outline"

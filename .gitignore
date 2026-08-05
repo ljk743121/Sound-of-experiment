@@ -18,11 +18,14 @@ logs
 .fleet
 .idea
 .vscode
+.trae
+.claude
 
 # Local env files
-.env
-.env.*
+**/.env
+**/*.env.*
 !.env.example
+**/*.ini
 
 # Local Netlify folder
 .netlify
@@ -38,12 +41,21 @@ deprecated
 **/*.pyc
 **/*.pyo
 **/*.csv
+**/logs
 
 # PyInstaller / Python build outputs
-externalScripts/build/
-externalScripts/dist/
-externalScripts/gui_automation/
-externalScripts/music_downloader/
+externalScripts/build
+externalScripts/dist
 *.log
 *.spec.bak
 *.exe
+
+# externalScripts
+externalScripts/music_downloader
+externalScripts/gui_automation
+externalScripts/tests
+scripts/testServer.ts
+
+# AI Prompts
+**/*PLAN*.md
+**/AGENT.md

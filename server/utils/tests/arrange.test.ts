@@ -5,13 +5,14 @@ import { type ArrangeSong, scheduleSongs } from "../arrange";
 function song(
   id: number,
   duration: number,
-  options: { expectedDate?: string; createdAt?: Date } = {},
+  options: { expectedDate?: string; createdAt?: Date; priority?: number } = {},
 ): ArrangeSong {
   return {
     id,
     duration,
     expectedPlayDate: options.expectedDate ?? null,
     createdAt: options.createdAt ?? new Date("2026-01-01T00:00:00Z"),
+    priority: options.priority ?? 0,
   };
 }
 
@@ -66,7 +67,15 @@ describe("scheduleSongs", () => {
     ];
     const result = scheduleSongs(songs, "2026-01-05", "2026-01-06", {
       existingAssignments: { "2026-01-05": [99] },
-      existingSongs: [{ id: 99, duration: MAX_DAILY_SONG_DURATION, expectedPlayDate: null, createdAt: new Date() }],
+      existingSongs: [
+        {
+          id: 99,
+          duration: MAX_DAILY_SONG_DURATION,
+          expectedPlayDate: null,
+          createdAt: new Date(),
+          priority: 0,
+        },
+      ],
     });
     const day5 = result.assignments["2026-01-05"] ?? [];
     const day6 = result.assignments["2026-01-06"] ?? [];
@@ -111,16 +120,27 @@ describe("scheduleSongs", () => {
   });
 
   it("会考虑已有的排歌记录计算剩余容量", () => {
-    const songs = [
-      song(1, 25 * 60),
-      song(2, 15 * 60),
-    ];
+    const songs = [song(1, 25 * 60), song(2, 15 * 60)];
     const result = scheduleSongs(songs, "2026-01-05", "2026-01-05", {
       existingAssignments: { "2026-01-05": [99] },
-      existingSongs: [{ id: 99, duration: 25 * 60, expectedPlayDate: null, createdAt: new Date() }],
+      existingSongs: [
+        { id: 99, duration: 25 * 60, expectedPlayDate: null, createdAt: new Date(), priority: 0 },
+      ],
     });
     const day = result.assignments["2026-01-05"] ?? [];
     expect(day).toStrictEqual([99, 2]);
     expect(result.dropped.length).toBe(1);
+  });
+
+  it("missed 歌曲优先级高于 approved 歌曲，优先占用容量", () => {
+    const songs = [
+      song(1, 25 * 60, { createdAt: new Date("2026-01-01T00:00:00Z"), priority: 1 }), // approved，早投稿
+      song(2, 25 * 60, { createdAt: new Date("2026-01-02T00:00:00Z"), priority: 0 }), // missed，晚投稿
+    ];
+    const result = scheduleSongs(songs, "2026-01-05", "2026-01-05");
+    const day = result.assignments["2026-01-05"] ?? [];
+    // 45 分钟容量仅够一首 25 分钟歌曲，missed（priority 0）优先被安排，approved 被丢弃
+    expect(day).toStrictEqual([2]);
+    expect(result.dropped).toStrictEqual([1]);
   });
 });

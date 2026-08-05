@@ -179,6 +179,210 @@ def get_access_token(
     return access_token
 
 
+def _arrangements_to_cache_map(data: Any) -> Dict[str, Dict[str, Any]]:
+    """将排歌列表转换为 {日期: {song_ids, unplayed_songs, status}}。"""
+    if not isinstance(data, list):
+        raise RuntimeError(f"排歌列表返回格式异常: {data}")
+
+    result: Dict[str, Dict[str, Any]] = {}
+    for arrangement in data:
+        if not isinstance(arrangement, dict):
+            continue
+        date_str = arrangement.get("date")
+        if not date_str:
+            continue
+
+        song_ids: List[int] = []
+        for song in arrangement.get("songs") or []:
+            if not isinstance(song, dict):
+                continue
+            raw_id = song.get("id")
+            if raw_id is None:
+                continue
+            try:
+                song_ids.append(int(raw_id))
+            except (TypeError, ValueError):
+                continue
+
+        try:
+            unplayed_songs = int(arrangement.get("unplayedSongs") or 0)
+        except (TypeError, ValueError):
+            unplayed_songs = 0
+
+        status = arrangement.get("status")
+        if not isinstance(status, str):
+            status = "pending"
+
+        result[str(date_str)] = {
+            "song_ids": song_ids,
+            "unplayed_songs": unplayed_songs,
+            "status": status,
+        }
+
+    return result
+
+def fetch_arrangements_cache_range(
+    base_url: str,
+    access_token: str,
+    start: str,
+    end: str,
+    *,
+    timeout: float = 30.0,
+) -> Dict[str, Dict[str, Any]]:
+    """
+    调用 arrangements.listRange 接口获取指定日期范围的排歌缓存数据。
+
+    Returns:
+        以排歌日期为键的 {song_ids, unplayed_songs, status} 字典。
+    """
+    url = _trpc_batch_url(base_url, "arrangements.listRange")
+    response = requests.get(
+        url,
+        headers={"Authorization": access_token},
+        params={
+            "batch": "1",
+            "input": json.dumps({
+                "0": {
+                    "json": {
+                        "start": start,
+                        "end": end,
+                    },
+                },
+            }),
+        },
+        timeout=timeout,
+    )
+    return _arrangements_to_cache_map(_parse_trpc_response(response))
+
+def upload_has_played_song_ids(
+    song_ids: List[int],
+    *,
+    base_url: str,
+    user_id: str,
+    password: str,
+    date: Optional[str] = None,
+    has_played: bool = True,
+    timeout: float = 30.0,
+) -> Dict[str, Any]:
+    """
+    登录后按歌曲 id 调用 arrangements.hasPlayed 接口。
+
+    Args:
+        song_ids: 排歌歌曲 id 列表。
+        base_url: 站点根地址。
+        user_id: 用户 id。
+        password: 用户密码。
+        date: 排歌日期（YYYY-MM-DD）。
+        has_played: True 标记为已播放；False 将整日排歌移除并放回候选池。
+        timeout: 请求超时时间（秒）。
+
+    Returns:
+        API 返回的 result.data 内容。
+    """
+    if not song_ids:
+        raise ValueError("歌曲 id 列表不能为空")
+    if date is None:
+        raise ValueError("必须指定排歌日期 date")
+
+    access_token = get_access_token(base_url, user_id, password)
+    payload = {
+        "date": date,
+        "songs": song_ids,
+        "hasPlayed": has_played,
+    }
+
+    url = _trpc_batch_url(base_url, "arrangements.hasPlayed")
+    response = requests.post(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": access_token,
+        },
+        json={"0": {"json": payload}},
+        timeout=timeout,
+    )
+    return _parse_trpc_response(response)
+
+
+def finish_arrangement(
+    date: str,
+    *,
+    base_url: str,
+    user_id: str,
+    password: str,
+    timeout: float = 30.0,
+) -> Dict[str, Any]:
+    """
+    调用 arrangements.finish 将指定日期标记为全部播放完成（status=success）。
+
+    Args:
+        date: 排歌日期（YYYY-MM-DD）。
+        base_url: 站点根地址。
+        user_id: 用户 id。
+        password: 用户密码。
+        timeout: 请求超时时间（秒）。
+
+    Returns:
+        API 返回的 result.data 内容。
+    """
+    access_token = get_access_token(base_url, user_id, password)
+    url = _trpc_batch_url(base_url, "arrangements.finish")
+    response = requests.post(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": access_token,
+        },
+        json={"0": {"json": {"date": date}}},
+        timeout=timeout,
+    )
+    return _parse_trpc_response(response)
+
+
+def recover_has_played(
+    song_ids: List[int],
+    *,
+    base_url: str,
+    user_id: str,
+    password: str,
+    date: str,
+    timeout: float = 30.0,
+) -> Dict[str, Any]:
+    """
+    登录后调用 arrangements.recover，将重试后重新下载成功的歌曲恢复回当天列表。
+
+    Args:
+        song_ids: 此前上报失败、本次重试下载成功的歌曲 id 列表。
+        base_url: 站点根地址。
+        user_id: 用户 id。
+        password: 用户密码。
+        date: 排歌日期（YYYY-MM-DD）。
+        timeout: 请求超时时间（秒）。
+
+    Returns:
+        API 返回的 result.data 内容。
+    """
+    if not song_ids:
+        raise ValueError("歌曲 id 列表不能为空")
+    if not date:
+        raise ValueError("必须指定排歌日期 date")
+
+    access_token = get_access_token(base_url, user_id, password)
+    payload = {"date": date, "songIds": song_ids}
+
+    url = _trpc_batch_url(base_url, "arrangements.recover")
+    response = requests.post(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": access_token,
+        },
+        json={"0": {"json": payload}},
+        timeout=timeout,
+    )
+    return _parse_trpc_response(response)
+
+
 def parse_date_from_csv_path(csv_path: str) -> Optional[str]:
     """从文件名（如 songs_2025-01-01.csv）中解析 YYYY-MM-DD 日期。"""
     basename = os.path.basename(csv_path)
@@ -242,28 +446,14 @@ def upload_has_played(
             )
 
     song_ids = read_song_ids_from_csv(csv_path)
-    if not song_ids:
-        raise ValueError("CSV 中没有可处理的歌曲 id")
-
-    access_token = get_access_token(base_url, user_id, password)
-
-    payload = {
-        "date": date,
-        "songs": song_ids,
-        "hasPlayed": has_played,
-    }
-
-    url = _trpc_batch_url(base_url, "arrangements.hasPlayed")
-    response = requests.post(
-        url,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": access_token,
-        },
-        json={"0": {"json": payload}},
-        timeout=30,
+    return upload_has_played_song_ids(
+        song_ids,
+        base_url=base_url,
+        user_id=user_id,
+        password=password,
+        date=date,
+        has_played=has_played,
     )
-    return _parse_trpc_response(response)
 
 
 def main() -> int:

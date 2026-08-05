@@ -52,6 +52,22 @@
               </p>
             </CardContent>
           </Card>
+          <Card
+            class="cursor-pointer transition-colors hover:bg-accent"
+            @click="navigateToDropped"
+          >
+            <CardHeader class="pb-2">
+              <CardDescription>错过未播</CardDescription>
+              <CardTitle class="text-2xl">
+                {{ stats?.missed ?? "-" }}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p class="text-xs text-muted-foreground">
+                错过未播歌曲
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         <div class="flex flex-wrap gap-2">

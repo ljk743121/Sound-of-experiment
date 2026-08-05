@@ -59,7 +59,13 @@ const states: Record<
     className:
       "bg-amber-50 dark:bg-amber-200/50 border-amber-100 dark:border-amber-200 text-amber-700 dark:text-amber-200",
   },
+  missed: {
+    label: "错过未播",
+    icon: "lucide:history",
+    className:
+      "bg-red-50 dark:bg-red-200/50 border-red-100 dark:border-red-200 text-red-700 dark:text-red-200",
+  },
 };
 
-const state = computed(() => (song.state ? states[song.state] : undefined));
+const state = computed(() => (song.state ? states[song.state as TSongState] : undefined));
 </script>

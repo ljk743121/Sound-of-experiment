@@ -6,6 +6,7 @@ import { MAX_DAILY_SONG_DURATION } from "~~/constants";
 import { db } from "~~/server/db";
 import { arrangements, songs, users } from "~~/server/db/schema";
 import { cacheDel, cacheGet, cacheSet } from "~~/server/utils/redis";
+import { getVolatileSongMap, STABLE_SONG_COLUMNS } from "~~/server/utils/songCache";
 import { hasBlockWord } from "~~/server/utils/universal";
 import {
   adminProcedure,
@@ -103,7 +104,7 @@ export const songRouter = router({
           lastSubmitAt: now,
         })
         .where(eq(users.id, ctx.user.id));
-      await cacheDel(`listMine:${ctx.user.id}`);
+      await cacheDel(`listMine:stable:${ctx.user.id}`);
     }),
   deleteMine: protectedProcedure
     .input(
@@ -122,7 +123,7 @@ export const songRouter = router({
       if (song.state === "used")
         throw new TRPCError({ code: "BAD_REQUEST", message: "该歌曲已被使用" });
       await db.delete(songs).where(eq(songs.id, input.id));
-      await cacheDel(`listMine:${ctx.user.id}`);
+      await cacheDel(`listMine:stable:${ctx.user.id}`);
     }),
   delete: adminProcedure
     .input(
@@ -173,7 +174,7 @@ export const songRouter = router({
     const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);// two weeks
     const rawSongs = await db.query.songs.findMany({
       where: or(
-        inArray(songs.state, ["pending", "approved", "dropped"]),
+        inArray(songs.state, ["pending", "approved", "dropped", "missed"]),
         and(
           inArray(songs.state, ["used", "rejected"]),
           gt(songs.createdAt, twoWeeksAgo),
@@ -212,7 +213,7 @@ export const songRouter = router({
 
     return rawSongs.map(song => ({
       ...song,
-      likeUsers: song.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)?.name || id),
+      likeUsers: song.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)!.name),
     }));
   }),
 
@@ -237,17 +238,24 @@ export const songRouter = router({
   }),
 
   listMine: protectedProcedure.query(async ({ ctx }) => {
-    const cacheKey = `listMine:${ctx.user.id}`;
+    const cacheKey = `listMine:stable:${ctx.user.id}`;
     const cachedList = await cacheGet(cacheKey);
-    if (cachedList) {
-      return JSON.parse(cachedList);
-    }
-    const list = await db.query.songs.findMany({
-      orderBy: desc(songs.createdAt),
-      where: eq(songs.ownerId, ctx.user.id),
-    });
 
-    const likerIds = [...new Set(list.flatMap(s => s.likes))];
+    let list;
+    if (cachedList) {
+      list = JSON.parse(cachedList);
+    } else {
+      list = await db.query.songs.findMany({
+        orderBy: desc(songs.createdAt),
+        where: eq(songs.ownerId, ctx.user.id),
+        columns: STABLE_SONG_COLUMNS,
+      });
+      await cacheSet(cacheKey, JSON.stringify(list), { EX: 86400 });
+    }
+
+    // 易变字段（点赞、状态等）不缓存，每次实时读取
+    const volatileMap = await getVolatileSongMap(list.map((s: { id: number }) => s.id));
+    const likerIds = [...new Set(list.flatMap((s: { id: number }) => volatileMap.get(s.id)?.likes ?? []))] as string[];
     const likers = likerIds.length
       ? await db.query.users.findMany({
         where: inArray(users.id, likerIds),
@@ -256,12 +264,14 @@ export const songRouter = router({
       : [];
     const likerMap = new Map(likers.map(u => [u.id, u]));
 
-    const finalList = list.map(song => ({
-      ...song,
-      likeUsers: song.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)?.name || id),
-    }));
-    await cacheSet(cacheKey, JSON.stringify(finalList), { EX: 86400 });
-    return finalList;
+    return list.map((song: { id: number }) => {
+      const volatile = volatileMap.get(song.id);
+      return {
+        ...song,
+        ...volatile,
+        likeUsers: volatile?.likes.map(id => likerMap.get(id)?.displayName || likerMap.get(id)!.name) ?? [],
+      };
+    });
   }),
 
   canSubmit: protectedProcedure.query(async ({ ctx }) => {
@@ -314,9 +324,7 @@ export const songRouter = router({
         likeCount: song.likeCount + 1,
       })
       .where(eq(songs.id, id));
-    if (song.ownerId === ctx.user.id) {
-      await cacheDel(`listMine:${ctx.user.id}`);
-    }
+    // 点赞数属于易变字段，listMine 已不缓存该部分，无需失效缓存
   }),
 
   disvote: protectedProcedure.input(z.number()).mutation(async ({ input: id, ctx }) => {
@@ -334,9 +342,7 @@ export const songRouter = router({
         likeCount: song.likeCount - 1,
       })
       .where(eq(songs.id, id));
-    if (song.ownerId === ctx.user.id) {
-      await cacheDel(`listMine:${ctx.user.id}`);
-    }
+    // 点赞数属于易变字段，listMine 已不缓存该部分，无需失效缓存
   }),
 
   idToName: protectedProcedure.input(z.array(z.string())).query(async ({ input }) => {

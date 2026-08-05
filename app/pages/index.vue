@@ -242,7 +242,13 @@
           <Alert v-if="currentArrangement?.unplayedSongs" class="mb-3" variant="destructive">
             <AlertTitle class="flex items-center gap-2">
               <Icon name="lucide:alert-circle" class="size-4" />
-              当天有 {{ currentArrangement.unplayedSongs }} 首歌没有播放,将参与下一次排歌
+              {{ currentArrangement?.status === 'failed' ? `当天有${currentArrangement.unplayedSongs} 首歌没有播放,将参与下一次排歌` : `当天未播放歌曲，原有${currentArrangement?.unplayedSongs}首歌` }}
+            </AlertTitle>
+          </Alert>
+          <Alert v-if="currentArrangement?.status === 'success'">
+            <AlertTitle class="flex items-center gap-2">
+              <Icon name="lucide:check-circle-2" class="size-4" />
+              当天歌曲已全部成功播放
             </AlertTitle>
           </Alert>
           <ul class="flex flex-col gap-3">
@@ -441,10 +447,14 @@ const calendarAttr = computed(() => {
   const list = userStore.loggedIn ? arrangementList.value : arrangementGuestList.value;
   for (const arrangement of list ?? []) {
     let dotColor: string | boolean = true;
-    if (arrangement.unplayedSongs) {
+    if (arrangement.status === "missed") {
       dotColor = "red";
-    } else if (arrangement.date < getDateString(new Date())) {
+    } else if (arrangement.status === "failed") {
+      dotColor = "yellow";
+    } else if (arrangement.status === "success") {
       dotColor = "green";
+    } else if (arrangement.date < getDateString(new Date())) {
+      dotColor = "gray";
     }
     res.push({
       dot: dotColor,
