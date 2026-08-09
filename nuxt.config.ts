@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from "@tailwindcss/vite";
 import { SCHOOL_NAME } from "./constants";
+import { env } from "./server/env";
 
 export default defineNuxtConfig({
   app: {
@@ -36,6 +37,19 @@ export default defineNuxtConfig({
         { rel: "preconnect", href: "https://music.163.com" },
         { rel: "preconnect", href: "https://y.qq.com" },
         { rel: "preconnect", href: "https://api.bilibili.com" },
+      ],
+      script: [
+        {
+          innerHTML: `
+            var _hmt = _hmt || [];
+            (function() {
+              var hm = document.createElement("script");
+              hm.src = "https://hm.baidu.com/hm.js?${env.BAIDU_ID}";
+              var s = document.getElementsByTagName("script")[0]; 
+              s.parentNode.insertBefore(hm, s);
+            })();
+          `,
+        },
       ],
     },
   },
@@ -145,8 +159,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // private
     public: {
-      // 百度统计 ID，通过 NUXT_PUBLIC_BAIDU_ANALYTICS_ID 注入
-      baiduAnalyticsId: "",
+      // public
     },
   },
 
