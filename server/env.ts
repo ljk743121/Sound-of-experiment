@@ -16,8 +16,7 @@ const envSchema = z.object({
   ENC_PRIVATE_KEY: z.string(),
   SIGN_KID: z.string(),
   ENC_KID: z.string(),
-  // HAS_PLAYED_TOKEN_SECRET: z.string().optional(),
-  CF_TOKEN: z.string().optional(),
+  BAIDU_ID: z.string().optional(),
   REDIS_URL: z.string().url().optional(),
   USER_API_CONFIG: z.string().optional(),
 });
@@ -26,7 +25,7 @@ const envParse = envSchema.safeParse(process.env);
 
 if (!envParse.success) {
   console.error(
-    "[ERROR] Invalid environment variables:",
+    "Invalid environment variables:",
     JSON.stringify(envParse.error.format(), null, 4),
   );
   process.exit(1);
