@@ -8,6 +8,13 @@
       "when": 1787823710877,
       "tag": "0000_slippery_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787832138719,
+      "tag": "0001_wealthy_jack_murdock",
+      "breakpoints": true
     }
   ]
 }

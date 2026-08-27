@@ -42,16 +42,6 @@ export type TPermission =
   | "config"
   | "manualArrange";
 
-// haven't used
-export type TIdentity =
-  | "student"
-  | "teacher"
-  | "admin"
-  | "host"
-  | "superadmin"
-  | "retiree"
-  | "grad";
-
 export type TSubmitType = "realName" | "anonymous" | "alias";
 
 // for vue-music-flow
