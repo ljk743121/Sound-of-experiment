@@ -63,15 +63,14 @@ export async function getVolatileSongMap(ids: number[]): Promise<Map<number, Vol
 }
 
 /**
- * 排歌记录中的易变字段（未播放歌曲数、播放状态），每次实时读取，不缓存。
+ * 排歌记录中的易变字段（播放状态），每次实时读取，不缓存。
  */
 export interface ArrangementVolatileFields {
-  unplayedSongs: number;
   status: string;
 }
 
 /**
- * 根据排歌日期批量获取排歌记录易变字段（未播放歌曲数、播放状态）。
+ * 根据排歌日期批量获取排歌记录易变字段（播放状态）。
  */
 export async function getArrangementVolatileMap(
   dates: string[],
@@ -83,10 +82,9 @@ export async function getArrangementVolatileMap(
     where: inArray(arrangements.date, dates),
     columns: {
       date: true,
-      unplayedSongs: true,
       status: true,
     },
   });
 
-  return new Map(rows.map(r => [r.date, { unplayedSongs: r.unplayedSongs, status: r.status }]));
+  return new Map(rows.map(r => [r.date, { status: r.status }]));
 }

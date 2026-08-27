@@ -84,7 +84,7 @@ export const arrangementsRouter = router({
 
   listApproved: adminProcedure.use(requirePermission(["manualArrange"])).query(async () => {
     return await db.query.songs.findMany({
-      where: inArray(songs.state, ["approved", "missed"]),
+      where: inArray(songs.state, ["approved", "missed", "failed"]),
       orderBy: [desc(songs.arrangementDate), desc(songs.createdAt)],
     });
   }),
@@ -235,12 +235,10 @@ export const arrangementsRouter = router({
 
     return arrangementsData.map((arrangement: { date: string; songs: { id: number }[] }) => {
       const arrangementVolatile = arrangementVolatileMap.get(arrangement.date) ?? {
-        unplayedSongs: 0,
         status: "pending",
       };
       return {
         ...arrangement,
-        unplayedSongs: arrangementVolatile.unplayedSongs,
         status: arrangementVolatile.status,
         songs: arrangement.songs.map((song: { id: number }) => {
           const volatile = volatileMap.get(song.id);
@@ -292,7 +290,7 @@ export const arrangementsRouter = router({
       consola.info(`${new Date().toLocaleString()} Redis 缓存写入：${cacheKey}`);
     }
 
-    // 易变字段（点赞数、状态、未播放数等）不缓存，每次实时读取并合并
+    // 易变字段（点赞数、状态等）不缓存，每次实时读取并合并
     const songIds = arrangementsData.flatMap((a: { songs: { id: number }[] }) =>
       a.songs.map((s: { id: number }) => s.id),
     );
@@ -302,12 +300,10 @@ export const arrangementsRouter = router({
 
     return arrangementsData.map((arrangement: { date: string; songs: { id: number }[] }) => {
       const arrangementVolatile = arrangementVolatileMap.get(arrangement.date) ?? {
-        unplayedSongs: 0,
         status: "pending",
       };
       return {
         ...arrangement,
-        unplayedSongs: arrangementVolatile.unplayedSongs,
         status: arrangementVolatile.status,
         songs: arrangement.songs.map((song: { id: number }) => ({
           ...song,
@@ -335,12 +331,17 @@ export const arrangementsRouter = router({
       .select({ count: count() })
       .from(songs)
       .where(eq(songs.state, "missed"));
+    const failedCount = await db
+      .select({ count: count() })
+      .from(songs)
+      .where(eq(songs.state, "failed"));
 
     return {
       approved: approvedCount[0]?.count ?? 0,
       pending: pendingCount[0]?.count ?? 0,
       dropped: droppedCount[0]?.count ?? 0,
       missed: missedCount[0]?.count ?? 0,
+      failed: failedCount[0]?.count ?? 0,
     };
   }),
 
@@ -382,9 +383,14 @@ export const arrangementsRouter = router({
         orderBy: [desc(songs.likeCount), asc(songs.createdAt)],
         columns: dateColumns,
       });
+      const failedSongs = await db.query.songs.findMany({
+        where: eq(songs.state, "failed"),
+        orderBy: [desc(songs.likeCount), asc(songs.createdAt)],
+        columns: dateColumns,
+      });
 
       let droppedSongs: typeof approvedSongs = [];
-      const availableSongs = [...approvedSongs, ...missedSongs];
+      const availableSongs = [...approvedSongs, ...missedSongs, ...failedSongs];
       if (
         (end.compare(start) + 1) * (input.songCount || 1) > availableSongs.length
         || input.songCount === 0
@@ -401,7 +407,7 @@ export const arrangementsRouter = router({
         duration: s.duration ?? 0,
         expectedPlayDate: s.expectedPlayDate,
         createdAt: s.createdAt,
-        priority: s.state === "missed" ? 0 : s.state === "dropped" ? 2 : 1,
+        priority: s.state === "missed" ? 0 : s.state === "approved" ? 1 : s.state === "failed" ? 2 : 3,
       }));
       if (candidateSongs.length === 0) {
         throw new TRPCError({
@@ -502,8 +508,10 @@ export const arrangementsRouter = router({
             columns: { id: true, state: true },
           })
           : [];
-        // missed 状态的歌曲未排上时保持 missed，不降级为 dropped
-        const songsToDrop = droppedSongRows.filter(s => s.state !== "missed").map(s => s.id);
+        // missed / failed 状态的歌曲未排上时保持原状态，不降级为 dropped
+        const songsToDrop = droppedSongRows
+          .filter(s => s.state !== "missed" && s.state !== "failed")
+          .map(s => s.id);
         if (songsToDrop.length > 0) {
           await tx
             .update(songs)
@@ -558,6 +566,7 @@ export const arrangementsRouter = router({
               duration: true,
               createdAt: true,
               position: true,
+              state: true,
               likeCount: true,
               ownerDisplayName: true,
               isRealName: true,
@@ -587,7 +596,6 @@ export const arrangementsRouter = router({
         orderBy: asc(arrangements.date),
         columns: {
           date: true,
-          unplayedSongs: true,
           status: true,
         },
         with: {
@@ -595,6 +603,8 @@ export const arrangementsRouter = router({
             orderBy: order,
             columns: {
               id: true,
+              state: true,
+              position: true,
             },
           },
         },
@@ -639,6 +649,8 @@ export const arrangementsRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
+      // hasPlayed 为 true 时表示当天尝试了播放歌曲，但是有部分歌曲播放失败，有部分歌曲播放成功，这里上传的songs是播放失败的歌曲，成功的歌曲不会上传。
+      // hasPlayed 为 false 时表示当天没有播放歌曲，全部歌曲都需要标记为missed，不用考虑传入的songs，直接从数据库中获取。
       const monitorHasPlayed = getConfig("monitorHasPlayed");
       if (!monitorHasPlayed) {
         throw new TRPCError({
@@ -676,25 +688,22 @@ export const arrangementsRouter = router({
       }
 
       if (!hasPlayed) {
+        // 当天没有播放歌曲，将当天所有歌曲标记为 missed，保留在排期列表（不从列表中删除），后续排歌仍以 missed 最高优先级处理
         const usedSongs = await db.query.songs.findMany({
           where: eq(songs.arrangementDate, date),
           columns: {
             id: true,
           },
         });
-        for (const i of usedSongs) {
+        if (usedSongs.length > 0) {
           await db
             .update(songs)
-            .set({
-              arrangementDate: null,
-              position: null,
-              state: "missed",
-            })
-            .where(eq(songs.id, i.id));
+            .set({ state: "missed" })
+            .where(eq(songs.arrangementDate, date));
         }
         await db
           .update(arrangements)
-          .set({ unplayedSongs: usedSongs.length, status: "missed" })
+          .set({ status: "missed" })
           .where(eq(arrangements.date, date));
         await invalidateArrangementCache();
         await cacheDel("songMap");
@@ -703,10 +712,11 @@ export const arrangementsRouter = router({
           count: usedSongs.length,
           processedIds: usedSongs.map(s => s.id),
           notFoundIds: [],
-          message: `成功将 ${usedSongs.length} 首歌曲从排歌中移除，将参与下一次排歌`,
+          message: `成功将 ${usedSongs.length} 首歌曲标记为未播放，保留在排期列表中`,
         };
       }
 
+      // 当天尝试播放：上传的 songs 为播放失败的歌曲，标记为 failed（保留在排期列表中）
       const matchingSongs = await db.query.songs.findMany({
         where: and(eq(songs.arrangementDate, date), inArray(songs.id, songIds)),
         columns: { id: true },
@@ -725,20 +735,26 @@ export const arrangementsRouter = router({
         };
       }
 
-      await db.transaction(async (tx) => {
-        await tx
-          .update(songs)
-          .set({
-            state: "approved",
-            arrangementDate: null,
-            position: null,
-          })
-          .where(inArray(songs.id, foundIds));
+      await db
+        .update(songs)
+        .set({ state: "failed" })
+        .where(inArray(songs.id, foundIds));
+
+      // 成功播放：当天其余仍为 used 的歌曲视为播放成功，标记为 played（保留在排期列表中）
+      const playedSongs = await db.query.songs.findMany({
+        where: and(eq(songs.arrangementDate, date), eq(songs.state, "used")),
+        columns: { id: true },
       });
+      if (playedSongs.length > 0) {
+        await db
+          .update(songs)
+          .set({ state: "played" })
+          .where(inArray(songs.id, playedSongs.map(s => s.id)));
+      }
 
       await db
         .update(arrangements)
-        .set({ unplayedSongs: foundIds.length, status: "failed" })
+        .set({ status: "failed" })
         .where(eq(arrangements.date, date));
 
       await invalidateArrangementCache();
@@ -748,8 +764,9 @@ export const arrangementsRouter = router({
         success: true,
         count: foundIds.length,
         processedIds: foundIds,
+        playedIds: playedSongs.map(s => s.id),
         notFoundIds,
-        message: `成功处理 ${foundIds.length} 首歌曲`,
+        message: `成功将 ${foundIds.length} 首歌曲标记为播放失败，${playedSongs.length} 首歌曲标记为已播放`,
       };
     }),
 
@@ -778,9 +795,14 @@ export const arrangementsRouter = router({
           message: `指定日期 ${input.date} 的排歌记录不存在`,
         });
       }
+      // 将当天仍为 used 的歌曲标记为 played（视为全部播放完成）
+      await db
+        .update(songs)
+        .set({ state: "played" })
+        .where(and(eq(songs.arrangementDate, input.date), eq(songs.state, "used")));
       await db
         .update(arrangements)
-        .set({ unplayedSongs: 0, status: "success" })
+        .set({ status: "success" })
         .where(eq(arrangements.date, input.date));
       await invalidateArrangementCache();
       await cacheDel("songMap");
@@ -809,7 +831,7 @@ export const arrangementsRouter = router({
       }
       const arrangement = await db.query.arrangements.findFirst({
         where: eq(arrangements.date, input.date),
-        columns: { date: true, unplayedSongs: true },
+        columns: { date: true },
       });
       if (!arrangement) {
         throw new TRPCError({
@@ -833,12 +855,18 @@ export const arrangementsRouter = router({
           .where(inArray(songs.id, restoredIds));
       }
 
-      // 扣减未播放数；归零则标记当天为 success，否则保持 failed
-      const remaining = Math.max((arrangement.unplayedSongs ?? 0) - restoredIds.length, 0);
-      const status = remaining === 0 ? "success" : "failed";
+      // 统计当天仍为 failed/missed 的歌曲；若全部恢复则标记为 success，否则保持 failed
+      const remainingUnplayed = await db.query.songs.findMany({
+        where: and(
+          eq(songs.arrangementDate, input.date),
+          inArray(songs.state, ["failed", "missed"]),
+        ),
+        columns: { id: true },
+      });
+      const status = remainingUnplayed.length === 0 ? "success" : "failed";
       await db
         .update(arrangements)
-        .set({ unplayedSongs: remaining, status })
+        .set({ status })
         .where(eq(arrangements.date, input.date));
       await invalidateArrangementCache();
       await cacheDel("songMap");
@@ -846,7 +874,7 @@ export const arrangementsRouter = router({
         success: true,
         date: input.date,
         restored: restoredIds.length,
-        unplayedSongs: remaining,
+        unplayedSongs: remainingUnplayed.length,
         status,
       };
     }),

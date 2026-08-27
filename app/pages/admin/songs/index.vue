@@ -24,15 +24,21 @@
       <ScrollArea class="h-[calc(100svh-4rem)]">
         <div class="sticky top-0 flex h-16 items-center border-b bg-background px-4">
           <Tabs v-model="selectedTab" class="w-full" default-value="used">
-            <TabsList class="grid grid-cols-3">
+            <TabsList class="grid grid-cols-5">
               <TabsTrigger value="used">
                 入选
+              </TabsTrigger>
+              <TabsTrigger value="played">
+                已播放
               </TabsTrigger>
               <TabsTrigger value="dropped">
                 落选
               </TabsTrigger>
               <TabsTrigger value="missed">
                 错过未播
+              </TabsTrigger>
+              <TabsTrigger value="failed">
+                播放失败
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -45,6 +51,16 @@
           class="flex flex-col gap-3 p-4"
         >
           <li v-for="song in songList?.filter(x => x.state === 'used')" :key="song.id">
+            <LazySongCard :song type="songs" />
+          </li>
+        </TransitionGroup>
+        <TransitionGroup
+          v-if="selectedTab === 'played'"
+          name="list"
+          tag="ul"
+          class="flex flex-col gap-3 p-4"
+        >
+          <li v-for="song in songList?.filter(x => x.state === 'played')" :key="song.id">
             <LazySongCard :song type="songs" />
           </li>
         </TransitionGroup>
@@ -65,6 +81,16 @@
           class="flex flex-col gap-3 p-4"
         >
           <li v-for="song in songList?.filter(x => x.state === 'missed')" :key="song.id">
+            <LazySongCard :song type="songs" />
+          </li>
+        </TransitionGroup>
+        <TransitionGroup
+          v-if="selectedTab === 'failed'"
+          name="list"
+          tag="ul"
+          class="flex flex-col gap-3 p-4"
+        >
+          <li v-for="song in songList?.filter(x => x.state === 'failed')" :key="song.id">
             <LazySongCard :song type="songs" />
           </li>
         </TransitionGroup>
@@ -107,5 +133,5 @@ const panels = ref([
   },
 ]);
 
-const selectedTab = ref<"used" | "dropped" | "missed">("used");
+const selectedTab = ref<"used" | "played" | "dropped" | "missed" | "failed">("used");
 </script>

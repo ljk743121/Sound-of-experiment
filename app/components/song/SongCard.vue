@@ -38,6 +38,22 @@
             <Badge variant="secondary" class="text-xs">
               {{ realNameLabel }}
             </Badge>
+            <Badge
+              v-if="isMine && song.arrangementDate && song.arrangementDate !== song.expectedPlayDate"
+              variant="secondary"
+              class="text-xs"
+            >
+              <Icon name="lucide:calendar" class="mr-1 size-3" />
+              {{ song.arrangementDate }}
+            </Badge>
+            <Badge
+              v-else-if="isMine && song.arrangementDate && song.arrangementDate === song.expectedPlayDate"
+              variant="secondary"
+              class="text-xs"
+            >
+              <Icon name="lucide:check" class="mr-1 size-3" />
+              期望日期：{{ song.expectedPlayDate }}
+            </Badge>
             <span
               v-if="song.ownerDisplayName"
               class="max-w-[120px] truncate text-xs text-muted-foreground md:max-w-[180px] lg:max-w-[240px]"
@@ -46,7 +62,7 @@
             </span>
           </div>
 
-          <SongState v-if="!isArrangement" :song class="mt-2" />
+          <SongState v-if="!(isArrangement && song.state === 'used')" :song class="mt-2" />
 
           <p
             v-if="song.msgPublic"
@@ -283,7 +299,7 @@
     </CardHeader>
 
     <CardContent class="flex flex-col gap-2 pt-0 sm:flex-row sm:flex-wrap sm:items-center">
-      <template v-if="song.state !== 'used' && song.state !== 'dropped' && song.state !== 'missed'">
+      <template v-if="song.state !== 'used' && song.state !== 'played' && song.state !== 'dropped' && song.state !== 'missed' && song.state !== 'failed'">
         <Button
           v-if="song.state !== 'approved' && song.id"
           variant="outline"

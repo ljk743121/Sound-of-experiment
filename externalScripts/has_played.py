@@ -180,7 +180,11 @@ def get_access_token(
 
 
 def _arrangements_to_cache_map(data: Any) -> Dict[str, Dict[str, Any]]:
-    """将排歌列表转换为 {日期: {song_ids, unplayed_songs, status}}。"""
+    """将排歌列表转换为 {日期: {song_ids, song_states, unplayed_songs, status}}。
+
+    服务端已移除 arrangements.unplayedSongs，未播放歌曲数改为由每首歌的 state
+    （"missed" / "failed"）统计得出。
+    """
     if not isinstance(data, list):
         raise RuntimeError(f"排歌列表返回格式异常: {data}")
 
@@ -193,6 +197,7 @@ def _arrangements_to_cache_map(data: Any) -> Dict[str, Dict[str, Any]]:
             continue
 
         song_ids: List[int] = []
+        song_states: Dict[str, str] = {}
         for song in arrangement.get("songs") or []:
             if not isinstance(song, dict):
                 continue
@@ -200,14 +205,15 @@ def _arrangements_to_cache_map(data: Any) -> Dict[str, Dict[str, Any]]:
             if raw_id is None:
                 continue
             try:
-                song_ids.append(int(raw_id))
+                song_id = int(raw_id)
             except (TypeError, ValueError):
                 continue
+            song_ids.append(song_id)
+            state = song.get("state")
+            if isinstance(state, str):
+                song_states[str(song_id)] = state
 
-        try:
-            unplayed_songs = int(arrangement.get("unplayedSongs") or 0)
-        except (TypeError, ValueError):
-            unplayed_songs = 0
+        unplayed_songs = sum(1 for s in song_states.values() if s in ("missed", "failed"))
 
         status = arrangement.get("status")
         if not isinstance(status, str):
@@ -215,6 +221,7 @@ def _arrangements_to_cache_map(data: Any) -> Dict[str, Dict[str, Any]]:
 
         result[str(date_str)] = {
             "song_ids": song_ids,
+            "song_states": song_states,
             "unplayed_songs": unplayed_songs,
             "status": status,
         }
@@ -233,7 +240,7 @@ def fetch_arrangements_cache_range(
     调用 arrangements.listRange 接口获取指定日期范围的排歌缓存数据。
 
     Returns:
-        以排歌日期为键的 {song_ids, unplayed_songs, status} 字典。
+        以排歌日期为键的 {song_ids, song_states, unplayed_songs, status} 字典。
     """
     url = _trpc_batch_url(base_url, "arrangements.listRange")
     response = requests.get(

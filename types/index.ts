@@ -22,7 +22,7 @@ export interface TSong {
   duration: number;
 };
 
-export type TSongState = "pending" | "approved" | "rejected" | "used" | "dropped" | "missed";
+export type TSongState = "pending" | "approved" | "rejected" | "used" | "played" | "dropped" | "missed" | "failed";
 
 export type TPermission =
   | "login" // login to home page

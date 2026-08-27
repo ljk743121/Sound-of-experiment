@@ -68,6 +68,22 @@
               </p>
             </CardContent>
           </Card>
+          <Card
+            class="cursor-pointer transition-colors hover:bg-accent"
+            @click="navigateToDropped"
+          >
+            <CardHeader class="pb-2">
+              <CardDescription>播放失败</CardDescription>
+              <CardTitle class="text-2xl">
+                {{ stats?.failed ?? "-" }}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p class="text-xs text-muted-foreground">
+                尝试播放但未成功的歌曲
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         <div class="flex flex-wrap gap-2">
