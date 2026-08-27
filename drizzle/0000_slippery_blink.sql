@@ -1,0 +1,1 @@
+ALTER TABLE "arrangements" DROP COLUMN "unplayedSongs";

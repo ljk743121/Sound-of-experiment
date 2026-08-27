@@ -174,9 +174,9 @@ export const songRouter = router({
     const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);// two weeks
     const rawSongs = await db.query.songs.findMany({
       where: or(
-        inArray(songs.state, ["pending", "approved", "dropped", "missed"]),
+        inArray(songs.state, ["pending", "approved", "dropped", "missed", "failed"]),
         and(
-          inArray(songs.state, ["used", "rejected"]),
+          inArray(songs.state, ["used", "played", "rejected"]),
           gt(songs.createdAt, twoWeeksAgo),
         ),
       ),

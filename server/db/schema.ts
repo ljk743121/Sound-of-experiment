@@ -1,4 +1,4 @@
-import type { TIdentity, TPermission, TSongState } from "~~/types";
+import type { TPermission, TSongState } from "~~/types";
 import { relations } from "drizzle-orm";
 import { boolean, integer, json, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
@@ -8,7 +8,6 @@ export const users = pgTable("users", {
   displayName: text(),
   password: text().notNull(),
   permissions: json().notNull().$type<TPermission[]>().default(["login"]),
-  identity: text().notNull().$type<TIdentity>().default("student"),
   remainSubmitSongs: integer().notNull().default(3),
   maxSubmitSongs: integer().notNull().default(3),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -19,7 +18,6 @@ export const users = pgTable("users", {
 export const arrangements = pgTable("arrangements", {
   date: text().primaryKey(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-  unplayedSongs: integer().notNull().default(0),
   status: text().notNull().default("pending"),
 });
 

@@ -239,10 +239,10 @@
             :is-dark="isDark"
             class="mb-4 bg-background!"
           />
-          <Alert v-if="currentArrangement?.unplayedSongs" class="mb-3" variant="destructive">
+          <Alert v-if="arrangementUnplayedCount" class="mb-3" variant="destructive">
             <AlertTitle class="flex items-center gap-2">
               <Icon name="lucide:alert-circle" class="size-4" />
-              {{ currentArrangement?.status === 'failed' ? `当天有${currentArrangement.unplayedSongs} 首歌没有播放,将参与下一次排歌` : `当天未播放歌曲，原有${currentArrangement?.unplayedSongs}首歌` }}
+              {{ currentArrangement?.status === 'failed' ? `当天有${arrangementUnplayedCount} 首歌没有播放,将参与下一次排歌` : `当天未播放歌曲，原有${arrangementUnplayedCount}首歌` }}
             </AlertTitle>
           </Alert>
           <Alert v-if="currentArrangement?.status === 'success'">
@@ -451,6 +451,12 @@ const currentArrangement = computed(() => {
 
 const arrangementListSongs = computed(() => {
   return currentArrangement.value?.songs || [];
+});
+
+const arrangementUnplayedCount = computed(() => {
+  return (currentArrangement.value?.songs || []).filter(
+    (s: { state?: string }) => s.state === "missed" || s.state === "failed",
+  ).length;
 });
 
 const calendarAttr = computed(() => {

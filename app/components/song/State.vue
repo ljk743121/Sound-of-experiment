@@ -53,6 +53,12 @@ const states: Record<
     className:
       "bg-green-50 dark:bg-green-200/50 border-green-100 dark:border-green-200 text-green-700 dark:text-green-200",
   },
+  played: {
+    label: "已播放",
+    icon: "lucide:play",
+    className:
+      "bg-blue-50 dark:bg-blue-200/50 border-blue-100 dark:border-blue-200 text-blue-700 dark:text-blue-200",
+  },
   dropped: {
     label: "落选",
     icon: "lucide:x",
@@ -62,6 +68,12 @@ const states: Record<
   missed: {
     label: "错过未播",
     icon: "lucide:history",
+    className:
+      "bg-red-50 dark:bg-red-200/50 border-red-100 dark:border-red-200 text-red-700 dark:text-red-200",
+  },
+  failed: {
+    label: "播放失败",
+    icon: "lucide:alert-circle",
     className:
       "bg-red-50 dark:bg-red-200/50 border-red-100 dark:border-red-200 text-red-700 dark:text-red-200",
   },

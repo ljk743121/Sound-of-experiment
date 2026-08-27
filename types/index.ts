@@ -22,7 +22,7 @@ export interface TSong {
   duration: number;
 };
 
-export type TSongState = "pending" | "approved" | "rejected" | "used" | "dropped" | "missed";
+export type TSongState = "pending" | "approved" | "rejected" | "used" | "played" | "dropped" | "missed" | "failed";
 
 export type TPermission =
   | "login" // login to home page
@@ -41,16 +41,6 @@ export type TPermission =
   | "robot"
   | "config"
   | "manualArrange";
-
-// haven't used
-export type TIdentity =
-  | "student"
-  | "teacher"
-  | "admin"
-  | "host"
-  | "superadmin"
-  | "retiree"
-  | "grad";
 
 export type TSubmitType = "realName" | "anonymous" | "alias";
 
