@@ -46,13 +46,15 @@
         <CardTitle> 投稿统计 </CardTitle>
       </CardHeader>
       <CardContent>
-        <BarChart
-          v-if="data?.chart"
-          index="date"
-          :data="data.chart"
-          :categories="['approved', 'dropped', 'pending', 'rejected', 'used']"
-          :rounded-corners="4"
-        />
+        <ClientOnly>
+          <LazyBarChart
+            v-if="data?.chart"
+            index="date"
+            :data="data.chart"
+            :categories="['approved', 'dropped', 'pending', 'rejected', 'used']"
+            :rounded-corners="4"
+          />
+        </ClientOnly>
       </CardContent>
     </Card>
   </div>
