@@ -11,13 +11,15 @@
               <h3 class="font-semibold">
                 发布公告
               </h3>
-              <MdEditor
-                v-model="newAnnouncement"
-                language="zh-CN"
-                no-upload-img
-                :toolbars="toolbars"
-                :read-only="isPending || isPostPending"
-              />
+              <ClientOnly>
+                <MdEditor
+                  v-model="newAnnouncement"
+                  language="zh-CN"
+                  no-upload-img
+                  :toolbars="toolbars"
+                  :read-only="isPending || isPostPending"
+                />
+              </ClientOnly>
               <Accordion type="single" collapsible>
                 <AccordionItem value="item-1">
                   <AccordionTrigger>发布时显示的名称是什么？</AccordionTrigger>
@@ -54,14 +56,16 @@
               <p>创建者：{{ isEditing.creatorId }}</p>
               <p>创建时间：{{ isEditing.createAt }}</p>
               <!-- <p>最后修改时间：{{ isEditing.updateAt }}</p> -->
-              <MdEditor
-                v-model="isEditing.markdown"
-                language="zh-CN"
-                no-upload-img
-                :toolbars="toolbars"
-                preview-theme="github"
-                no-img-zoom-in
-              />
+              <ClientOnly>
+                <MdEditor
+                  v-model="isEditing.markdown"
+                  language="zh-CN"
+                  no-upload-img
+                  :toolbars="toolbars"
+                  preview-theme="github"
+                  no-img-zoom-in
+                />
+              </ClientOnly>
               <Button :disabled="isUpdatePending" @click="updateAnnouncement">
                 确认修改
               </Button>
@@ -207,7 +211,7 @@ const toolbars: ToolbarNames[] = [
   // 'image',
   "table",
   // 'mermaid',
-  "katex",
+  // "katex",
   "-",
   "revoke",
   "next",

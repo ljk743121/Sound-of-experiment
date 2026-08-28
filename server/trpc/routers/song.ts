@@ -36,6 +36,106 @@ async function checkCanSubmit(remainSongs: number) {
   return remainSongs > 0;
 }
 
+// 将歌曲按期望播放日期自动安排进度表；无法安排（超时/空间不足）时保持 approved 状态
+async function arrangeSongOnDate(song: {
+  id: number;
+  duration: number | null;
+  expectedPlayDate: string | null;
+  createdAt: Date;
+}) {
+  const date = song.expectedPlayDate;
+  if (!date)
+    return;
+  const existingArrangement = await db.query.arrangements.findFirst({
+    where: eq(arrangements.date, date),
+    with: {
+      songs: {
+        columns: {
+          id: true,
+          duration: true,
+          position: true,
+          createdAt: true,
+          expectedPlayDate: true,
+        },
+      },
+    },
+  });
+
+  const existingSongs = existingArrangement?.songs ?? [];
+  const currentSong = {
+    id: song.id,
+    duration: song.duration ?? 0,
+    position: -1,
+    createdAt: song.createdAt,
+    expectedPlayDate: date,
+  };
+  const slotSongs = [...existingSongs, currentSong].sort(
+    (a, b) => {
+      // if expectedPlayDate===date, put it last, otherwise put it first
+      // if both expectedPlayDate!==date, keep the order
+      const cmp = Number(a.expectedPlayDate === date) - Number(b.expectedPlayDate === date);
+      if (cmp !== 0)
+        return cmp;
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    },
+  );
+
+  const removedIds: number[] = [];
+  while (slotSongs.reduce((sum, s) => sum + (s.duration ?? 0), 0) > MAX_DAILY_SONG_DURATION) {
+    const last = slotSongs.pop();
+    if (!last)
+      break;
+    if (!last?.expectedPlayDate) {
+      slotSongs.push(last);
+      break;
+    }
+    if (last.id === song.id) {
+      // 当前歌曲提交时间最晚，无法安排，保持 approved 状态
+      await db.transaction(async (tx) => {
+        for (const removedId of removedIds) {
+          await tx
+            .update(songs)
+            .set({ state: "approved", arrangementDate: null, position: null })
+            .where(eq(songs.id, removedId));
+        }
+        await tx
+          .update(songs)
+          .set({ state: "approved", arrangementDate: null, position: null })
+          .where(eq(songs.id, song.id));
+      });
+      await invalidateArrangementCache();
+      return;
+    }
+    removedIds.push(last.id);
+  }
+  slotSongs.sort((a, b) => {
+    // let songs with expectedPlayDate===date first
+    const cmp = Number(b.expectedPlayDate === date) - Number(a.expectedPlayDate === date);
+    if (cmp !== 0)
+      return cmp;
+    return a.createdAt.getTime() - b.createdAt.getTime();
+  });
+  await db.transaction(async (tx) => {
+    if (!existingArrangement) {
+      await tx.insert(arrangements).values({ date });
+    }
+    for (let i = 0; i < slotSongs.length; i++) {
+      await tx
+        .update(songs)
+        .set({ state: "used", arrangementDate: date, position: i + 1 })
+        .where(eq(songs.id, slotSongs[i]!.id));
+    }
+    for (const removedId of removedIds) {
+      await tx
+        .update(songs)
+        .set({ state: "approved", arrangementDate: null, position: null })
+        .where(eq(songs.id, removedId));
+    }
+  });
+
+  await invalidateArrangementCache();
+}
+
 export const songRouter = router({
   create: protectedProcedure
     .input(
@@ -383,95 +483,7 @@ export const songRouter = router({
           return;
         }
         // if has expectedPlayDate
-        const date = song.expectedPlayDate;
-        const existingArrangement = await db.query.arrangements.findFirst({
-          where: eq(arrangements.date, date),
-          with: {
-            songs: {
-              columns: {
-                id: true,
-                duration: true,
-                position: true,
-                createdAt: true,
-                expectedPlayDate: true,
-              },
-            },
-          },
-        });
-
-        const existingSongs = existingArrangement?.songs ?? [];
-        const currentSong = {
-          id: song.id,
-          duration: song.duration ?? 0,
-          position: -1,
-          createdAt: song.createdAt,
-          expectedPlayDate: song.expectedPlayDate,
-        };
-        const slotSongs = [...existingSongs, currentSong].sort(
-          (a, b) => {
-            // if expectedPlayDate===date, put it last, otherwise put it first
-            // if both expectedPlayDate!==date, keep the order
-            const cmp = Number(a.expectedPlayDate === date) - Number(b.expectedPlayDate === date);
-            if (cmp !== 0)
-              return cmp;
-            return a.createdAt.getTime() - b.createdAt.getTime();
-          },
-        );
-
-        const removedIds: number[] = [];
-        while (slotSongs.reduce((sum, s) => sum + (s.duration ?? 0), 0) > MAX_DAILY_SONG_DURATION) {
-          const last = slotSongs.pop();
-          if (!last)
-            break;
-          if (!last?.expectedPlayDate) {
-            slotSongs.push(last);
-            break;
-          }
-          if (last.id === input.id) {
-            // 当前歌曲提交时间最晚，无法安排，保持 approved 状态
-            await db.transaction(async (tx) => {
-              for (const removedId of removedIds) {
-                await tx
-                  .update(songs)
-                  .set({ state: "approved", arrangementDate: null, position: null })
-                  .where(eq(songs.id, removedId));
-              }
-              await tx
-                .update(songs)
-                .set({ state: "approved", arrangementDate: null, position: null })
-                .where(eq(songs.id, input.id));
-            });
-            await invalidateArrangementCache();
-            return;
-          }
-          removedIds.push(last.id);
-        }
-        slotSongs.sort((a, b) => {
-          // let songs with expectedPlayDate===date first
-          const cmp = Number(b.expectedPlayDate === date) - Number(a.expectedPlayDate === date);
-          if (cmp !== 0)
-            return cmp;
-          return a.createdAt.getTime() - b.createdAt.getTime();
-        });
-        await db.transaction(async (tx) => {
-          if (!existingArrangement) {
-            await tx.insert(arrangements).values({ date });
-          }
-          for (let i = 0; i < slotSongs.length; i++) {
-            await tx
-              .update(songs)
-              .set({ state: "used", arrangementDate: date, position: i + 1 })
-              .where(eq(songs.id, slotSongs[i]!.id));
-          }
-          for (const removedId of removedIds) {
-            await tx
-              .update(songs)
-              .set({ state: "approved", arrangementDate: null, position: null })
-              .where(eq(songs.id, removedId));
-          }
-        });
-
-        await invalidateArrangementCache();
+        await arrangeSongOnDate(song);
       }),
 
     reject: adminProcedure
@@ -493,12 +505,40 @@ export const songRouter = router({
       }),
 
     acceptAll: adminProcedure.use(requirePermission(["review"])).mutation(async () => {
-      await db
-        .update(songs)
-        .set({
-          state: "approved",
-        })
-        .where(eq(songs.state, "pending"));
+      const pendingSongs = await db.query.songs.findMany({
+        where: eq(songs.state, "pending"),
+        columns: {
+          id: true,
+          duration: true,
+          expectedPlayDate: true,
+          createdAt: true,
+        },
+      });
+
+      // 无期望播放日期的直接通过
+      const dailyFreeSongs = pendingSongs.filter(s => !s.expectedPlayDate);
+      if (dailyFreeSongs.length) {
+        await db
+          .update(songs)
+          .set({ state: "approved" })
+          .where(inArray(songs.id, dailyFreeSongs.map(s => s.id)));
+      }
+
+      // 有期望播放日期的按日期与今天接近程度排序后再安排，越接近今天优先级越高
+      const nowDate = new Date();
+      const today = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}-${String(nowDate.getDate()).padStart(2, "0")}`;
+      const datedSongs = pendingSongs
+        .filter(s => s.expectedPlayDate)
+        .sort((a, b) => {
+          const diffA = Math.abs(Date.parse(a.expectedPlayDate!) - Date.parse(today));
+          const diffB = Math.abs(Date.parse(b.expectedPlayDate!) - Date.parse(today));
+          if (diffA !== diffB)
+            return diffA - diffB;
+          return a.expectedPlayDate! < b.expectedPlayDate! ? -1 : a.expectedPlayDate! > b.expectedPlayDate! ? 1 : 0;
+        });
+      for (const s of datedSongs) {
+        await arrangeSongOnDate(s);
+      }
     }),
   }),
 });
