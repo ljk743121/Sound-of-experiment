@@ -407,7 +407,7 @@ export const arrangementsRouter = router({
         duration: s.duration ?? 0,
         expectedPlayDate: s.expectedPlayDate,
         createdAt: s.createdAt,
-        priority: s.state === "missed" ? 0 : s.state === "approved" ? 1 : s.state === "failed" ? 2 : 3,
+        priority: s.state === "missed" ? 0 : s.state === "approved" ? 1 : s.state === "dropped" ? 2 : 3,
       }));
       if (candidateSongs.length === 0) {
         throw new TRPCError({

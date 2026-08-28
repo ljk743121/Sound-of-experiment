@@ -3,9 +3,9 @@
  *
  * 规则：
  * - 每日播放总时长不超过 maxDailyDuration 秒（默认 45 分钟 = 2700 秒）
- * - 优先级：期望日期 > 投稿时间（早投稿优先）
- * - 期望日期在排歌区间内的歌曲优先安排到对应日期
- * - 期望日期已满或不可用时，自动调整到最近的可用日期
+ * - 优先级：closeness（期望日期与目标日期的接近度，相同日期最接近）> 状态优先级 > 投稿时间（早投稿优先）
+ * - 有期望日期的歌曲优先排到对应日期，状态优先级（missed>approved>dropped>failed）越高越优先占用容量
+ * - 期望日期已过（早于程序运行当天，当天不算已过）或已排满无法插入时，自动调整到最近的可用日期
  * - 仍无法安排的歌曲作为冲突返回
  */
 // by Kimi-K2.7-Coder
@@ -16,7 +16,7 @@ export interface ArrangeSong {
   duration: number;
   expectedPlayDate: string | null;
   createdAt: Date;
-  /** 排歌优先级，数值越小越优先安排（missed=0，approved=1，dropped=2） */
+  /** 排歌优先级，数值越小越优先安排（missed=0，approved=1，dropped=2，failed=3） */
   priority: number;
 }
 
@@ -114,12 +114,17 @@ export function scheduleSongs(
 
   const dayIndex = new Map<string, number>(days.map((d, i) => [d.date, i]));
 
+  // 期望日期早于程序运行当天的视为“已过”（当天不算已过），已过歌曲不再安排到期望日期，改按自由分配处理
+  const todayString = formatDate(new Date());
+
   const expectedSongs = songs
-    .filter(s => s.expectedPlayDate && dayIndex.has(s.expectedPlayDate))
+    .filter(s => s.expectedPlayDate && dayIndex.has(s.expectedPlayDate) && s.expectedPlayDate >= todayString)
     .sort(sortByPriorityAndCreatedAt);
 
+  // 有期望日期的歌曲仅在“日期已过”或“在排歌区间内”时参与排歌；
+  // 期望日期在未来且不在本次排歌区间内的歌曲不参与本次排歌（既不安排也不丢弃）
   const freeSongs = songs
-    .filter(s => !s.expectedPlayDate || !dayIndex.has(s.expectedPlayDate))
+    .filter(s => !s.expectedPlayDate || s.expectedPlayDate < todayString)
     .sort(sortByPriorityAndCreatedAt);
 
   const assignments: Record<string, number[]> = {};
